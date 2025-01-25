@@ -29,7 +29,6 @@ void checkingTest()
     std::cout << s << std::endl;
 }
 
-
 void relationshipTest()
 {
     PIECEID_MAP MAP{

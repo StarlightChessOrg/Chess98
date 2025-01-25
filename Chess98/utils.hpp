@@ -198,13 +198,13 @@ std::vector<Piece> relationship_beAttacked(Board &board, Piece piece)
 
     // 兵、将
     if ((abs(board.pieceidOn(piece.x + 1, piece.y)) == R_PAWN ||
-    abs(board.pieceidOn(piece.x + 1, piece.y) == R_KING)) &&
+         abs(board.pieceidOn(piece.x + 1, piece.y) == R_KING)) &&
         board.teamOn(piece.x + 1, piece.y) != piece.getTeam())
     {
         selected.emplace_back(board.piecePosition(piece.x + 1, piece.y));
     }
     if ((abs(board.pieceidOn(piece.x - 1, piece.y)) == R_PAWN ||
-        abs(board.pieceidOn(piece.x - 1, piece.y) == R_KING)) &&
+         abs(board.pieceidOn(piece.x - 1, piece.y) == R_KING)) &&
         board.teamOn(piece.x - 1, piece.y) != piece.getTeam())
     {
         selected.emplace_back(board.piecePosition(piece.x - 1, piece.y));
@@ -486,6 +486,11 @@ std::vector<Piece> relationship_beProtected(Board &board, Piece piece)
     return relationship_beAttacked(board, replacement);
 }
 
+/// @brief 是否有保护的棋子
+/// @param board
+/// @param x
+/// @param y
+/// @return
 bool relationship_hasProtector(Board &board, int x, int y)
 {
     return relationship_beProtected(board, board.piecePosition(x, y)).size() > 0;
