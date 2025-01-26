@@ -57,6 +57,9 @@ public:
         return (vlSelf > 10000 + 1200);
     }
 
+    void vlOpenCalculator(int& vlOpen);
+    void vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack);
+
     bool isChecking = false;
 
     //和根节点的距离
@@ -74,6 +77,10 @@ private:
     std::vector<PIECE_INDEX> blackPieces{};
     bool isRedKingLive = false;
     bool isBlackKingLive = false;
+
+private:
+    //基础评估相关
+    std::map<PIECEID, WEIGHT_MAP> pieceWeights;
 };
 
 /// @brief 初始化棋盘
@@ -117,7 +124,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
             }
         }
     }
-    initEvaluate();
+    this->initEvaluate();
     // 双方将帅的位置
     for (const Piece &piece : this->getAllLivePieces())
     {
@@ -243,7 +250,19 @@ std::vector<Piece> Board::getPiecesByTeam(TEAM team)
 
 void Board::initEvaluate()
 {
-    this->vlRed = this->vlBlack = 0;
+    // 更新权重数组
+    int vlOpen = 0;
+    int vlRedAttack = 0;
+    int vlBlackAttack = 0;
+    this->vlOpenCalculator(vlOpen);
+    this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
+    this->pieceWeights = getBasicEvluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
+
+    //调整不受威胁方少掉的士象分
+    this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
+    this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
+
+    //进一步重新计算分数
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -251,14 +270,15 @@ void Board::initEvaluate()
             PIECEID pid = this->pieceidMap[x][y];
             if (pid > 0)
             {
-                this->vlRed += pieceWeights[pid - 1][x][y];
+                this->vlRed += pieceWeights[pid][x][y];
             }
             else if (pid < 0)
             {
-                this->vlBlack += pieceWeights[abs(pid) - 1][x][size_t(9) - y];
+                this->vlBlack += pieceWeights[pid][x][size_t(9) - y];
             }
         }
     }
+
 }
 
 /// @brief 步进
@@ -299,7 +319,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
         this->vlRed += (valNewPos - valOldPos);
         if (eaten.pieceid != EMPTY_PIECEID)
         {
-            this->vlRed += pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+            this->vlBlack -= pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
         }
     }
     else
@@ -309,7 +329,7 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
         this->vlBlack += (valNewPos - valOldPos);
         if (eaten.pieceid != EMPTY_PIECEID)
         {
-            this->vlBlack += pieceWeights[eaten.pieceid][x2][y2];
+            this->vlRed -= pieceWeights[eaten.pieceid][x2][y2];
         }
     }
 
@@ -368,7 +388,7 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
         this->vlRed -= (valPos2 - valPos1);
         if (eaten.pieceid != EMPTY_PIECEID)
         {
-            this->vlRed -= pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+            this->vlBlack += pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
         }
     }
     else
@@ -378,7 +398,7 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
         this->vlBlack -= (valPos2 - valPos1);
         if (eaten.pieceid != EMPTY_PIECEID)
         {
-            this->vlBlack -= pieceWeights[eaten.pieceid][x2][y2];
+            this->vlRed += pieceWeights[eaten.pieceid][x2][y2];
         }
     }
 }
@@ -389,6 +409,108 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
 void Board::undoMove(Move move, Piece eaten)
 {
     this->undoMove(move.x1, move.y1, move.x2, move.y2, eaten);
+}
+
+void Board::vlOpenCalculator(int& vlOpen) {
+    // 首先判断局势处于开中局还是残局阶段，方法是计算各种棋子的数量，按照车=6、马炮=3、其它=1相加
+    int rookLiveSum = 0;
+    int knightCannonLiveSum = 0;
+    int otherLiveSum = 0;
+    for (const Piece& piece : this->getAllLivePieces()) {
+        PIECEID pid = std::abs(piece.pieceid);
+        if (pid == R_ROOK) {
+            rookLiveSum++;
+        }
+        else if (pid == R_KNIGHT || pid == R_CANNON) {
+            knightCannonLiveSum++;
+        }
+        else if(pid != R_KING){
+            otherLiveSum++;
+        }
+    }
+    vlOpen = rookLiveSum * 6 + knightCannonLiveSum * 3 + otherLiveSum;
+    // 使用二次函数，子力很少时才认为接近残局
+    vlOpen = (2 * TOTAL_MIDGAME_VALUE - vlOpen) * vlOpen;
+    vlOpen /= TOTAL_MIDGAME_VALUE;
+}
+
+void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) {
+    // 然后判断各方是否处于进攻状态，方法是计算各种过河棋子的数量，按照车马2炮兵1相加
+    int redAttackLiveRookSum = 0;
+    int blackAttackLiveRookSum = 0;
+    int redAttackLiveKnightSum = 0;
+    int blackAttackLiveKnightSum = 0;
+    int redAttackLiveCannonSum = 0;
+    int blackAttackLiveCannonSum = 0;
+    int redAttackLivePawnSum = 0;
+    int blackAttackLivePawnSum = 0;
+    for (const Piece& piece : this->getAllLivePieces()) {
+        PIECEID pid = std::abs(piece.pieceid);
+        if (piece.getTeam() == RED) {
+            if (piece.y >= 5) {
+                if (pid == R_ROOK) {
+                    redAttackLiveRookSum++;
+                }
+                else if (pid == R_CANNON) {
+                    redAttackLiveCannonSum++;
+                }
+                else if (pid == R_KNIGHT) {
+                    redAttackLiveKnightSum++;
+                }
+                else if (pid == R_PAWN) {
+                    redAttackLivePawnSum++;
+                }
+            }
+        }
+        else if (piece.getTeam() == BLACK) {
+            if (piece.y <= 4) {
+                if (pid == R_ROOK) {
+                    blackAttackLiveRookSum++;
+                }
+                else if (pid == R_CANNON) {
+                    blackAttackLiveCannonSum++;
+                }
+                else if (pid == R_KNIGHT) {
+                    blackAttackLiveKnightSum++;
+                }
+                else if (pid == R_PAWN) {
+                    blackAttackLivePawnSum++;
+                }
+            }
+        }
+    }
+    //红
+    vlRedAttack = redAttackLiveRookSum * 2;
+    vlRedAttack += redAttackLiveKnightSum * 2;
+    vlRedAttack += redAttackLiveCannonSum;
+    vlRedAttack += redAttackLivePawnSum;
+    //黑
+    vlBlackAttack = blackAttackLiveRookSum * 2;
+    vlBlackAttack += blackAttackLiveKnightSum * 2;
+    vlBlackAttack += blackAttackLiveCannonSum;
+    vlBlackAttack += blackAttackLivePawnSum;
+    // 如果本方轻子数比对方多，那么每多一个轻子(车算2个轻子)威胁值加2。威胁值最多不超过8
+    int redSimpleValues = 0;
+    int blackSimpleValues = 0;
+    //红
+    redSimpleValues += redAttackLiveRookSum * 2;
+    redSimpleValues += redAttackLiveKnightSum;
+    redSimpleValues += redAttackLiveCannonSum;
+    redSimpleValues += redAttackLivePawnSum;
+    //黑
+    blackSimpleValues += blackAttackLiveRookSum * 2;
+    blackSimpleValues += blackAttackLiveKnightSum;
+    blackSimpleValues += blackAttackLiveCannonSum;
+    blackSimpleValues += blackAttackLivePawnSum;
+    // 设置
+    if (redSimpleValues > blackSimpleValues) {
+        vlRedAttack += (redSimpleValues - blackSimpleValues) * 2;
+    }
+    else if (redSimpleValues < blackSimpleValues) {
+        vlBlackAttack += (blackSimpleValues - redSimpleValues) * 2;
+    }
+    vlRedAttack = std::min<int>(vlRedAttack, TOTAL_ATTACK_VALUE);
+    vlBlackAttack = std::min<int>(vlBlackAttack, TOTAL_ATTACK_VALUE);
 }
 
 /// @brief 打印
