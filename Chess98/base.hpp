@@ -48,6 +48,7 @@ PIECEID_MAP DEFAULT_MAP{
      {R_BISHOP, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_BISHOP},
      {R_KNIGHT, 0, R_CANNON, 0, 0, 0, 0, B_CANNON, 0, B_KNIGHT},
      {R_ROOK, 0, 0, R_PAWN, 0, 0, B_PAWN, 0, 0, B_ROOK}}};
+     
 const int INF = 1000000;
 const int BAN = INF - 2000;
 

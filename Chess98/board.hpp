@@ -39,20 +39,24 @@ public:
         return this->team == RED ? (vlRed - vlBlack) : (vlBlack - vlRed);
     }
 
-    void doNullMove() {
+    void doNullMove()
+    {
         this->team = -this->team;
     }
 
-    void undoNullMove() {
+    void undoNullMove()
+    {
         this->team = -this->team;
     }
 
-    bool nullOkay() {
+    bool nullOkay()
+    {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 600);
     }
 
-    bool nullSafe() {
+    bool nullSafe()
+    {
         const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
         return (vlSelf > 10000 + 1200);
     }
@@ -62,7 +66,7 @@ public:
 
     bool isChecking = false;
 
-    //和根节点的距离
+    // 和根节点的距离
     int distance = 0;
     // 评估相关
     int vlRed = 0;

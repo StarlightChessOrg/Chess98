@@ -240,17 +240,23 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
     // probCut
     const bool mChecking = inCheck(board);
 
-    if (!mChecking) {
-        if (!banNullMove) {
-            if (board.nullOkay()) {
+    if (!mChecking)
+    {
+        if (!banNullMove)
+        {
+            if (board.nullOkay())
+            {
                 board.doNullMove();
                 int vl = -searchCut(board, depth - 3, -beta + 1, true);
                 board.undoNullMove();
-                if (vl >= beta) {
-                    if (board.nullSafe()) {
+                if (vl >= beta)
+                {
+                    if (board.nullSafe())
+                    {
                         return vl;
                     }
-                    else if (searchCut(board, depth - 2, beta, true) >= beta) {
+                    else if (searchCut(board, depth - 2, beta, true) >= beta)
+                    {
                         return vl;
                     }
                 }
