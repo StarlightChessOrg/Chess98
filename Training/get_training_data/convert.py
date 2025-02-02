@@ -19,7 +19,7 @@ def gen():
         return dump_line
 
     filepaths = get_filepaths("D:\\dump_2","txt")
-    for path in filepaths:
+    for p,path in enumerate(filepaths):
         with open(path,"r",encoding="utf-8") as f:
             lines = f.readlines()
             dump_lines = []
@@ -42,9 +42,9 @@ def gen():
                     pos.makeMove(mv)
                 except:
                     break
-            with open(f"D:\\dump_3\\{i}.txt","w+",encoding="utf-8") as f:
+            with open(f"D:\\dump_3\\{p}.txt","w+",encoding="utf-8") as f:
                 f.writelines(dump_lines)
-            with open(f"D:\\dump_3\\{i}_mirror.txt","w+",encoding="utf-8") as f:
+            with open(f"D:\\dump_3\\{p}_mirror.txt","w+",encoding="utf-8") as f:
                 f.writelines(mirror_dump_lines)
 
 
