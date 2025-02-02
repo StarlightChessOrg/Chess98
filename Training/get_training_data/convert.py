@@ -27,18 +27,21 @@ def gen():
             pos = Position()
             pos.fromFen("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1")
             for i,line in enumerate(lines):
-                line = line.strip()
-                #
-                mv = int(line)
-                mvs = pos.generateMoves()
-                #
-                mirrorMove = MIRROR_MOVE(mv)
-                mirrorMoves = [MIRROR_MOVE(move) for move in mvs]
-                #
-                dump_lines.append(get_dump_line(mv,mvs))
-                mirror_dump_lines.append(get_dump_line(mirrorMove,mirrorMoves))
-                #
-                pos.makeMove(mv)
+                try:
+                    line = line.strip()
+                    #
+                    mv = int(line)
+                    mvs = pos.generateMoves()
+                    #
+                    mirrorMove = MIRROR_MOVE(mv)
+                    mirrorMoves = [MIRROR_MOVE(move) for move in mvs]
+                    #
+                    dump_lines.append(get_dump_line(mv,mvs))
+                    mirror_dump_lines.append(get_dump_line(mirrorMove,mirrorMoves))
+                    #
+                    pos.makeMove(mv)
+                except:
+                    break
             with open(f"D:\\dump_3\\{i}.txt","w+",encoding="utf-8") as f:
                 f.writelines(dump_lines)
             with open(f"D:\\dump_3\\{i}_mirror.txt","w+",encoding="utf-8") as f:
