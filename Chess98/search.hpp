@@ -189,7 +189,7 @@ Move Search::searchOpenBook(Board &board)
         // 这里定义比较规则：从大到小排序
         return a.val > b.val; });
 
-    std::srand(std::time(0));
+    std::srand(unsigned(std::time(0)));
 
     int vlSum = 0;
     for (Move &move : bookMoves)
@@ -366,13 +366,13 @@ int Search::searchPV(Board &board, int depth, int alpha, int beta)
         // multi probCut
         if (depth % 4 == 0)
         {
-            const float vlScale = (float)vlPawn / 100.0;
-            const float a = 1.02 * vlScale;
-            const float b = 2.36 * vlScale;
-            const float sigma = 82.0 * vlScale;
-            const float t = 1.5;
-            const int upperBound = (t * sigma + beta - b) / a;
-            const int lowerBound = (-t * sigma + alpha - b) / a;
+            const double vlScale = (double)vlPawn / 100.0;
+            const double a = 1.02 * vlScale;
+            const double b = 2.36 * vlScale;
+            const double sigma = 82.0 * vlScale;
+            const double t = 1.5;
+            const int upperBound = int((t * sigma + beta - b) / a);
+            const int lowerBound = int((-t * sigma + alpha - b) / a);
             if (searchCut(board, depth - 2, upperBound) >= upperBound)
             {
                 return beta;
@@ -506,12 +506,12 @@ int Search::searchCut(Board &board, int depth, int beta, bool banNullMove)
         }
         else if (depth % 4 == 0)
         {
-            const float vlScale = (float)vlPawn / 100.0;
-            const float a = 1.02 * vlScale;
-            const float b = 2.36 * vlScale;
-            const float sigma = 82.0 * vlScale;
-            const float t = 1.5;
-            const int upperBound = (t * sigma + beta - b) / a;
+            const double vlScale = (double)vlPawn / 100.0;
+            const double a = 1.02 * vlScale;
+            const double b = 2.36 * vlScale;
+            const double sigma = 82.0 * vlScale;
+            const double t = 1.5;
+            const int upperBound = int((t * sigma + beta - b) / a);
             if (searchCut(board, depth - 2, upperBound) >= upperBound)
             {
                 return beta;

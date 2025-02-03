@@ -47,7 +47,33 @@ public:
                 this->cannonCache[num][i] = this->generateCannonRegion(i, index, i < pow(2, 9) ? 8 : 9);
             }
         }
-        
+    }
+
+    /// @brief 步进
+    /// @param x1
+    /// @param y1
+    /// @param x2
+    /// @param y2
+    /// @return 是否有吃子
+    void doMove(int x1, int y1, int x2, int y2)
+    {
+        bool ret = bool(this->getBit(x2, y2));
+        this->deleteBit(x1, y1);
+        this->setBit(x2, y2);
+    }
+
+    /// @brief 撤销步进
+    /// @param x1
+    /// @param y1
+    /// @param x2
+    /// @param y2
+    /// @param eaten
+    void undoMove(int x1, int y1, int x2, int y2, bool eaten)
+    {
+        this->setBit(x1, y1);
+        if (!eaten) {
+            this->deleteBit(x2, y2);
+        }
     }
 
     TYPE_ROOK_CACHE rookCache{};

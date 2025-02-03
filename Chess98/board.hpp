@@ -154,6 +154,7 @@ Board::Board(PIECEID_MAP pieceidMap, int initTeam)
             this->pieceBlackKing = &(this->pieces[piece.pieceIndex]);
         }
     }
+
     this->bitboard = new BitBoard{ this->pieceidMap };
 }
 
@@ -335,6 +336,9 @@ Piece Board::doMove(int x1, int y1, int x2, int y2)
 
     this->team = -this->team;
     this->distance += 1;
+
+    this->bitboard->doMove(x1, y1, x2, y2);
+
     return eaten;
 }
 
@@ -405,6 +409,8 @@ void Board::undoMove(int x1, int y1, int x2, int y2, Piece eaten)
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
+
+    this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
 }
 
 /// @brief 撤销步进
