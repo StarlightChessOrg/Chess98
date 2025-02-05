@@ -78,7 +78,7 @@ def get_filepaths(directory,extension="txt"):
         for _file in files:
             if _file.endswith(extension):
                 filepaths.append(os.path.join(root,_file))
-    print("size of filepaths = ",len(filepaths))
+    #print("size of filepaths = ",len(filepaths))
     return filepaths
 
 def mv_to_xy(mv):
