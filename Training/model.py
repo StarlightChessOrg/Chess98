@@ -48,6 +48,28 @@ class nnue(nn.Module):
         inputs = torch.stack(inputs,dim=0)
         return inputs.to(public_device)
 
+def check_trained_model_output():
+    model = nnue().to(public_device)
+    weights = torch.load("model_epoch_1_train_acc_0.1648_train_loss_3.0780_test_acc_0.1729_test_loss_3.1130.pth")
+    model.load_state_dict(weights)
+    model.eval()
+    #
+    check_board = [
+        [C,0,0,B,0,0,b,0,0,c],
+        [M,0,P,0,0,0,0,p,0,m],
+        [X,0,0,B,0,0,b,0,0,x],
+        [S,0,0,0,0,0,0,0,0,s],
+        [K,0,0,B,0,0,b,0,0,k],
+        [S,0,0,0,0,0,0,0,0,s],
+        [X,0,0,B,0,0,b,0,0,x],
+        [M,0,P,0,0,0,0,p,0,m],
+        [C,0,0,B,0,0,b,0,0,c],
+    ]
+    check_board = np.asarray(check_board,dtype=np.int32)
+    input = model.convert_board_to_x(check_board,Red).to(public_device)
+    y = model(input)
+    print(float(y))
+
 
 if __name__ == "__main__":
-    pass
+    check_trained_model_output()
