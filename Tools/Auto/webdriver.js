@@ -1,5 +1,5 @@
 /////////////////////////////
-const OPPONENT_LEVEL = 8
+const OPPONENT_LEVEL = 9
 const CPPFILE_RELATIVE_PATH_DIRECTORY = "../../Chess98/"
 /////////////////////////////
 
