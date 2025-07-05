@@ -83,7 +83,7 @@ PIECEID_MAP decode(BOARD_CODE code)
     return result;
 }
 
-void setBoardCode(const Board& board)
+void setBoardCode(const Board &board)
 {
     const BOARD_CODE code = generateCode(board);
     const std::string historyMovesBack =

@@ -13,7 +13,7 @@ const int LazyMargin_2 = KNIGHT_EXTEND_MARGIN;
 
 class Board
 {
-  public:
+public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
     Piece pieceIndex(PIECE_INDEX pieceIndex);
@@ -591,12 +591,11 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
     }
 }
 
-
 // 车的机动性
 int Board::rookMobility() const
 {
     int result = 0;
-    for (const Piece& rook : this->pieceRegistry.at(this->team * R_ROOK))
+    for (const Piece &rook : this->pieceRegistry.at(this->team * R_ROOK))
     {
         const int x = rook.x;
         const int y = rook.y;
@@ -625,8 +624,9 @@ int Board::rookMobility() const
     return result;
 }
 
-
-const std::array<std::array<int, 10>, 9> badKnightPosMap = { {
+// 马的灵活性
+const std::array<std::array<int, 10>, 9> badKnightPosMap = {
+    {
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
@@ -635,14 +635,13 @@ const std::array<std::array<int, 10>, 9> badKnightPosMap = { {
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
         {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-    } };
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    }};
 
-// 马的灵活性
 int Board::knightMobility() const
 {
     int result = 0;
-    for (const Piece& knight : this->pieceRegistry.at(this->team * R_KNIGHT))
+    for (const Piece &knight : this->pieceRegistry.at(this->team * R_KNIGHT))
     {
         const int x = knight.x;
         const int y = knight.y;
@@ -719,7 +718,7 @@ int Board::knightMobility() const
     return result;
 }
 
-int Board::evaluate(int vlAlpha,int vlBeta,bool useKnowledge = true) const
+int Board::evaluate(int vlAlpha, int vlBeta, bool useKnowledge = true) const
 {
     // Level 1
     int vlEvaluate = this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);

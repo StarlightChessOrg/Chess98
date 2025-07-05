@@ -16,8 +16,8 @@
 #include <string>
 #include <vector>
 #ifdef _MSC_VER
-#include <thread>
 #include <functional>
+#include <thread>
 #endif
 
 void wait(int ms)
@@ -65,20 +65,14 @@ const TEAM OVERFLOW_TEAM = 2;
 
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
-    {R_KING, "RK"},   {R_GUARD, "RG"},  {R_BISHOP, "RB"},      {R_KNIGHT, "RN"},
-    {R_ROOK, "RR"},   {R_CANNON, "RC"}, {R_PAWN, "RP"},        {B_KING, "BK"},
-    {B_GUARD, "BG"},  {B_BISHOP, "BB"}, {B_KNIGHT, "BN"},      {B_ROOK, "BR"},
-    {B_CANNON, "BC"}, {B_PAWN, "BP"},   {EMPTY_PIECEID, "__"}, {OVERFLOW_PIECEID, "  "}};
+    {R_KING, "RK"}, {R_GUARD, "RG"}, {R_BISHOP, "RB"}, {R_KNIGHT, "RN"}, {R_ROOK, "RR"}, {R_CANNON, "RC"}, {R_PAWN, "RP"}, {B_KING, "BK"}, {B_GUARD, "BG"}, {B_BISHOP, "BB"}, {B_KNIGHT, "BN"}, {B_ROOK, "BR"}, {B_CANNON, "BC"}, {B_PAWN, "BP"}, {EMPTY_PIECEID, "__"}, {OVERFLOW_PIECEID, "  "}};
 
 std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
-    {"RK", R_KING},   {"RG", R_GUARD},  {"RB", R_BISHOP},      {"RN", R_KNIGHT},
-    {"RR", R_ROOK},   {"RC", R_CANNON}, {"RP", R_PAWN},        {"BK", B_KING},
-    {"BG", B_GUARD},  {"BB", B_BISHOP}, {"BN", B_KNIGHT},      {"BR", B_ROOK},
-    {"BC", B_CANNON}, {"BP", B_PAWN},   {"__", EMPTY_PIECEID}, {"  ", OVERFLOW_PIECEID}};
+    {"RK", R_KING}, {"RG", R_GUARD}, {"RB", R_BISHOP}, {"RN", R_KNIGHT}, {"RR", R_ROOK}, {"RC", R_CANNON}, {"RP", R_PAWN}, {"BK", B_KING}, {"BG", B_GUARD}, {"BB", B_BISHOP}, {"BN", B_KNIGHT}, {"BR", B_ROOK}, {"BC", B_CANNON}, {"BP", B_PAWN}, {"__", EMPTY_PIECEID}, {"  ", OVERFLOW_PIECEID}};
 
 class Piece
 {
-  public:
+public:
     Piece() = default;
     Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex) : pieceid(pieceid), x(x), y(y), pieceIndex(pieceIndex)
     {
@@ -115,7 +109,7 @@ using PIECES = std::vector<Piece>;
 
 class Move
 {
-  public:
+public:
     Move() = default;
     Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
         : x1(x1), y1(y1), x2(x2), y2(y2), id(x1 * 1000 + y1 * 100 + x2 * 10 + y2), val(val), moveType(moveType)
@@ -147,7 +141,7 @@ using MOVES = std::vector<Move>;
 
 class Result
 {
-  public:
+public:
     Result(Move move, int score) : move(move), val(score)
     {
     }
@@ -155,9 +149,10 @@ class Result
     int val = 0;
 };
 
-template <typename T> class TrickResult
+template <typename T>
+class TrickResult
 {
-  public:
+public:
     TrickResult(bool isSuccess, std::vector<T> data) : isSuccess(isSuccess), data(std::move(data))
     {
     }

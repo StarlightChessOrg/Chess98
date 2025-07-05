@@ -11,7 +11,7 @@ using TYPE_CANNON_CACHE = std::array<std::array<REGION_CANNON, 10>, 1024>;
 
 class BitBoard
 {
-  public:
+public:
     BitBoard(PIECEID_MAP pieceidMap)
     {
         // 初始化棋盘

@@ -7,7 +7,7 @@
 // 历史启发
 class HistoryHeuristic
 {
-  public:
+public:
     HistoryHeuristic() = default;
     void sort(MOVES &moves) const;
     void add(Move move, int depth);
@@ -36,13 +36,13 @@ void HistoryHeuristic::sort(MOVES &moves) const
         }
     }
     // vl history compare
-    std::sort(moves.begin(), moves.end(), [](Move &first, Move &second) -> bool {
+    std::sort(moves.begin(), moves.end(), [](Move &first, Move &second) -> bool
+              {
         if (first.moveType != second.moveType)
         {
             return first.moveType > second.moveType;
         }
-        return first.val > second.val;
-    });
+        return first.val > second.val; });
 }
 
 void HistoryHeuristic::add(Move move, int depth)
@@ -62,7 +62,7 @@ void HistoryHeuristic::reset()
 // 杀手启发
 class KillerTable
 {
-  public:
+public:
     KillerTable() = default;
     void reset();
     void add(Board &board, Move move);
@@ -104,7 +104,7 @@ void captureSort(Board &board, MOVES &moves)
 // 置换表启发
 class TransportationTable
 {
-  public:
+public:
     TransportationTable(int hashLevel = 24)
     {
         this->hashSize = (1 << hashLevel);

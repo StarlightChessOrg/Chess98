@@ -5,7 +5,8 @@ const int MAX_GEN_MOVES = 128;
 
 struct BookStruct
 {
-    union {
+    union
+    {
         uint32_t dwZobristLock;
         int nPtr;
     };

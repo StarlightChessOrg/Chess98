@@ -4,7 +4,7 @@
 
 class Moves
 {
-  public:
+public:
     static MOVES king(TEAM team, Board &board, int x, int y);
 
     static MOVES guard(TEAM team, Board &board, int x, int y);
@@ -674,7 +674,13 @@ MOVES Moves::getCaptureMoves(Board &board)
     result.reserve(64);
 
     const std::map<PIECEID, int> weightPairs{
-        {R_KING, 4}, {R_ROOK, 4}, {R_CANNON, 3}, {R_KNIGHT, 3}, {R_BISHOP, 2}, {R_GUARD, 2}, {R_PAWN, 1},
+        {R_KING, 4},
+        {R_ROOK, 4},
+        {R_CANNON, 3},
+        {R_KNIGHT, 3},
+        {R_BISHOP, 2},
+        {R_GUARD, 2},
+        {R_PAWN, 1},
     };
     std::array<std::vector<Move>, 9> orderMap{};
 
