@@ -1,8 +1,11 @@
-import os
 import torch
+import numpy as np
+from board import *
 import time
-from model import NNUE, qNNUE
-from board import Situation, Red, Black
+
+# 加载量化后的模型
+model = torch.jit.load('models/nnue_quantized.pt', map_location='cpu')
+model.eval()
 
 def evaluate_position(model, device, fen):
     """
@@ -76,17 +79,4 @@ if __name__ == "__main__":
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/BC5C1/9/RN1AKABNR b - - 0 1","相七进九"],
         ["rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/BC5C1/9/RN1AKABNR w - - 0 1","相七进九"],
     ]
-
-    # 加载和评估原始模型
-    print("--- 正在加载和评估原始模型 ---")
-    original_model = NNUE(input_size=7 * 9 * 10)
-    original_model.load_state_dict(torch.load("models/epoch_1.pth", map_location='cpu', weights_only=True))
-    original_model.to('cpu')
-    original_model.eval()
-    evaluate_model(original_model, fens, 'cpu')
-
-    print("\n\n--- 正在加载和评估量化模型 ---")
-    # 加载和评估量化模型
-    quantized_model = torch.jit.load("models/nnue_quantized.pt", map_location='cpu')
-    quantized_model.eval()
-    evaluate_model(quantized_model, fens, 'cpu')
+    evaluate_model(model, fens, device='cpu')

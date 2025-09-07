@@ -72,7 +72,7 @@ def quantize_and_save_model(model_path, data_dir, output_path):
 
 if __name__ == "__main__":
     trained_model_path = "models/epoch_1.pth"
-    data_directory = r"F:\chess_data"
+    data_directory = "nnue/data/"
     output_model_path = "models/nnue_quantized.pt"
 
     if not os.path.exists(trained_model_path):

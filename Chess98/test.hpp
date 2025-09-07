@@ -42,6 +42,7 @@ void testByUI()
 #ifdef NNUE
 void testGenerateNNUE()
 {
+    NNUE_appexit = false;
     NNUE_filename = getUniqueRandomFilename();
     int randomDepth = NNUE_RANDOM_MOVE_COUNT;
     int maxDepth = NNUE_DEPTH;
