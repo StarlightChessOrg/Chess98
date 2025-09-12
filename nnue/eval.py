@@ -1,7 +1,7 @@
 import os
 import torch
 import time
-from model import NNUE, qNNUE
+from model import NNUE
 from board import Situation, Red, Black
 
 def evaluate_position(model, device, fen):
@@ -84,9 +84,3 @@ if __name__ == "__main__":
     original_model.to('cpu')
     original_model.eval()
     evaluate_model(original_model, fens, 'cpu')
-
-    print("\n\n--- 正在加载和评估量化模型 ---")
-    # 加载和评估量化模型
-    quantized_model = torch.jit.load("models/nnue_quantized.pt", map_location='cpu')
-    quantized_model.eval()
-    evaluate_model(quantized_model, fens, 'cpu')
