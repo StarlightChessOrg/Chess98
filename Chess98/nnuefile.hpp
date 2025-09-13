@@ -7,7 +7,7 @@
 
 // 这里放配置
 const std::string NNUE_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
-const int NNUE_DEPTH = 6;                                             // 最大搜索深度
+const int NNUE_DEPTH = 6;                            // 最大搜索深度
 const int NNUE_RANDOM_MOVE_COUNT = 5;
 const int MAX_MOVES = 140;
 #ifdef _WIN32

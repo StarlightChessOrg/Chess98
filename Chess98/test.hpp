@@ -83,7 +83,7 @@ void testGenerateNNUE()
         {
             s.board.doMove(a.move);
         }
-        else 
+        else
         {
             NNUE_appexit = true;
             break;
