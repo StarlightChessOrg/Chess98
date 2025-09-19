@@ -1,6 +1,6 @@
 #pragma once
 
-#define NNUE
+// #define NNUE
 
 #ifdef NNUE
 #include "base.hpp"
