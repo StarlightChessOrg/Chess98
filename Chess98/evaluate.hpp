@@ -1,5 +1,5 @@
 #pragma once
-
+#include <torch/script.h>
 #include "base.hpp"
 
 using WEIGHT_MAP = std::array<std::array<int, 10>, 9>;

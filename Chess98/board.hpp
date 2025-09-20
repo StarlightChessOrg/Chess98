@@ -1,9 +1,7 @@
 #pragma once
-
 #include "bitboard.hpp"
 #include "evaluate.hpp"
 #include "hash.hpp"
-#include <torch/script.h>
 
 class Board
 {

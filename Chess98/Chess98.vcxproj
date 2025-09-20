@@ -205,6 +205,9 @@
     <ClInclude Include="ui.hpp" />
     <ClInclude Include="utils.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\nnue\models\nnue_2025_9_20.pt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
