@@ -1,6 +1,30 @@
 #pragma once
 #include <torch/script.h>
 #include "base.hpp"
+#include <memory>
+#include <iostream>
+#include <filesystem>
+
+inline std::shared_ptr<torch::jit::script::Module> load_nnue_model(const std::string& path) {
+    std::cerr << "Trying to load NNUE model from path: [" << path << "]" << std::endl;
+    if (!std::filesystem::exists(path)) {
+        std::cerr << "NNUE model file not found: " << path << std::endl;
+        return nullptr;
+    }
+    try { 
+        return std::make_shared<torch::jit::script::Module>(torch::jit::load(path));
+    }
+    catch (const c10::Error& e) {
+        std::cerr << "Failed to load NNUE model: " << e.what() << std::endl;
+        return nullptr;
+    }
+}
+
+// 懒加载单例获取模型
+inline std::shared_ptr<torch::jit::script::Module>& get_nnue_model() {
+    static std::shared_ptr<torch::jit::script::Module> nnue_model = load_nnue_model(R"(F:\nnue_2025_9_20.pt)");
+    return nnue_model;
+}
 
 using WEIGHT_MAP = std::array<std::array<int, 10>, 9>;
 

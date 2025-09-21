@@ -1,6 +1,6 @@
 #pragma once
-#include "bitboard.hpp"
 #include "evaluate.hpp"
+#include "bitboard.hpp"
 #include "hash.hpp"
 
 class Board

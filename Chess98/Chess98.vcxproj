@@ -68,7 +68,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -102,6 +102,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,6 +118,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,6 +136,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,11 +156,15 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>F:/Envs/libtorch/libtorch-debug/include;F:/Envs/libtorch/libtorch-debug/include/torch/csrc/api/include;F:/Envs/libtorch/libtorch-debug/lib/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>F:/Envs/libtorch/libtorch-debug/lib/c10.lib;F:/Envs/libtorch/libtorch-debug/lib/libprotobufd.lib;F:/Envs/libtorch/libtorch-debug/lib/dnnl.lib;F:/Envs/libtorch/libtorch-debug/lib/torch.lib;F:/Envs/libtorch/libtorch-debug/lib/torch_cpu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>F:/Envs/libtorch/libtorch-debug/lib/c10.lib;F:/Envs/libtorch/libtorch-debug/lib/dnnl.lib;F:/Envs/libtorch/libtorch-debug/lib/torch.lib;F:/Envs/libtorch/libtorch-debug/lib/torch_cpu.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -158,6 +174,10 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -173,7 +193,14 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>F:/Envs/libtorch/libtorch-debug/include;F:/Envs/libtorch/libtorch-debug/include/torch/csrc/api/include;F:/Envs/libtorch/libtorch-debug/lib/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>F:/Envs/libtorch/libtorch-release/include;F:/Envs/libtorch/libtorch-release/include/torch/csrc/api/include;F:/Envs/libtorch/libtorch-release/lib/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -182,7 +209,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <StackReserveSize>16777216</StackReserveSize>
       <StackCommitSize>16777216</StackCommitSize>
-      <AdditionalDependencies>F:/Envs/libtorch/libtorch-debug/lib/c10.lib;F:/Envs/libtorch/libtorch-debug/lib/libprotobufd.lib;F:/Envs/libtorch/libtorch-debug/lib/dnnl.lib;F:/Envs/libtorch/libtorch-debug/lib/torch.lib;F:/Envs/libtorch/libtorch-debug/lib/torch_cpu.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>F:/Envs/libtorch/libtorch-release/lib/c10.lib;F:/Envs/libtorch/libtorch-release/lib/dnnl.lib;F:/Envs/libtorch/libtorch-release/lib/torch.lib;F:/Envs/libtorch/libtorch-release/lib/torch_cpu.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
