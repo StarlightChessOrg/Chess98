@@ -1,4 +1,5 @@
-﻿#include "test.hpp"
+﻿#include <torch/script.h>
+#include "test.hpp"
 
 int main()
 {

@@ -432,36 +432,35 @@ Result Search::searchOpenBook()
 
     struct BookFileStruct
     {
-        FILE *fp = nullptr;
         int nLen = 0;
+        bool isEdit = false;
+        std::string filename;
 
         bool open(const char *szFileName, bool bEdit = false)
         {
-            errno_t result = fopen_s(&fp, szFileName, bEdit ? "r+b" : "rb");
-            if (result == 0)
-            {
-                fseek(fp, 0, SEEK_END);
-                nLen = ftell(fp) / sizeof(BookStruct);
-                return true;
-            }
-            return false;
-        }
-
-        void close(void) const
-        {
-            fclose(fp);
+            isEdit = bEdit;
+            filename = szFileName;
+            std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
+            if (!ifs.is_open()) return false;
+            nLen = int(ifs.tellg() / sizeof(BookStruct));
+            return true;
         }
 
         void read(BookStruct &bk, int nMid) const
         {
-            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
-            fread_(&bk, sizeof(BookStruct), 1, fp);
+            std::ifstream ifs(filename, std::ios::binary);
+            if (!ifs.is_open()) return;
+            ifs.seekg(nMid * sizeof(BookStruct), std::ios::beg);
+            ifs.read(reinterpret_cast<char*>(&bk), sizeof(BookStruct));
         }
 
         void write(const BookStruct &bk, int nMid) const
         {
-            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
-            fwrite(&bk, sizeof(BookStruct), 1, fp);
+            if (!isEdit) return;
+            std::fstream fstr(filename, std::ios::in | std::ios::out | std::ios::binary);
+            if (!fstr.is_open()) return;
+            fstr.seekp(nMid * sizeof(BookStruct), std::ios::beg);
+            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(BookStruct));
         }
     };
 
@@ -523,7 +522,6 @@ Result Search::searchOpenBook()
 
     if (nScan == 2)
     {
-        pBookFileStruct.close();
         return Result{Move{}, -1};
     }
 
@@ -590,8 +588,6 @@ Result Search::searchOpenBook()
             break;
         }
     }
-
-    pBookFileStruct.close();
 
     bookMove.starter = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);

@@ -3,10 +3,7 @@
 #include <windows.h>
 #elif __unix__
 #include <unistd.h>
-#define fopen_s(pFile, filename, mode) ((*(pFile)) = fopen((filename), (mode))) == NULL
-using errno_t = int;
 #endif
-#include <torch/script.h>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -21,6 +18,7 @@ using errno_t = int;
 #include <functional>
 #include <chrono>
 #include <unordered_map>
+#include <fstream>
 
 using NNUE_MODEL = torch::jit::Module;
 NNUE_MODEL loadModel()
@@ -150,52 +148,26 @@ void fread_(void *_Buffer, size_t _ElementSize, size_t _ElementCount, FILE *_Str
     size_t res = fread(_Buffer, _ElementSize, _ElementCount, _Stream);
 }
 
-FILE *openFile(const std::string &filename, const char *mode, int retryCount = 0)
-{
-    FILE *file = nullptr;
-    errno_t result = fopen_s(&file, filename.c_str(), mode);
-    if (retryCount >= 5)
-    {
-        std::cerr << "Failed to open file: " << filename << std::endl;
-        system_("pause");
-        return file;
-    }
-    if (result != 0)
-    {
-        sleep_(50);
-        return openFile(filename, mode, retryCount + 1);
-    }
-    return file;
-}
-
 std::string readFile(const std::string &filename)
 {
-    FILE *file = openFile(filename, "r");
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file)
     {
         return "";
     }
-
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
-
-    std::string content(length, '\0');
-    fread_(&content[0], 1, length, file);
-    fclose(file);
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     return content;
 }
 
 void writeFile(const std::string &filename, const std::string &content)
 {
-    FILE *file = openFile(filename, "w+");
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
     if (!file)
     {
+        std::cerr << "Failed to open file for writing: " << filename << std::endl;
         return;
     }
-
-    fwrite(content.c_str(), 1, content.size(), file);
-    fclose(file);
+    file.write(content.c_str(), content.size());
 }
 
 void printPieceidMap(PIECEID_MAP pieceidMap)
