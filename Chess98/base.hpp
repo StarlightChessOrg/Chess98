@@ -22,14 +22,14 @@ using errno_t = int;
 #include <chrono>
 #include <unordered_map>
 
-torch::jit::Module loadModel()
+using NNUE_MODEL = torch::jit::Module;
+NNUE_MODEL loadModel()
 {
-    std::ifstream fin("F:/nnue_2025_9_20.pt", std::ios::binary);
-    if (!fin) {
+    std::ifstream file("./nnue.pt", std::ios::binary);
+    if (!file) {
         std::cerr << "Failed to open model file!" << std::endl;
     }
-
-    return torch::jit::load(fin);
+    return torch::jit::load(file);
 }
 
 // 基本定义
