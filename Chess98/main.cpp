@@ -2,7 +2,6 @@
 
 int main()
 {
-    auto model = loadModel();
 #ifndef GENFILES
     std::cout << "You're runing in UI mode. And you can run nnue filegen by adding 'define GENFILES' in nnuefile.hpp!\n"
               << std::endl;
