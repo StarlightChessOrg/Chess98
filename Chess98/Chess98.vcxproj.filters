@@ -58,7 +58,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\nnue\models\nnue.pt" />
     <None Include="nnue.pt">
       <Filter>Resource Files</Filter>
     </None>
