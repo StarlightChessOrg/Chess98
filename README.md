@@ -9,7 +9,7 @@
 - 依赖：Node.js (要求终端能够使用node命令, 以启用UI)
 - 编译器：目前 g++, MSVC 都能过编译
 
-如果想要下棋, 请确保 `Chess98/nnuefile.hpp` 中没有 `#define NNUE`, 否则会运行跑谱器
+如果想要下棋, 请确保 `Chess98/nnuefile.hpp` 中没有 `#define GENFILES`, 否则会运行跑谱器
 
 确保 localhost:9494 没有被占用, 这是 UI 的服务器端口。
 
@@ -57,7 +57,7 @@ Error: Unable to obtain browser driver.
 
 ### 跑谱器
 
-在 `Chess98/nnuefile.hpp` 内加上 `#define NNUE` 启用跑谱器, 输出 json 文件到指定目录下
+在 `Chess98/nnuefile.hpp` 内加上 `#define GENFILES` 启用跑谱器, 输出 json 文件到指定目录下
 
 配置可以在 nnuefile.hpp 的开头调整几个常量
 

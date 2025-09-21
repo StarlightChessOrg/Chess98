@@ -48,10 +48,10 @@ protected:
     int searchCut(int depth, int beta, bool banNullMove = false);
     int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
 
-#ifdef NNUE
+#ifdef GENFILES
 public:
-    friend void testGenerateNNUE();
-    Result searchGenereateNNUE(int maxDepth, int maxTime);
+    friend void testGenerateGENFILES();
+    Result searchGenereateGENFILES(int maxDepth, int maxTime);
 #endif
 
 protected:
@@ -326,8 +326,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     return bestNode;
 }
 
-#ifdef NNUE
-Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
+#ifdef GENFILES
+Result Search::searchGenereateGENFILES(int maxDepth, int maxTime = 3)
 {
     log_nodecount++;
 
@@ -336,7 +336,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
     if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
     {
         // 将帅是否在棋盘上
-        NNUE_appexit = true;
+        GENFILES_appexit = true;
         return Result{Move{}, 0};
     }
     else if (this->repeatCheck())
@@ -412,7 +412,7 @@ Result Search::searchGenereateNNUE(int maxDepth, int maxTime = 3)
 
     str.pop_back();
     str += "]},";
-    NNUE_filecontent += str;
+    GENFILES_filecontent += str;
 
     return bestNode;
 }

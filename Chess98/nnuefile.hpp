@@ -1,17 +1,17 @@
 #pragma once
 #include "base.hpp"
 
-// #define NNUE
+// #define GENFILES
 
-#ifdef NNUE
-const std::string NNUE_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
-const int NNUE_DEPTH = 6;							 // 最大搜索深度
-const int NNUE_RANDOM_MOVE_COUNT = 5;				 // 每次随机走的步数
+#ifdef GENFILES
+const std::string GENFILES_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
+const int GENFILES_DEPTH = 6;							 // 最大搜索深度
+const int GENFILES_RANDOM_MOVE_COUNT = 5;				 // 每次随机走的步数
 const int MAX_MOVES = 140;							 // 最多走多少步就认定为死循环局面, 直接判和
 #ifdef _WIN32
-const std::string NNUE_RESTART_EXE_FILE = "./Chess98.exe"; // 跑完一局继续跑的exe文件路径
+const std::string GENFILES_RESTART_EXE_FILE = "./Chess98.exe"; // 跑完一局继续跑的exe文件路径
 #elif __unix__
-const std::string NNUE_RESTART_LINUX_FILE = "./a.out"; // 跑完一局继续跑的unix执行文件路径
+const std::string GENFILES_RESTART_LINUX_FILE = "./a.out"; // 跑完一局继续跑的unix执行文件路径
 #endif
 
 template <typename T>
@@ -61,17 +61,17 @@ std::string getUniqueRandomFilename()
 	return filename;
 }
 
-std::string NNUE_filecontent = "[";
-bool NNUE_appexit = false;
-std::string NNUE_filename = getUniqueRandomFilename();
+std::string GENFILES_filecontent = "[";
+bool GENFILES_appexit = false;
+std::string GENFILES_filename = getUniqueRandomFilename();
 
-void saveNNUE()
+void saveGENFILES()
 {
-	if (NNUE_filecontent.back() == ',')
+	if (GENFILES_filecontent.back() == ',')
 	{
-		NNUE_filecontent.pop_back();
+		GENFILES_filecontent.pop_back();
 	}
-	NNUE_filecontent = replaceAll(NNUE_filecontent, "}{", "},{");
-	writeFile(NNUE_OUTPUT_DIR + NNUE_filename + ".json", NNUE_filecontent + "]");
+	GENFILES_filecontent = replaceAll(GENFILES_filecontent, "}{", "},{");
+	writeFile(GENFILES_OUTPUT_DIR + GENFILES_filename + ".json", GENFILES_filecontent + "]");
 }
 #endif

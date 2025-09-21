@@ -6,6 +6,7 @@
 #define fopen_s(pFile, filename, mode) ((*(pFile)) = fopen((filename), (mode))) == NULL
 using errno_t = int;
 #endif
+#include <torch/script.h>
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -20,7 +21,16 @@ using errno_t = int;
 #include <functional>
 #include <chrono>
 #include <unordered_map>
-#include <memory>
+
+torch::jit::Module loadModel()
+{
+    std::ifstream fin("F:/nnue_2025_9_20.pt", std::ios::binary);
+    if (!fin) {
+        std::cerr << "Failed to open model file!" << std::endl;
+    }
+
+    return torch::jit::load(fin);
+}
 
 // 基本定义
 

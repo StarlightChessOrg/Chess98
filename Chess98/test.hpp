@@ -39,17 +39,17 @@ void testByUI()
     ui(team, aiFirst, maxDepth, maxTime, fenCode);
 }
 
-#ifdef NNUE
-void testGenerateNNUE()
+#ifdef GENFILES
+void testGenerateGENFILES()
 {
-    NNUE_appexit = false;
-    NNUE_filename = getUniqueRandomFilename();
-    int randomDepth = NNUE_RANDOM_MOVE_COUNT;
-    int maxDepth = NNUE_DEPTH;
+    GENFILES_appexit = false;
+    GENFILES_filename = getUniqueRandomFilename();
+    int randomDepth = GENFILES_RANDOM_MOVE_COUNT;
+    int maxDepth = GENFILES_DEPTH;
 #ifdef _WIN32
-    std::string exePath = NNUE_RESTART_EXE_FILE;
+    std::string exePath = GENFILES_RESTART_EXE_FILE;
 #elif __unix__
-    std::string exePath = NNUE_RESTART_LINUX_FILE;
+    std::string exePath = GENFILES_RESTART_LINUX_FILE;
 #endif
 
     const std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
@@ -61,7 +61,7 @@ void testGenerateNNUE()
     {
         count++;
         std::cout << count << "---------------" << std::endl;
-        Result a = s.searchGenereateNNUE(maxDepth, 3);
+        Result a = s.searchGenereateGENFILES(maxDepth, 3);
         if (a.move.id != -1)
         {
             Move m = getRandomFromVector<Move>(s.rootMoves);
@@ -69,26 +69,26 @@ void testGenerateNNUE()
         }
         else
         {
-            NNUE_appexit = true;
+            GENFILES_appexit = true;
             break;
         }
-        saveNNUE();
+        saveGENFILES();
     }
-    while (s.board.historyMoves.size() < MAX_MOVES && NNUE_appexit == false)
+    while (s.board.historyMoves.size() < MAX_MOVES && GENFILES_appexit == false)
     {
         count++;
         std::cout << count << "---------------" << std::endl;
-        Result a = s.searchGenereateNNUE(maxDepth, 3);
+        Result a = s.searchGenereateGENFILES(maxDepth, 3);
         if (a.move.id != -1)
         {
             s.board.doMove(a.move);
         }
         else
         {
-            NNUE_appexit = true;
+            GENFILES_appexit = true;
             break;
         }
-        saveNNUE();
+        saveGENFILES();
     }
 }
 #endif
