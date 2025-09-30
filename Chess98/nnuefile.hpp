@@ -7,7 +7,7 @@
 const std::string GENFILES_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
 const int GENFILES_DEPTH = 6;							 // 最大搜索深度
 const int GENFILES_RANDOM_MOVE_COUNT = 5;				 // 每次随机走的步数
-const int MAX_MOVES = 140;							 // 最多走多少步就认定为死循环局面, 直接判和
+const int MAX_MOVES = 140;								 // 最多走多少步就认定为死循环局面, 直接判和
 #ifdef _WIN32
 const std::string GENFILES_RESTART_EXE_FILE = "./Chess98.exe"; // 跑完一局继续跑的exe文件路径
 #elif __unix__

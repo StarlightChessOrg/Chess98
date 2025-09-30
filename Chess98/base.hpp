@@ -24,7 +24,8 @@ using NNUE_MODEL = torch::jit::Module;
 NNUE_MODEL loadModel()
 {
     std::ifstream file("./nnue.pt", std::ios::binary);
-    if (!file) {
+    if (!file)
+    {
         std::cerr << "Failed to open model file!" << std::endl;
     }
     return torch::jit::load(file);

@@ -441,7 +441,8 @@ Result Search::searchOpenBook()
             isEdit = bEdit;
             filename = szFileName;
             std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
-            if (!ifs.is_open()) return false;
+            if (!ifs.is_open())
+                return false;
             nLen = int(ifs.tellg() / sizeof(BookStruct));
             return true;
         }
@@ -449,18 +450,21 @@ Result Search::searchOpenBook()
         void read(BookStruct &bk, int nMid) const
         {
             std::ifstream ifs(filename, std::ios::binary);
-            if (!ifs.is_open()) return;
+            if (!ifs.is_open())
+                return;
             ifs.seekg(nMid * sizeof(BookStruct), std::ios::beg);
-            ifs.read(reinterpret_cast<char*>(&bk), sizeof(BookStruct));
+            ifs.read(reinterpret_cast<char *>(&bk), sizeof(BookStruct));
         }
 
         void write(const BookStruct &bk, int nMid) const
         {
-            if (!isEdit) return;
+            if (!isEdit)
+                return;
             std::fstream fstr(filename, std::ios::in | std::ios::out | std::ios::binary);
-            if (!fstr.is_open()) return;
+            if (!fstr.is_open())
+                return;
             fstr.seekp(nMid * sizeof(BookStruct), std::ios::beg);
-            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(BookStruct));
+            fstr.write(reinterpret_cast<const char *>(&bk), sizeof(BookStruct));
         }
     };
 
