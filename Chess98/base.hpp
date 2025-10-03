@@ -20,17 +20,6 @@
 #include <unordered_map>
 #include <fstream>
 
-using NNUE_MODEL = torch::jit::Module;
-NNUE_MODEL loadModel()
-{
-    std::ifstream file("./nnue.pt", std::ios::binary);
-    if (!file)
-    {
-        std::cerr << "Failed to open model file!" << std::endl;
-    }
-    return torch::jit::load(file);
-}
-
 // 基本定义
 
 const int QUIESCENCE_EXTEND_DEPTH = 64;

@@ -3,7 +3,7 @@
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"
-#include "nnuefile.hpp"
+#include "genfiles.hpp"
 
 class Search
 {
