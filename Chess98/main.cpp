@@ -1,14 +1,12 @@
 ﻿#include "test.hpp"
+#include "genfiles.hpp"
 
 int main()
 {
 #ifndef GENFILES
     testByUI();
 #else
-    while (true)
-    {
-        testGenerateGENFILES();
-    }
+    genfiles();
 #endif
 
     return 0;
