@@ -182,7 +182,6 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
             if (content == "undo" && board.historyMoves.size() > 1)
             {
                 count--;
-                std::cout << "undo" << std::endl;
                 board.undoMove();
                 board.undoMove();
 

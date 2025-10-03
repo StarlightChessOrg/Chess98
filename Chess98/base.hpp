@@ -170,28 +170,28 @@ void printPieceidMap(PIECEID_MAP pieceidMap)
             {
                 if (j == -1)
                 {
-                    std::cout << "X ";
+                    std::clog << "X ";
                 }
                 else
                 {
-                    std::cout << j << " ";
+                    std::clog << j << " ";
                 }
             }
             else
             {
                 if (j == -1)
                 {
-                    std::cout << i << " ";
+                    std::clog << i << " ";
                 }
                 else
                 {
-                    std::cout << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
+                    std::clog << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
                 }
             }
         }
-        std::cout << "\n";
+        std::clog << "\n";
     }
-    std::cout << std::endl;
+    std::clog << std::endl;
 }
 
 // 基本类
