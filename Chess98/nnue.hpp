@@ -9,8 +9,8 @@ class NNUE {
 public:
     NNUE(std::string model_path)
     {
-        // 从stream加载模型
-        std::ifstream fin("./nnue.ptd", std::ios::binary);
+        std::ifstream fin("./nnue.pt", std::ios::binary);
+        assert(fin != nullptr);
         this->model = torch::jit::load(fin);
     }
 
