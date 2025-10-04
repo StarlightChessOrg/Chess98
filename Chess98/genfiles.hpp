@@ -5,15 +5,11 @@
 #define GENFILES
 
 #ifdef GENFILES
+
 const std::string GENFILES_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
 const int GENFILES_DEPTH = 6;							 // 最大搜索深度
 const int GENFILES_RANDOM_MOVE_COUNT = 5;				 // 每次随机走的步数
-const int MAX_MOVES = 10;								 // 最多走多少步就认定为死循环局面, 直接判和
-#ifdef _WIN32
-const std::string GENFILES_RESTART_EXE_FILE = "./Chess98.exe"; // 跑完一局继续跑的exe文件路径
-#elif __unix__
-const std::string GENFILES_RESTART_LINUX_FILE = "./a.out"; // 跑完一局继续跑的unix执行文件路径
-#endif
+const int MAX_MOVES = 120;								 // 最多走多少步就认定为死循环局面, 直接判和
 
 template <typename T>
 T getRandomFromVector(const std::vector<T> &vec)
@@ -180,11 +176,6 @@ void genfiles()
     GENFILES_filename = getUniqueRandomFilename();
     int randomDepth = GENFILES_RANDOM_MOVE_COUNT;
     int maxDepth = GENFILES_DEPTH;
-#ifdef _WIN32
-    std::string exePath = GENFILES_RESTART_EXE_FILE;
-#elif __unix__
-    std::string exePath = GENFILES_RESTART_LINUX_FILE;
-#endif
 
     const std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
     SearchGenfiles* s = new SearchGenfiles(fenToPieceidMap(fenCode), RED);
@@ -228,4 +219,5 @@ void genfiles()
 	GENFILES_appexit = true;
 	genfiles();
 }
+
 #endif
