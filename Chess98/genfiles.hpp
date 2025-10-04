@@ -2,7 +2,7 @@
 #include "base.hpp"
 #include "search.hpp"
 
-#define GENFILES
+// #define GENFILES
 
 #ifdef GENFILES
 
