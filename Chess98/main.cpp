@@ -3,6 +3,7 @@
 
 int main()
 {
+    NNUE("./nnue.pt");
 #ifndef GENFILES
     testByUI();
 #else
