@@ -11,7 +11,7 @@
 **/cmake-build-release
 **/package.json
 **/package-lock.json
-**/nnue/data/
+**/nnue/data/*.json
 **/*.out
 **/pytorch_env
 **/example/
