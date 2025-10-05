@@ -4,7 +4,7 @@ from board import *
 import time
 
 # 加载量化后的模型
-model = torch.jit.load('models/nnue_quantized.pt', map_location='cpu')
+model = torch.jit.load('models/nnue_2025_9_20.pt', map_location='cpu')
 model.eval()
 
 def evaluate_position(model, device, fen):
