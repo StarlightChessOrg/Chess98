@@ -1,9 +1,4 @@
 #pragma once
-#ifdef _WIN32
-#include <windows.h>
-#elif __unix__
-#include <unistd.h>
-#endif
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -19,6 +14,11 @@
 #include <chrono>
 #include <unordered_map>
 #include <fstream>
+#ifdef _WIN32
+#include <windows.h>
+#elif __unix__
+#include <unistd.h>
+#endif
 
 // 基本定义
 
