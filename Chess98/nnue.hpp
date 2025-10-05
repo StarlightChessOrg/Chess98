@@ -20,32 +20,32 @@ public:
     MODEL model;
 
 public:
-    float evaluate(const PIECEID_MAP& pieceidMap, TEAM team)
-    {
-        try
-        {
-            // 1. 生成随机输入张量 [1, 630] (与Python的torch.randn(1, 630)等价)
-            torch::Tensor test_input = nnueInput(pieceidMap, team);
+    float evaluate(const PIECEID_MAP& pieceidMap, TEAM team) {
+        try {
+            // 1. 生成输入张量
+            TENSOR input = nnueInput(pieceidMap, team);
 
-            // 2. 运行模型推理
+            // 2. 模型推理
             torch::NoGradGuard no_grad;
-            torch::Tensor test_output = model.forward({ test_input }).toTensor();
+            TENSOR output = model.forward({ input }).toTensor();
 
-            // 3. 提取并打印输出结果 (与Python的test_output[0].tolist()等价)
-            auto output_accessor = test_output.accessor<float, 2>(); // [1, 2]的二维访问器
-            float first_val = output_accessor[0][0];
-            float second_val = output_accessor[0][1];
+            // 3. 处理输出
+            auto output_accessor = output.accessor<float, 2>();
+            float score = (team == RED) ? output_accessor[0][1] : output_accessor[0][0];
+            score *= 1000;  // 与Python端缩放一致
 
-            // 4. 格式化输出
-            std::cout << "C++ output: [" << first_val << ", " << second_val << "]" << std::endl;
+            // 打印最终评估值
 
-            // 可选：打印更多调试信息
-            std::cout << "Input shape: " << test_input.sizes() << std::endl;
-            std::cout << "Output shape: " << test_output.sizes() << std::endl;
+            return score;
+
         }
-        catch (const c10::Error& e)
-        {
-            std::cerr << "Error during model evaluation: " << e.what() << std::endl;
+        catch (const std::exception& e) {
+            std::cerr << "[ERROR] Evaluation failed: " << e.what() << std::endl;
+            std::cerr << "  Exception type: " << typeid(e).name() << std::endl;
+            return 0.0f;
+        }
+        catch (...) {
+            std::cerr << "[ERROR] Unknown exception during evaluation!" << std::endl;
             return 0.0f;
         }
     }
@@ -67,6 +67,6 @@ protected:
         }
 
         // 2. 展平为一维张量 [630]，然后添加批次维度 [1, 630]
-        return input.flatten().unsqueeze(0);  // 或等价写法：.reshape({1, 630})
+        return input.flatten().reshape({ 1, 630 });
     }
 };
