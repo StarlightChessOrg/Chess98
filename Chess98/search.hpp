@@ -22,14 +22,14 @@ public:
         this->pTransportation->reset();
         this->log_nodecount = 0;
     }
+    
+    static const int QUIESCENCE_EXTEND_DEPTH = 64;
+    static const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
 
-    Board &getBoard()
-    {
-        return this->board;
-    }
+public:
+    Board board{PIECEID_MAP{}, EMPTY_TEAM};
 
 protected:
-    Board board{PIECEID_MAP{}, EMPTY_TEAM};
     MOVES rootMoves{};
     HistoryTable *pHistory = new HistoryTable{};
     KillerTable *pKiller = new KillerTable{};

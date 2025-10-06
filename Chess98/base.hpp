@@ -22,8 +22,6 @@
 
 // 基本定义
 
-const int QUIESCENCE_EXTEND_DEPTH = 64;
-const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
 const int INF = 1000000;
 const int BAN = INF - 2000;
 const int ILLEGAL_VAL = INF * 2;
@@ -32,8 +30,12 @@ using uint32 = unsigned int;
 using int32 = int;
 using HASH_KEY_MAP = const std::array<std::array<int32, 10>, 9>;
 using PIECE_INDEX = int;
-const PIECE_INDEX EMPTY_INDEX = -1;
 using PIECEID = int;
+using TEAM = int;
+using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
+using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
+
+const PIECE_INDEX EMPTY_INDEX = -1;
 const PIECEID EMPTY_PIECEID = 0;
 const PIECEID R_KING = 1;
 const PIECEID R_GUARD = 2;
@@ -50,14 +52,11 @@ const PIECEID B_ROOK = -5;
 const PIECEID B_CANNON = -6;
 const PIECEID B_PAWN = -7;
 const PIECEID OVERFLOW_PIECEID = 8;
-using TEAM = int;
 const TEAM EMPTY_TEAM = 0;
 const TEAM RED = 1;
 const TEAM BLACK = -1;
 const TEAM OVERFLOW_TEAM = 2;
-using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
-using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
-std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
+const std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
     {R_KING, "RK"},
     {R_GUARD, "RG"},
     {R_BISHOP, "RB"},
@@ -74,7 +73,7 @@ std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
     {B_PAWN, "BP"},
     {EMPTY_PIECEID, "__"},
     {OVERFLOW_PIECEID, "  "}};
-std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
+const std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
     {"RK", R_KING},
     {"RG", R_GUARD},
     {"RB", R_BISHOP},
