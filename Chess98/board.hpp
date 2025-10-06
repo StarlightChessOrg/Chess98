@@ -63,14 +63,14 @@ public:
         return (vlSelf > 10000 + 1200);
     }
 
-    BITLINE getBitLineX(int x) const
+    UINT32 getBitLineX(int x) const
     {
-        return this->bitboard->xBitBoard[x];
+        return this->bitboard->getBitlineX(x);
     }
 
-    BITLINE getBitLineY(int y) const
+    UINT32 getBitLineY(int y) const
     {
-        return this->bitboard->yBitBoard[y];
+        return this->bitboard->getBitlineY(y);
     }
 
     PIECES getLivePiecesById(PIECEID pieceid)
@@ -124,7 +124,7 @@ public:
     MOVES historyMoves{};
     std::vector<PIECEID_MAP> historySituations{};
     TEAM team = -1;
-    std::unique_ptr<BitBoard> bitboard{nullptr};
+    std::unique_ptr<Bitboard> bitboard{nullptr};
     int distance = 0;
     int vlRed = 0;
     int vlBlack = 0;
@@ -213,7 +213,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
     // 初始化局面哈希
     initHashInfo();
 
-    this->bitboard = std::make_unique<BitBoard>(this->pieceidMap);
+    this->bitboard = std::make_unique<Bitboard>(this->pieceidMap);
 }
 
 Piece Board::pieceIndex(PIECE_INDEX pieceIndex) const

@@ -250,7 +250,7 @@ MOVES MovesGenerate::rook(TEAM team, Board &board, int x, int y)
     result.reserve(64);
 
     // 纵向着法
-    BITLINE bitlineX = board.getBitLineX(x);
+    UINT32 bitlineX = board.getBitLineX(x);
     REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
     for (int y2 = y + 1; y2 < regionX[1]; y2++)
     {
@@ -270,7 +270,7 @@ MOVES MovesGenerate::rook(TEAM team, Board &board, int x, int y)
     }
 
     // 横向着法
-    BITLINE bitlineY = board.getBitLineY(y);
+    UINT32 bitlineY = board.getBitLineY(y);
     REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
     for (int x2 = x + 1; x2 < regionY[1]; x2++)
     {
@@ -298,7 +298,7 @@ MOVES MovesGenerate::cannon(TEAM team, Board &board, int x, int y)
     result.reserve(64);
 
     // 横向着法
-    BITLINE bitlineY = board.getBitLineY(y);
+    UINT32 bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     for (int x2 = x + 1; x2 <= regionY[2]; x2++)
     {
@@ -318,7 +318,7 @@ MOVES MovesGenerate::cannon(TEAM team, Board &board, int x, int y)
     }
 
     // 纵向着法
-    BITLINE bitlineX = board.getBitLineX(x);
+    UINT32 bitlineX = board.getBitLineX(x);
     REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
     for (int y2 = y + 1; y2 <= regionX[2]; y2++)
     {
@@ -433,7 +433,7 @@ MOVES MovesGenerate::getMoves(Board &board)
     const Piece &bKing = board.getPieceFromRegistry(board.team * B_KING, 0);
     if (rKing.x == bKing.x)
     {
-        BITLINE bitlineX = board.getBitLineX(rKing.x);
+        UINT32 bitlineX = board.getBitLineX(rKing.x);
         REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
         if (region[1] == bKing.y)
         {
@@ -747,7 +747,7 @@ MOVES MovesGenerate::rookCapture(TEAM team, Board &board, int x, int y)
     result.reserve(8);
 
     // 纵向着法
-    BITLINE bitlineX = board.getBitLineX(x);
+    UINT32 bitlineX = board.getBitLineX(x);
     REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
     if (board.teamOn(x, regionX[1]) == -team)
     {
@@ -759,7 +759,7 @@ MOVES MovesGenerate::rookCapture(TEAM team, Board &board, int x, int y)
     }
 
     // 横向着法
-    BITLINE bitlineY = board.getBitLineY(y);
+    UINT32 bitlineY = board.getBitLineY(y);
     REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
     if (board.teamOn(regionY[1], y) == -team)
     {
@@ -779,7 +779,7 @@ MOVES MovesGenerate::cannonCapture(TEAM team, Board &board, int x, int y)
     result.reserve(8);
 
     // 横向着法
-    BITLINE bitlineY = board.getBitLineY(y);
+    UINT32 bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     if (board.teamOn(regionY[3], y) == -team && regionY[3] != regionY[2])
     {
@@ -791,7 +791,7 @@ MOVES MovesGenerate::cannonCapture(TEAM team, Board &board, int x, int y)
     }
 
     // 纵向着法
-    BITLINE bitlineX = board.getBitLineX(x);
+    UINT32 bitlineX = board.getBitLineX(x);
     REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
     if (board.teamOn(x, regionX[3]) == -team && regionX[3] != regionX[2])
     {
@@ -898,7 +898,7 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     const Piece &bKing = board.getPieceFromRegistry(board.team * B_KING, 0);
     if (rKing.x == bKing.x)
     {
-        BITLINE bitlineX = board.getBitLineX(rKing.x);
+        UINT32 bitlineX = board.getBitLineX(rKing.x);
         REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
         if (region[1] == bKing.y)
         {

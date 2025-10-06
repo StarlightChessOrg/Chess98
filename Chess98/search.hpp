@@ -178,7 +178,7 @@ protected:
                 {
                     if (ply5.x2 == ply4.x1)
                     {
-                        BITLINE bitlineX = board.getBitLineX(ply5.x2);
+                        UINT32 bitlineX = board.getBitLineX(ply5.x2);
                         REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, starter.y, 9);
                         if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
                             board.piecePosition(ply5.x2, regionX[0]).pieceIndex == target.pieceIndex)
@@ -189,7 +189,7 @@ protected:
                     }
                     else if (ply5.y2 == ply4.y1)
                     {
-                        BITLINE bitlineY = board.getBitLineY(ply5.y2);
+                        UINT32 bitlineY = board.getBitLineY(ply5.y2);
                         REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, starter.x, 8);
                         if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
                             board.piecePosition(regionY[1], ply5.y2).pieceIndex == target.pieceIndex)
@@ -204,7 +204,7 @@ protected:
                 {
                     if (ply5.x2 == ply4.x1)
                     {
-                        BITLINE bitlineX = board.getBitLineX(ply5.x2);
+                        UINT32 bitlineX = board.getBitLineX(ply5.x2);
                         REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, starter.y, 9);
                         if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
                             board.piecePosition(ply5.x2, regionX[3]).pieceIndex == target.pieceIndex)
@@ -215,7 +215,7 @@ protected:
                     }
                     else if (ply5.y2 == ply4.y1)
                     {
-                        BITLINE bitlineY = board.getBitLineY(ply5.y2);
+                        UINT32 bitlineY = board.getBitLineY(ply5.y2);
                         REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, starter.x, 8);
                         if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
                             board.piecePosition(regionY[3], ply5.y2).pieceIndex == target.pieceIndex)

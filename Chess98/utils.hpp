@@ -117,7 +117,7 @@ bool inCheck(Board &board, TEAM judgeTeam)
     const PIECEID ENEMY_CANNON = R_CANNON * -team;
     const PIECEID ENEMY_KING = R_KING * -team;
 
-    BITLINE bitlineY = board.getBitLineY(y);
+    UINT32 bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     if (board.pieceidOn(regionY[1] - 1, y) == ENEMY_ROOK)
     {
@@ -136,7 +136,7 @@ bool inCheck(Board &board, TEAM judgeTeam)
         return true;
     }
 
-    BITLINE bitlineX = board.getBitLineX(x);
+    UINT32 bitlineX = board.getBitLineX(x);
     REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
     const PIECEID &p1 = board.pieceidOn(x, regionX[1] - 1);
     if (p1 == ENEMY_ROOK || p1 == ENEMY_KING)
@@ -302,7 +302,7 @@ bool hasProtector(Board &board, int x, int y)
     const PIECEID MY_ROOK = R_ROOK * team;
     const PIECEID MY_CANNON = R_CANNON * team;
 
-    BITLINE bitlineY = board.getBitLineY(y);
+    UINT32 bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
     if (board.pieceidOn(regionY[1] - 1, y) == MY_ROOK)
     {
@@ -320,7 +320,7 @@ bool hasProtector(Board &board, int x, int y)
     {
         return true;
     }
-    BITLINE bitlineX = board.getBitLineX(x);
+    UINT32 bitlineX = board.getBitLineX(x);
     REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
     if (board.pieceidOn(x, regionX[1] - 1) == MY_ROOK)
     {
@@ -361,12 +361,12 @@ bool isValidMoveInSituation(Board &board, Move move)
         if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法, 若横纵坐标都不相同, 则一定不合理
             return false;
         // 生成车的着法范围, 看是否有障碍物
-        BITLINE bitlineX = board.getBitLineX(move.x1);
+        UINT32 bitlineX = board.getBitLineX(move.x1);
         REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, move.y1, 9);
         if (move.y2 < regionX[0] || move.y2 > regionX[1])
             return false;
         // 横向
-        BITLINE bitlineY = board.getBitLineY(move.y1);
+        UINT32 bitlineY = board.getBitLineY(move.y1);
         REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, move.x1, 8);
         if (move.x2 < regionY[0] || move.x2 > regionY[1])
             return false;
@@ -400,12 +400,12 @@ bool isValidMoveInSituation(Board &board, Move move)
         if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法, 若横纵坐标都不同, 则一定不合理
             return false;
         // 生成炮的着法范围
-        BITLINE bitlineX = board.getBitLineX(move.x1);
+        UINT32 bitlineX = board.getBitLineX(move.x1);
         REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, move.y1, 9);
         if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
             return false;
         // 横向
-        BITLINE bitlineY = board.getBitLineY(move.y1);
+        UINT32 bitlineY = board.getBitLineY(move.y1);
         REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, move.x1, 8);
         if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
             return false;
