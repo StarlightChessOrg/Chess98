@@ -20,11 +20,15 @@
 #include <unistd.h>
 #endif
 
-// 基本定义
-
-const int INF = 1000000;
-const int BAN = INF - 2000;
-const int ILLEGAL_VAL = INF * 2;
+class Piece;
+class Move;
+class Result;
+class TrickResult;
+class TransItem;
+void wait(int ms);
+void command(std::string str);
+void readFile(std::string filename, std::string& content);
+void writeFile(std::string filename, std::string content);
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
@@ -34,7 +38,11 @@ using PIECEID = int;
 using TEAM = int;
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
-
+using PIECES = std::vector<Piece>;
+using MOVES = std::vector<Move>;
+const int INF = 1000000;
+const int BAN = INF - 2000;
+const int ILLEGAL_VAL = INF * 2;
 const PIECE_INDEX EMPTY_INDEX = -1;
 const PIECEID EMPTY_PIECEID = 0;
 const PIECEID R_KING = 1;
@@ -116,85 +124,6 @@ enum SEARCH_TYPE
     QUIESC = 3
 };
 
-// 基本函数
-
-void sleep_(int ms)
-{
-#ifdef _WIN32
-    Sleep(ms);
-#elif __unix__
-    sleep(ms / 1000);
-#endif
-}
-
-void system_(std::string str)
-{
-    int res = system(str.c_str());
-}
-
-void fread_(void *_Buffer, size_t _ElementSize, size_t _ElementCount, FILE *_Stream)
-{
-    size_t res = fread(_Buffer, _ElementSize, _ElementCount, _Stream);
-}
-
-std::string readFile(const std::string &filename)
-{
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
-    if (!file)
-    {
-        return "";
-    }
-    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    return content;
-}
-
-void writeFile(const std::string &filename, const std::string &content)
-{
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
-    if (!file)
-    {
-        std::cerr << "Failed to open file for writing: " << filename << std::endl;
-        return;
-    }
-    file.write(content.c_str(), content.size());
-}
-
-void printPieceidMap(PIECEID_MAP pieceidMap)
-{
-    for (int i = -1; i <= 8; i++)
-    {
-        for (int j = -1; j <= 9; j++)
-        {
-            if (i == -1)
-            {
-                if (j == -1)
-                {
-                    std::clog << "X ";
-                }
-                else
-                {
-                    std::clog << j << " ";
-                }
-            }
-            else
-            {
-                if (j == -1)
-                {
-                    std::clog << i << " ";
-                }
-                else
-                {
-                    std::clog << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
-                }
-            }
-        }
-        std::clog << "\n";
-    }
-    std::clog << std::endl;
-}
-
-// 基本类
-
 class Piece
 {
 public:
@@ -231,8 +160,6 @@ public:
     int team = -2;
     bool isLive = true;
 };
-
-using PIECES = std::vector<Piece>;
 
 class Move
 {
@@ -275,8 +202,6 @@ public:
     Piece captured{};
 };
 
-using MOVES = std::vector<Move>;
-
 class Result
 {
 public:
@@ -289,17 +214,16 @@ public:
     int val = 0;
 };
 
-template <typename T>
 class TrickResult
 {
 public:
-    TrickResult(bool isSuccess, std::vector<T> data)
+    TrickResult(bool isSuccess, std::vector<int> data)
         : isSuccess(isSuccess),
           data(std::move(data)) {};
 
 public:
     bool isSuccess = false;
-    std::vector<T> data;
+    std::vector<int> data;
 };
 
 class TransItem
@@ -319,3 +243,39 @@ public:
     Move betaMove{};
     Move alphaMove{};
 };
+
+void wait(int ms)
+{
+#ifdef _WIN32
+    Sleep(ms);
+#elif __unix__
+    sleep(ms / 1000);
+#endif
+}
+
+void command(std::string str)
+{
+    int res = system(str.c_str());
+}
+
+void readFile(std::string filename, std::string& content)
+{
+    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    if (!file)
+    {
+        content = "";
+    }
+    std::string result((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    content = result;
+}
+
+void writeFile(std::string filename, std::string content)
+{
+    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    if (!file)
+    {
+        std::cerr << "Failed to open file for writing: " << filename << std::endl;
+        return;
+    }
+    file.write(content.c_str(), content.size());
+}

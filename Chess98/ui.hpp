@@ -135,9 +135,9 @@ void setBoardCode(Board &board)
         http.request(options2).end();\n\
             ";
 
-    sleep_(200);
+    wait(200);
     writeFile("./_put_.js", jsPutCode);
-    system_("node ./_put_.js");
+    command("node ./_put_.js");
 }
 
 void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
@@ -148,11 +148,11 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     // variables
     int count = 0;
     Search s = Search(pieceidMap, team);
-    Board &board = s.getBoard();
+    Board &board = s.board;
 
     // 界面
     writeFile("./_server_.js", SERVER_CODE);
-    system_("powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"");
+    command("powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"");
     setBoardCode(board);
     board.print();
     std::string moveFileContent = "____";
@@ -171,12 +171,13 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
                 board.historyMoves.back().isCheckingMove = true;
 
             setBoardCode(board);
-            moveFileContent = readFile("./_move_.txt");
+            readFile("./_move_.txt", moveFileContent);
         }
         else
         {
             // 读取文件
-            std::string content = readFile("./_move_.txt");
+            std::string content;
+            readFile("./_move_.txt", content);
 
             // 悔棋
             if (content == "undo" && board.historyMoves.size() > 1)
@@ -207,11 +208,11 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
                 {
                     // 避免转换失败导致崩溃
                     std::cerr << "Invalid move: " << moveFileContent << std::endl;
-                    system_("pause");
+                    command("pause");
                     throw e;
                 }
             }
         }
-        sleep_(50);
+        wait(50);
     }
 }

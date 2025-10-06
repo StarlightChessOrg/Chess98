@@ -56,14 +56,14 @@ protected:
         }
     }
 
-    TrickResult<int> nullAndDeltaPruning(bool mChecking, int &alpha, int &beta, int &vlBest) const
+    TrickResult nullAndDeltaPruning(bool mChecking, int &alpha, int &beta, int &vlBest) const
     {
         if (!mChecking)
         {
             int vl = board.evaluate();
             if (vl >= beta)
             {
-                return TrickResult<int>{true, {vl}};
+                return TrickResult{true, {vl}};
             }
             vlBest = vl;
             if (vl > alpha)
@@ -71,10 +71,10 @@ protected:
                 alpha = vl;
             }
         }
-        return TrickResult<int>{false, {}};
+        return TrickResult{false, {}};
     }
 
-    TrickResult<int> mateDistancePruning(int alpha, int &beta) const
+    TrickResult mateDistancePruning(int alpha, int &beta) const
     {
         const int vlDistanceMate = INF - board.distance;
         if (vlDistanceMate < beta)
@@ -82,26 +82,26 @@ protected:
             beta = vlDistanceMate;
             if (alpha >= vlDistanceMate)
             {
-                return TrickResult<int>(true, {vlDistanceMate});
+                return TrickResult(true, {vlDistanceMate});
             }
         }
         return {false, {}};
     }
 
-    TrickResult<int> futilityPruning(int alpha, int beta, int depth) const
+    TrickResult futilityPruning(int alpha, int beta, int depth) const
     {
         if (depth == 1)
         {
             int vl = board.evaluate();
             if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
             {
-                return TrickResult<int>{true, {vl}};
+                return TrickResult{true, {vl}};
             }
         }
-        return TrickResult<int>{false, {}};
+        return TrickResult{false, {}};
     }
 
-    TrickResult<int> multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
+    TrickResult multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
     {
         if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
         {
@@ -114,15 +114,15 @@ protected:
             const int lowerBound = int((-t * sigma + alpha - b) / a);
             if (this->searchCut(depth - 2, upperBound) >= upperBound)
             {
-                return TrickResult<int>{true, {beta}};
+                return TrickResult{true, {beta}};
             }
             else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
             {
-                return TrickResult<int>{true, {alpha}};
+                return TrickResult{true, {alpha}};
             }
         }
 
-        return TrickResult<int>{false, {}};
+        return TrickResult{false, {}};
     }
 
     bool repeatCheck()
@@ -567,7 +567,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // mate distance pruning
-    TrickResult<int> result = this->mateDistancePruning(alpha, beta);
+    TrickResult result = this->mateDistancePruning(alpha, beta);
     if (result.isSuccess)
     {
         return result.data[0];
@@ -750,7 +750,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // mate distance pruning
-    TrickResult<int> trickResult = this->mateDistancePruning(beta - 1, beta);
+    TrickResult trickResult = this->mateDistancePruning(beta - 1, beta);
     if (trickResult.isSuccess)
     {
         return trickResult.data[0];
@@ -888,7 +888,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // mate distance pruning
-    TrickResult<int> trickresult = this->mateDistancePruning(alpha, beta);
+    TrickResult trickresult = this->mateDistancePruning(alpha, beta);
     if (trickresult.isSuccess)
     {
         return trickresult.data[0];
@@ -901,7 +901,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     // 验证上一步是否是将军着法
     this->setCheckingMove(mChecking);
     // null and delta pruning
-    TrickResult<int> nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
+    TrickResult nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
     if (nullDeltaResult.isSuccess)
     {
         return nullDeltaResult.data[0];
