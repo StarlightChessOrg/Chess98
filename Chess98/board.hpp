@@ -36,7 +36,9 @@ public:
 
     bool isKingLive(TEAM team) const
     {
-        return team == RED ? this->isRedKingLive : this->isBlackKingLive;
+        return (team == RED)
+                   ? pieceIndex(this->pieceRegistry.at(R_KING)[0]).isLive
+                   : pieceIndex(this->pieceRegistry.at(B_KING)[0]).isLive;
     }
 
     int evaluate() const;
@@ -134,8 +136,6 @@ public:
     PIECES pieces{};
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};
-    bool isRedKingLive = false;
-    bool isBlackKingLive = false;
     PIECEID_MAP pieceidMap{};
     std::vector<int32> hashKeyList{};
     std::vector<int32> hashLockList{};
@@ -161,10 +161,6 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM initTeam)
                     this->redPieces.emplace_back(index);
                 else
                     this->blackPieces.emplace_back(index);
-                if (pieceid == R_KING)
-                    this->isRedKingLive = true;
-                if (pieceid == B_KING)
-                    this->isBlackKingLive = true;
                 this->pieceRegistry[pieceid].emplace_back(this->pieces.back().pieceIndex);
             }
             else
@@ -291,14 +287,6 @@ void Board::doMove(Move move)
     {
         this->pieces[eaten.pieceIndex].isLive = false;
     }
-    if (eaten.pieceid == R_KING)
-    {
-        this->isRedKingLive = false;
-    }
-    if (eaten.pieceid == B_KING)
-    {
-        this->isBlackKingLive = false;
-    }
     this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
     if (attackStarter.team == RED)
@@ -368,14 +356,6 @@ void Board::undoMove()
     if (eaten.pieceIndex != -1)
     {
         this->pieces[eaten.pieceIndex].isLive = true;
-    }
-    if (eaten.pieceid == R_KING)
-    {
-        this->isRedKingLive = true;
-    }
-    if (eaten.pieceid == B_KING)
-    {
-        this->isBlackKingLive = true;
     }
     // 更新评估分
     if (attackStarter.team == RED)
