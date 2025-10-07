@@ -88,7 +88,6 @@ public:
     }
 
     MOVES historyMoves{};
-    std::vector<PIECEID_MAP> historySituations{};
     TEAM team = -1;
     std::unique_ptr<Bitboard> bitboard{nullptr};
     int distance = 0;
@@ -343,7 +342,6 @@ void Board::doMove(Move move)
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyMoves.back().starter = attackStarter;
     this->historyMoves.back().captured = eaten;
-    this->historySituations.emplace_back(this->pieceidMap);
 }
 
 void Board::undoMove()
@@ -359,7 +357,6 @@ void Board::undoMove()
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
-    this->historySituations.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
     // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
