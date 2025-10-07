@@ -34,12 +34,7 @@ public:
 
     void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 
-    bool isKingLive(TEAM team) const
-    {
-        return (team == RED)
-                   ? pieceIndex(this->pieceRegistry.at(R_KING)[0]).isLive
-                   : pieceIndex(this->pieceRegistry.at(B_KING)[0]).isLive;
-    }
+    bool isKingLive(TEAM team) const { return team == RED ? getPieceReg(R_KING).isLive : getPieceReg(R_KING).isLive; }
 
     int evaluate() const;
 
@@ -113,15 +108,15 @@ public:
         {B_CANNON, {}},
         {B_PAWN, {}}};
 
-    Piece getPieceFromRegistry(PIECEID pieceid, int index)
+    Piece getPieceReg(PIECEID pieceid) const
     {
-        return this->pieceIndex(this->pieceRegistry.at(pieceid)[index]);
+        return this->pieceIndex(this->pieceRegistry.at(pieceid)[0]);
     }
 
-    PIECES getPiecesFromRegistry(PIECEID pieceid)
+    PIECES getPiecesFromReg(PIECEID pieceid) const
     {
         PIECES result{};
-        for (PIECE_INDEX pieceindex : this->pieceRegistry[pieceid])
+        for (PIECE_INDEX pieceindex : this->pieceRegistry.at(pieceid))
         {
             const Piece &piece = this->pieceIndex(pieceindex);
             if (piece.isLive)

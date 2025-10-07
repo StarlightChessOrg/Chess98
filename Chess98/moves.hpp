@@ -429,8 +429,8 @@ MOVES MovesGenerate::generateMovesOn(Board &board, int x, int y)
 MOVES MovesGenerate::getMoves(Board &board)
 {
     // 对面笑
-    const Piece &rKing = board.getPieceFromRegistry(board.team * R_KING, 0);
-    const Piece &bKing = board.getPieceFromRegistry(board.team * B_KING, 0);
+    const Piece &rKing = board.getPieceReg(board.team * R_KING);
+    const Piece &bKing = board.getPieceReg(board.team * B_KING);
     if (rKing.x == bKing.x)
     {
         UINT32 bitlineX = board.getBitLineX(rKing.x);
@@ -465,37 +465,37 @@ MOVES MovesGenerate::getMoves(Board &board)
     MOVES result{};
     result.reserve(64);
 
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_ROOK))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_ROOK))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_PAWN))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_PAWN))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_CANNON))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_CANNON))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_KNIGHT))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_KNIGHT))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_BISHOP))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_BISHOP))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_GUARD))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_GUARD))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_KING))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_KING))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
@@ -894,8 +894,8 @@ MOVES MovesGenerate::generateCaptureMovesOn(Board &board, int x, int y)
 MOVES MovesGenerate::getCaptureMoves(Board &board)
 {
     // 对面笑
-    const Piece &rKing = board.getPieceFromRegistry(board.team * R_KING, 0);
-    const Piece &bKing = board.getPieceFromRegistry(board.team * B_KING, 0);
+    const Piece &rKing = board.getPieceReg(board.team * R_KING);
+    const Piece &bKing = board.getPieceReg(board.team * B_KING);
     if (rKing.x == bKing.x)
     {
         UINT32 bitlineX = board.getBitLineX(rKing.x);
@@ -920,37 +920,37 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     MOVES result{};
     result.reserve(64);
 
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_ROOK))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_ROOK))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_PAWN))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_PAWN))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_CANNON))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_CANNON))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_KNIGHT))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_KNIGHT))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_BISHOP))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_BISHOP))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_GUARD))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_GUARD))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece &piece : board.getPiecesFromRegistry(board.team * R_KING))
+    for (const Piece &piece : board.getPiecesFromReg(board.team * R_KING))
     {
         std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());

@@ -54,7 +54,7 @@ bool isInPalace(Board &board, int x, int y)
 
 bool inCheck(Board &board, TEAM judgeTeam)
 {
-    const Piece &king = judgeTeam == RED ? board.getPieceFromRegistry(R_KING, 0) : board.getPieceFromRegistry(B_KING, 0);
+    const Piece &king = judgeTeam == RED ? board.getPieceReg(R_KING) : board.getPieceReg(B_KING);
     const int &x = king.x;
     const int &y = king.y;
     const TEAM &team = king.team;

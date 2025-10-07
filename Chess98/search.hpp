@@ -312,7 +312,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 防止没有可行着法
     if (bestNode.move.id == -1)
     {
-        const Piece &king = board.getPieceFromRegistry(board.team == RED ? R_KING : B_KING, 0);
+        const Piece &king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
         bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
     }
 
