@@ -276,7 +276,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     }
 
     // 输出局面信息
-    std::cout << "situation: " << boardToFen(board) << std::endl;
+    std::cout << "situation: " << pieceidmapToFen(board.pieceidMap, board.team) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
     log_rootresults = {};
 

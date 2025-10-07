@@ -87,41 +87,6 @@ public:
         return result;
     }
 
-    void print() const
-    {
-        const PIECEID_MAP &pieceidMap = this->pieceidMap;
-        for (int i = -1; i <= 8; i++)
-        {
-            for (int j = -1; j <= 9; j++)
-            {
-                if (i == -1)
-                {
-                    if (j == -1)
-                    {
-                        std::clog << "X ";
-                    }
-                    else
-                    {
-                        std::clog << j << " ";
-                    }
-                }
-                else
-                {
-                    if (j == -1)
-                    {
-                        std::clog << i << " ";
-                    }
-                    else
-                    {
-                        std::clog << PIECE_NAME_PAIRS.at(pieceidMap[i][j]);
-                    }
-                }
-            }
-            std::clog << "\n";
-        }
-        std::clog << std::endl;
-    }
-
     MOVES historyMoves{};
     std::vector<PIECEID_MAP> historySituations{};
     TEAM team = -1;

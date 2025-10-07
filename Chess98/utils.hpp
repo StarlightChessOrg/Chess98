@@ -418,7 +418,7 @@ bool isValidMoveInSituation(Board &board, Move move)
     return !skip;
 }
 
-PIECEID_MAP fenToPieceidMap(std::string fenCode)
+PIECEID_MAP fenToPieceidmap(std::string fenCode)
 {
     PIECEID_MAP pieceidMap = PIECEID_MAP{};
     int colNum = 9;
@@ -471,7 +471,7 @@ PIECEID_MAP fenToPieceidMap(std::string fenCode)
     return pieceidMap;
 }
 
-std::string boardToFen(Board &board)
+std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
 {
     std::string result = "";
     int spaceCount = 0;
@@ -494,7 +494,7 @@ std::string boardToFen(Board &board)
     {
         for (int y = 0; y < 9; y++)
         {
-            PIECEID pieceid = board.pieceidOn(y, x);
+            PIECEID pieceid = pieceidMap[y][x];
             if (pieceid == EMPTY_PIECEID)
             {
                 spaceCount++;
@@ -517,7 +517,7 @@ std::string boardToFen(Board &board)
         result += "/";
     }
     result.pop_back();
-    result += board.team == RED ? " w" : " b";
+    result += team == RED ? " w" : " b";
     result += " - - 0 1";
 
     return result;

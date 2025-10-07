@@ -143,7 +143,7 @@ void setBoardCode(Board &board)
 void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
 {
     // 初始局面
-    PIECEID_MAP pieceidMap = fenToPieceidMap(fenCode);
+    PIECEID_MAP pieceidMap = fenToPieceidmap(fenCode);
 
     // variables
     int count = 0;
@@ -154,7 +154,6 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     writeFile("./_server_.js", SERVER_CODE);
     command("powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"");
     setBoardCode(board);
-    board.print();
     std::string moveFileContent = "____";
 
     while (true)

@@ -101,7 +101,7 @@ public:
         }
 
         // 输出局面信息
-        std::cout << "situation: " << boardToFen(board) << std::endl;
+        std::cout << "situation: " << pieceidmapToFen(board.pieceidMap, board.team) << std::endl;
         std::cout << "evaluate: " << board.evaluate() << std::endl;
 
         // 搜索
@@ -122,7 +122,7 @@ public:
         std::string str = "";
         for (int depth = 1; depth <= maxDepth; depth++)
         {
-            str = "{\"fen\":\"" + boardToFen(board) + "\",\"history\":[" + historyStr + "],\"data\":[";
+            str = "{\"fen\":\"" + pieceidmapToFen(board.pieceidMap, board.team) + "\",\"history\":[" + historyStr + "],\"data\":[";
             bestNode = searchRoot(depth);
 
             auto end = std::chrono::high_resolution_clock::now();
@@ -144,7 +144,7 @@ public:
                 str += "{";
                 str += "\"moveid\":" + std::to_string(result.move.id);
                 board.doMove(result.move);
-                str += ",\"fen_after_move\":\"" + boardToFen(board) + "\"";
+                str += ",\"fen_after_move\":\"" + pieceidmapToFen(board.pieceidMap, board.team) + "\"";
                 board.undoMove();
                 str += ",\"vl\":" + std::to_string(result.val);
                 str += "},";
@@ -180,7 +180,7 @@ void genfiles()
     int maxDepth = GENFILES_DEPTH;
 
     const std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-    SearchGenfiles *s = new SearchGenfiles(fenToPieceidMap(fenCode), RED);
+    SearchGenfiles *s = new SearchGenfiles(fenToPieceidmap(fenCode), RED);
     int count = 0;
 
     // 前几步随机

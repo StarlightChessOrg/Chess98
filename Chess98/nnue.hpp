@@ -107,7 +107,7 @@ void testNNUE()
     };
     for (int i = 0; i < fens.size(); i++)
     {
-        auto res = model.evaluate(fenToPieceidMap(fens[i][0]), fens[i][0].find('w') ? RED : BLACK);
+        auto res = model.evaluate(fenToPieceidmap(fens[i][0]), fens[i][0].find('w') ? RED : BLACK);
         std::cout << fens[i][1] << ": " << res << std::endl;
     }
 }
