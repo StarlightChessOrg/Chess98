@@ -1,6 +1,15 @@
 #pragma once
 #include "board.hpp"
 
+bool isRivercrossedPawn(Board& board, int x, int y);
+bool hasCrossedRiver(Board &board, int x, int y);
+bool isInPalace(Board &board, int x, int y);
+bool inCheck(Board &board, TEAM judgeTeam);
+bool hasProtector(Board &board, int x, int y);
+bool isValidMoveInSituation(Board &board, Move move);
+PIECEID_MAP fenToPieceidmap(std::string fenCode);
+std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team);
+
 bool isRivercrossedPawn(Board &board, int x, int y)
 {
     PIECEID pieceid = board.pieceidOn(x, y);
