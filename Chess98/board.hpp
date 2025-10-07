@@ -113,7 +113,7 @@ public:
         return this->pieceIndex(this->pieceRegistry.at(pieceid)[0]);
     }
 
-    PIECES getPiecesFromReg(PIECEID pieceid) const
+    PIECES getPiecesReg(PIECEID pieceid) const
     {
         PIECES result{};
         for (PIECE_INDEX pieceindex : this->pieceRegistry.at(pieceid))
