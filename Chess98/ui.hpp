@@ -82,6 +82,23 @@ server.listen(9494)\n\
 
 BOARD_CODE generateCode(Board &board)
 {
+    const std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
+        {R_KING, "RK"},
+        {R_GUARD, "RG"},
+        {R_BISHOP, "RB"},
+        {R_KNIGHT, "RN"},
+        {R_ROOK, "RR"},
+        {R_CANNON, "RC"},
+        {R_PAWN, "RP"},
+        {B_KING, "BK"},
+        {B_GUARD, "BG"},
+        {B_BISHOP, "BB"},
+        {B_KNIGHT, "BN"},
+        {B_ROOK, "BR"},
+        {B_CANNON, "BC"},
+        {B_PAWN, "BP"},
+        {EMPTY_PIECEID, "__"},
+        {OVERFLOW_PIECEID, "  "}};
     BOARD_CODE code = "";
     for (int i = 0; i < 9; i++)
     {
@@ -97,6 +114,23 @@ BOARD_CODE generateCode(Board &board)
 
 PIECEID_MAP decode(BOARD_CODE code)
 {
+    const std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
+        {"RK", R_KING},
+        {"RG", R_GUARD},
+        {"RB", R_BISHOP},
+        {"RN", R_KNIGHT},
+        {"RR", R_ROOK},
+        {"RC", R_CANNON},
+        {"RP", R_PAWN},
+        {"BK", B_KING},
+        {"BG", B_GUARD},
+        {"BB", B_BISHOP},
+        {"BN", B_KNIGHT},
+        {"BR", B_ROOK},
+        {"BC", B_CANNON},
+        {"BP", B_PAWN},
+        {"__", EMPTY_PIECEID},
+        {"  ", OVERFLOW_PIECEID}};
     PIECEID_MAP result{};
     for (int i = 0; i < 90; i++)
     {

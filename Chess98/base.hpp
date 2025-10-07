@@ -29,6 +29,9 @@ void wait(int ms);
 void command(std::string str);
 void readFile(std::string filename, std::string& content);
 void writeFile(std::string filename, std::string content);
+enum MOVE_TYPE;
+enum NODE_TYPE;
+enum SEARCH_TYPE;
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
@@ -64,40 +67,6 @@ const TEAM EMPTY_TEAM = 0;
 const TEAM RED = 1;
 const TEAM BLACK = -1;
 const TEAM OVERFLOW_TEAM = 2;
-const std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
-    {R_KING, "RK"},
-    {R_GUARD, "RG"},
-    {R_BISHOP, "RB"},
-    {R_KNIGHT, "RN"},
-    {R_ROOK, "RR"},
-    {R_CANNON, "RC"},
-    {R_PAWN, "RP"},
-    {B_KING, "BK"},
-    {B_GUARD, "BG"},
-    {B_BISHOP, "BB"},
-    {B_KNIGHT, "BN"},
-    {B_ROOK, "BR"},
-    {B_CANNON, "BC"},
-    {B_PAWN, "BP"},
-    {EMPTY_PIECEID, "__"},
-    {OVERFLOW_PIECEID, "  "}};
-const std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
-    {"RK", R_KING},
-    {"RG", R_GUARD},
-    {"RB", R_BISHOP},
-    {"RN", R_KNIGHT},
-    {"RR", R_ROOK},
-    {"RC", R_CANNON},
-    {"RP", R_PAWN},
-    {"BK", B_KING},
-    {"BG", B_GUARD},
-    {"BB", B_BISHOP},
-    {"BN", B_KNIGHT},
-    {"BR", B_ROOK},
-    {"BC", B_CANNON},
-    {"BP", B_PAWN},
-    {"__", EMPTY_PIECEID},
-    {"  ", OVERFLOW_PIECEID}};
 
 enum MOVE_TYPE
 {
