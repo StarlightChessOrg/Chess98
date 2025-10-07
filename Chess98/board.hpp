@@ -117,8 +117,9 @@ public:
                     }
                 }
             }
-            std::clog << "\n" << std::endl;
+            std::clog << "\n";
         }
+        std::clog << std::endl;
     }
 
     MOVES historyMoves{};
