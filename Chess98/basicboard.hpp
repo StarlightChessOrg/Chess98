@@ -5,7 +5,6 @@ class BasicBoard
 {
 public:
     BasicBoard(PIECEID_MAP pieceidMap, TEAM team);
-    ~BasicBoard();
 
 public:
     PIECES pieces{};
@@ -21,7 +20,9 @@ public:
     void undoMove(int x1, int y1, int x2, int y2);
     PIECEID pieceidOn(int x, int y) const;
     TEAM teamOn(int x, int y) const;
-    Piece pieceIndex(int i) const { return pieces[i]; }
+    Piece pieceIndex(int i) const;
+    PIECES getAllLivePieces() const;
+    PIECES getPiecesByTeam(TEAM team) const;
     Piece getPieceReg(PIECEID pieceid) const;
     PIECES getPiecesReg(PIECEID pieceid) const;
 };
@@ -33,11 +34,10 @@ BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
 
 void BasicBoard::doMove(int x1, int y1, int x2, int y2)
 {
-
 }
+
 void BasicBoard::undoMove(int x1, int y1, int x2, int y2)
 {
-    
 }
 
 PIECEID BasicBoard::pieceidOn(int x, int y) const
@@ -63,6 +63,38 @@ TEAM BasicBoard::teamOn(int x, int y) const
     {
         return OVERFLOW_TEAM;
     }
+}
+
+Piece BasicBoard::pieceIndex(int i) const
+{
+    return this->pieces[i];
+}
+
+PIECES BasicBoard::getAllLivePieces() const
+{
+    PIECES result{};
+    for (Piece piece : this->pieces)
+    {
+        if (piece.isLive)
+        {
+            result.emplace_back(piece);
+        }
+    }
+    return result;
+}
+
+PIECES BasicBoard::getPiecesByTeam(TEAM team) const
+{
+    PIECES result{};
+    PIECES allPieces = this->getAllLivePieces();
+    for (Piece piece : allPieces)
+    {
+        if (piece.team == team)
+        {
+            result.emplace_back(piece);
+        }
+    }
+    return result;
 }
 
 Piece BasicBoard::getPieceReg(PIECEID pieceid) const
