@@ -11,16 +11,18 @@ public:
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};
     PIECEID_MAP pieceidMap{};
+    std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
     MOVES historyMoves{};
     TEAM team{};
     std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
 
 public:
-    void doMove(int x1, int y1, int x2, int y2);
-    void undoMove(int x1, int y1, int x2, int y2);
+    void doMove(Move move);
+    void undoMove();
     PIECEID pieceidOn(int x, int y) const;
     TEAM teamOn(int x, int y) const;
     Piece pieceIndex(int i) const;
+    Piece piecePosition(int x, int y) const;
     PIECES getAllLivePieces() const;
     PIECES getPiecesByTeam(TEAM team) const;
     Piece getPieceReg(PIECEID pieceid) const;
@@ -32,11 +34,13 @@ BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
 {
 }
 
-void BasicBoard::doMove(int x1, int y1, int x2, int y2)
+void BasicBoard::doMove(Move move)
 {
+    const int &x1 = move.x1, x2 = move.x2;
+    const int &y1 = move.y1, y2 = move.y2;
 }
 
-void BasicBoard::undoMove(int x1, int y1, int x2, int y2)
+void BasicBoard::undoMove()
 {
 }
 
@@ -68,6 +72,25 @@ TEAM BasicBoard::teamOn(int x, int y) const
 Piece BasicBoard::pieceIndex(int i) const
 {
     return this->pieces[i];
+}
+
+Piece BasicBoard::piecePosition(int x, int y) const
+{
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
+    {
+        if (this->pieceidMap[x][y] != 0)
+        {
+            return this->pieceIndex(this->pieceIndexMap[x][y]);
+        }
+        else
+        {
+            return Piece{EMPTY_PIECEID, -1, -1, EMPTY_INDEX};
+        }
+    }
+    else
+    {
+        return Piece{OVERFLOW_PIECEID, -1, -1, EMPTY_INDEX};
+    }
 }
 
 PIECES BasicBoard::getAllLivePieces() const

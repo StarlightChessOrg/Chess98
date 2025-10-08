@@ -27,7 +27,7 @@ class TrickResult;
 class TransItem;
 void wait(int ms);
 void command(std::string str);
-void readFile(std::string filename, std::string& content);
+void readFile(std::string filename, std::string &content);
 void writeFile(std::string filename, std::string content);
 enum MOVE_TYPE;
 enum NODE_TYPE;
@@ -97,6 +97,7 @@ class Piece
 {
 public:
     Piece() = default;
+    Piece(PIECEID pieceid) : pieceid(pieceid) {}
     Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
         : pieceid(pieceid),
           x(x),
@@ -135,7 +136,7 @@ class Move
 public:
     Move() = default;
 
-    Move(int x1, int y1, int x2, int y2, int val = 0, int moveType = 0)
+    Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL)
         : x1(x1),
           y1(y1),
           x2(x2),
@@ -165,7 +166,7 @@ public:
     int x2 = -1;
     int y2 = -1;
     int val = 0;
-    int moveType = 0;
+    MOVE_TYPE moveType = NORMAL;
     bool isCheckingMove = false;
     Piece starter{};
     Piece captured{};
@@ -227,7 +228,7 @@ void command(std::string str)
     int res = system(str.c_str());
 }
 
-void readFile(std::string filename, std::string& content)
+void readFile(std::string filename, std::string &content)
 {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file)
