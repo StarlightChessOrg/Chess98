@@ -21,6 +21,7 @@ public:
     void undoMove(int x1, int y1, int x2, int y2);
     PIECEID pieceidOn(int x, int y) const;
     TEAM teamOn(int x, int y) const;
+    Piece pieceIndex(int i) const { return pieces[i]; }
     Piece getPieceReg(PIECEID pieceid) const;
     PIECES getPiecesReg(PIECEID pieceid) const;
 };
@@ -28,15 +29,30 @@ public:
 BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
     : team(team), pieceidMap(pieceidMap)
 {
+}
+
+void BasicBoard::doMove(int x1, int y1, int x2, int y2)
+{
+
+}
+void BasicBoard::undoMove(int x1, int y1, int x2, int y2)
+{
     
 }
 
 PIECEID BasicBoard::pieceidOn(int x, int y) const
 {
-    return (x >= 0 && x <= 8 && y >= 0 && y <= 9) ? this->pieceidMap[x][y] : OVERFLOW_PIECEID;
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
+    {
+        return this->pieceidMap[x][y];
+    }
+    else
+    {
+        return OVERFLOW_PIECEID;
+    }
 }
 
-TEAM BasicBoard::teamOn(int x, int y) const 
+TEAM BasicBoard::teamOn(int x, int y) const
 {
     if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
     {
@@ -47,4 +63,24 @@ TEAM BasicBoard::teamOn(int x, int y) const
     {
         return OVERFLOW_TEAM;
     }
+}
+
+Piece BasicBoard::getPieceReg(PIECEID pieceid) const
+{
+    const Piece result = this->pieceIndex(this->pieceRegistry.at(pieceid)[0]);
+    return result.isLive ? result : Piece{};
+}
+
+PIECES BasicBoard::getPiecesReg(PIECEID pieceid) const
+{
+    PIECES result{};
+    for (PIECE_INDEX pieceindex : this->pieceRegistry.at(pieceid))
+    {
+        const Piece &piece = this->pieceIndex(pieceindex);
+        if (piece.isLive)
+        {
+            result.emplace_back(piece);
+        }
+    }
+    return result;
 }
