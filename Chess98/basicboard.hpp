@@ -8,15 +8,17 @@ public:
     BasicBoard(PIECEID_MAP pieceidMap, TEAM team);
 
 public:
-    PIECES pieces{};
-    std::vector<PIECE_INDEX> redPieces{};
-    std::vector<PIECE_INDEX> blackPieces{};
     PIECEID_MAP pieceidMap{};
-    std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
-    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
     MOVES historyMoves{};
     TEAM team{};
     std::unique_ptr<Bitboard> bitboard{};
+
+protected:
+    PIECES pieces{};
+    std::vector<PIECE_INDEX> redPieces{};
+    std::vector<PIECE_INDEX> blackPieces{};
+    std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
+    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
 
 public:
     void doMove(Move move);
