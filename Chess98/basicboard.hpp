@@ -32,9 +32,39 @@ public:
 };
 
 BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
-    : team(team), pieceidMap(pieceidMap)
 {
+    this->pieceidMap = pieceidMap;
+    this->team = team;
+    this->bitboard = std::make_unique<Bitboard>(pieceidMap);
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            PIECEID &pieceid = pieceidMap[x][y];
+            if (pieceid != 0)
+            {
+                const int &size = int(this->pieces.size());
+                Piece piece{pieceidMap[x][y], x, y, size};
+                PIECE_INDEX index = size - 1;
 
+                this->pieces.emplace_back(piece);
+                this->pieceIndexMap[x][y] = index;
+                this->pieceRegistry[pieceid].emplace_back(this->pieces.back().pieceIndex);
+                if (pieceid > 0)
+                {
+                    this->redPieces.emplace_back(index);
+                }
+                else
+                {
+                    this->blackPieces.emplace_back(index);
+                }
+            }
+            else
+            {
+                this->pieceIndexMap[x][y] = -1;
+            }
+        }
+    }
 }
 
 void BasicBoard::doMove(Move move)
@@ -63,11 +93,11 @@ void BasicBoard::doMove(Move move)
 
 void BasicBoard::undoMove()
 {
-    const Move& back = this->historyMoves.back();
+    const Move &back = this->historyMoves.back();
     const int &x1 = back.x1, &x2 = back.x2;
     const int &y1 = back.y1, &y2 = back.y2;
-    const Piece& attacker = back.starter;
-    const Piece& captured = back.captured;
+    const Piece &attacker = back.starter;
+    const Piece &captured = back.captured;
 
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
     this->pieceidMap[x2][y2] = captured.pieceid;
