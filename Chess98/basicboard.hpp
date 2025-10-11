@@ -1,5 +1,6 @@
 #pragma once
 #include "base.hpp"
+#include "bitboard.hpp"
 
 class BasicBoard
 {
@@ -12,9 +13,10 @@ public:
     std::vector<PIECE_INDEX> blackPieces{};
     PIECEID_MAP pieceidMap{};
     std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
+    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
     MOVES historyMoves{};
     TEAM team{};
-    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
+    std::unique_ptr<Bitboard> bitboard{};
 
 public:
     void doMove(Move move);
@@ -32,12 +34,31 @@ public:
 BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
     : team(team), pieceidMap(pieceidMap)
 {
+    
 }
 
 void BasicBoard::doMove(Move move)
 {
-    const int &x1 = move.x1, x2 = move.x2;
-    const int &y1 = move.y1, y2 = move.y2;
+    const int &x1 = move.x1, &x2 = move.x2;
+    const int &y1 = move.y1, &y2 = move.y2;
+    const Piece &attacker = this->piecePosition(x1, y1);
+    const Piece &captured = this->piecePosition(x2, y2);
+
+    this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
+    this->pieceidMap[x1][y1] = 0;
+    this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
+    this->pieceIndexMap[x1][y1] = -1;
+    this->pieces[attacker.pieceIndex].x = x2;
+    this->pieces[attacker.pieceIndex].y = y2;
+    this->team = -this->team;
+    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
+    this->historyMoves.back().starter = attacker;
+    this->historyMoves.back().captured = captured;
+    this->bitboard->doMove(x1, y1, x2, y2);
+    if (captured.pieceIndex != -1)
+    {
+        this->pieces[captured.pieceIndex].isLive = false;
+    }
 }
 
 void BasicBoard::undoMove()

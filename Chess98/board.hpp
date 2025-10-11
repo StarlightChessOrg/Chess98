@@ -70,20 +70,6 @@ public:
         return this->bitboard->getBitlineY(y);
     }
 
-    PIECES getLivePiecesById(PIECEID pieceid)
-    {
-        PIECES result{};
-        for (const PIECE_INDEX pieceindex : this->pieceRegistry[pieceid])
-        {
-            Piece piece = this->pieceIndex(pieceindex);
-            if (piece.isLive)
-            {
-                result.emplace_back(piece);
-            }
-        }
-        return result;
-    }
-
     MOVES historyMoves{};
     TEAM team = -1;
     std::unique_ptr<Bitboard> bitboard{nullptr};
