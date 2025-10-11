@@ -34,7 +34,7 @@ public:
 BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
     : team(team), pieceidMap(pieceidMap)
 {
-    
+
 }
 
 void BasicBoard::doMove(Move move)
@@ -63,6 +63,25 @@ void BasicBoard::doMove(Move move)
 
 void BasicBoard::undoMove()
 {
+    const Move& back = this->historyMoves.back();
+    const int &x1 = back.x1, &x2 = back.x2;
+    const int &y1 = back.y1, &y2 = back.y2;
+    const Piece& attacker = back.starter;
+    const Piece& captured = back.captured;
+
+    this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
+    this->pieceidMap[x2][y2] = captured.pieceid;
+    this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
+    this->pieceIndexMap[x2][y2] = captured.pieceIndex;
+    this->pieces[attacker.pieceIndex].x = x1;
+    this->pieces[attacker.pieceIndex].y = y1;
+    this->team = -this->team;
+    this->historyMoves.pop_back();
+    this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
+    if (captured.pieceIndex != -1)
+    {
+        this->pieces[captured.pieceIndex].isLive = true;
+    }
 }
 
 PIECEID BasicBoard::pieceidOn(int x, int y) const
