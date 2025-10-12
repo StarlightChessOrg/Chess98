@@ -120,6 +120,7 @@ public:
         {
             this->team = BLACK;
         }
+        this->isLive = true;
     }
 
 public:
@@ -127,8 +128,8 @@ public:
     int x = -1;
     int y = -1;
     PIECE_INDEX pieceIndex = -1;
-    int team = -2;
-    bool isLive = true;
+    int team = EMPTY_TEAM;
+    bool isLive = false;
 };
 
 class Move
