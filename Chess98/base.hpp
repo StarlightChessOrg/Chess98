@@ -13,6 +13,7 @@
 #include <functional>
 #include <chrono>
 #include <unordered_map>
+#include <memory>
 #include <fstream>
 #ifdef _WIN32
 #include <windows.h>
@@ -29,9 +30,6 @@ void wait(int ms);
 void command(std::string str);
 void readFile(std::string filename, std::string &content);
 void writeFile(std::string filename, std::string content);
-enum MOVE_TYPE;
-enum NODE_TYPE;
-enum SEARCH_TYPE;
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
@@ -67,31 +65,22 @@ const TEAM EMPTY_TEAM = 0;
 const TEAM RED = 1;
 const TEAM BLACK = -1;
 const TEAM OVERFLOW_TEAM = 2;
-
-enum MOVE_TYPE
-{
-    NORMAL = 0,
-    HISTORY = 1,
-    CAPTURE = 2,
-    KILLER = 3,
-    HASH = 4
-};
-
-enum NODE_TYPE
-{
-    NONE_TYPE = 0,
-    ALPHA_TYPE = 1,
-    BETA_TYPE = 2,
-    EXACT_TYPE = 3,
-};
-
-enum SEARCH_TYPE
-{
-    ROOT = 0,
-    PV = 1,
-    CUT = 2,
-    QUIESC = 3
-};
+using MOVE_TYPE = int;
+const MOVE_TYPE NORMAL = 0;
+const MOVE_TYPE HISTORY = 1;
+const MOVE_TYPE CAPTURE = 2;
+const MOVE_TYPE KILLER = 3;
+const MOVE_TYPE HASH = 4;
+using NODE_TYPE = int;
+const NODE_TYPE NONE_TYPE = 0;
+const NODE_TYPE ALPHA_TYPE = 1;
+const NODE_TYPE BETA_TYPE = 2;
+const NODE_TYPE EXACT_TYPE = 3;
+using SEARCH_TYPE = int;
+const SEARCH_TYPE ROOT = 0;
+const SEARCH_TYPE PV = 1;
+const SEARCH_TYPE CUT = 2;
+const SEARCH_TYPE QUIESC = 3;
 
 class Piece
 {

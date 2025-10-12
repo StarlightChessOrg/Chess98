@@ -920,7 +920,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     {
         availableMoves = MovesGenerate::getMoves(board);
         pHistory->sort(availableMoves);
-        leftDistance = std::min<int>(leftDistance, QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
+        leftDistance = std::min<int>(leftDistance, Search::QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
     }
     else
     {

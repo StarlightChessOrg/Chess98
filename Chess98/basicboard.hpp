@@ -75,7 +75,6 @@ BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
 //     const int &y1 = move.y1, &y2 = move.y2;
 //     const Piece &attacker = this->piecePosition(x1, y1);
 //     const Piece &captured = this->piecePosition(x2, y2);
-
 //     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
 //     this->pieceidMap[x1][y1] = 0;
 //     this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
@@ -100,7 +99,6 @@ BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
 //     const int &y1 = back.y1, &y2 = back.y2;
 //     const Piece &attacker = back.starter;
 //     const Piece &captured = back.captured;
-
 //     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
 //     this->pieceidMap[x2][y2] = captured.pieceid;
 //     this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
