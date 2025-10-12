@@ -47,7 +47,7 @@ BasicBoard::BasicBoard(PIECEID_MAP pieceidMap, TEAM team)
             {
                 const int &size = int(this->pieces.size());
                 Piece piece{pieceidMap[x][y], x, y, size};
-                PIECE_INDEX index = size - 1;
+                PIECE_INDEX index = size;
 
                 this->pieces.emplace_back(piece);
                 this->pieceIndexMap[x][y] = index;
