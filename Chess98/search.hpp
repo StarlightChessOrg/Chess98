@@ -167,12 +167,12 @@ protected:
             // 长捉情况比较特殊
             // 只有车、马、炮能作为长捉的发起者
             // 发起者不断捉同一个子, 判负
-            if (abs(ply1.starter.pieceid) == R_ROOK ||
-                abs(ply1.starter.pieceid) == R_KNIGHT ||
-                abs(ply1.starter.pieceid) == R_CANNON)
+            if (abs(ply1.attacker.pieceid) == R_ROOK ||
+                abs(ply1.attacker.pieceid) == R_KNIGHT ||
+                abs(ply1.attacker.pieceid) == R_CANNON)
             {
-                const Piece &starter = ply1.starter;
-                const Piece &target = ply2.starter;
+                const Piece &starter = ply1.attacker;
+                const Piece &target = ply2.attacker;
                 // 车
                 if (abs(starter.pieceid) == R_ROOK)
                 {
@@ -494,7 +494,7 @@ Result Search::searchOpenBook()
         }
     }
 
-    bookMove.starter = board.piecePosition(bookMove.x1, bookMove.y1);
+    bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
     return isValidMoveInSituation(board, bookMove) ? Result{bookMove, 1} : Result{Move{}, -1};

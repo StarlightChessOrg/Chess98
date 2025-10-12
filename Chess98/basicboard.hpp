@@ -184,7 +184,7 @@ void BasicBoard::doMove(Move move)
     this->pieces[attacker.pieceIndex].y = y2;
     this->team = -this->team;
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
-    this->historyMoves.back().starter = attacker;
+    this->historyMoves.back().attacker = attacker;
     this->historyMoves.back().captured = captured;
     // this->bitboard->doMove(x1, y1, x2, y2);
     if (captured.pieceIndex != -1)
@@ -198,7 +198,7 @@ void BasicBoard::undoMove()
     const Move &back = this->historyMoves.back();
     const int &x1 = back.x1, &x2 = back.x2;
     const int &y1 = back.y1, &y2 = back.y2;
-    const Piece &attacker = back.starter;
+    const Piece &attacker = back.attacker;
     const Piece &captured = back.captured;
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
     this->pieceidMap[x2][y2] = captured.pieceid;

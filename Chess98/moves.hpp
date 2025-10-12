@@ -441,12 +441,12 @@ MOVES MovesGenerate::getMoves(Board &board)
             if (board.team == RED)
             {
                 result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
-                result[0].starter = rKing;
+                result[0].attacker = rKing;
             }
             else
             {
                 result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
-                result[0].starter = bKing;
+                result[0].attacker = bKing;
             }
             return result;
         }
@@ -509,12 +509,12 @@ MOVES MovesGenerate::getMoves(Board &board)
         board.undoMove();
         if (!skip)
         {
-            move.starter = board.piecePosition(move.x1, move.y1);
+            move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
             if (move.captured.pieceid != EMPTY_PIECEID)
             {
                 move.moveType = CAPTURE;
-                move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.starter.pieceid));
+                move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.attacker.pieceid));
             }
             moves.emplace_back(move);
         }
@@ -906,12 +906,12 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
             if (board.team == RED)
             {
                 result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
-                result[0].starter = rKing;
+                result[0].attacker = rKing;
             }
             else
             {
                 result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
-                result[0].starter = bKing;
+                result[0].attacker = bKing;
             }
             return result;
         }
@@ -964,7 +964,7 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
         board.undoMove();
         if (!skip)
         {
-            move.starter = board.piecePosition(move.x1, move.y1);
+            move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
             moves.emplace_back(move);
         }

@@ -31,7 +31,7 @@ public:
     {
         int pos1 = 10 * move.x1 + move.y1;
         int pos2 = 10 * move.x2 + move.y2;
-        int teamID = (move.starter.team + 1) >> 1;
+        int teamID = (move.attacker.team + 1) >> 1;
         this->historyTable[teamID][pos1][pos2] += (depth << 1);
     }
 
@@ -43,7 +43,7 @@ public:
             {
                 int pos1 = 10 * move.x1 + move.y1;
                 int pos2 = 10 * move.x2 + move.y2;
-                int teamID = (move.starter.team + 1) >> 1;
+                int teamID = (move.attacker.team + 1) >> 1;
                 move.moveType = HISTORY;
                 move.val = this->historyTable[teamID][pos1][pos2];
             }
@@ -286,7 +286,7 @@ public:
         {
             for (Move &move : orderMap[score])
             {
-                move.starter = board.piecePosition(move.x1, move.y1);
+                move.attacker = board.piecePosition(move.x1, move.y1);
                 move.captured = board.piecePosition(move.x2, move.y2);
                 result.emplace_back(move);
             }

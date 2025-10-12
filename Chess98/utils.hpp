@@ -355,9 +355,9 @@ bool isValidMoveInSituation(Board &board, Move move)
     PIECEID attacker = board.pieceidOn(move.x1, move.y1);
     if (attacker == 0) // 若攻击者不存在, 则一定是不合理着法
         return false;
-    if (attacker != move.starter.pieceid) // 若攻击者不一致, 则一定是不合理着法
+    if (attacker != move.attacker.pieceid) // 若攻击者不一致, 则一定是不合理着法
         return false;
-    if (move.starter.team != board.team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
+    if (move.attacker.team != board.team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
         return false;
     PIECEID captured = board.pieceidOn(move.x2, move.y2);
     if (captured != 0 && board.teamOn(move.x2, move.y2) ==

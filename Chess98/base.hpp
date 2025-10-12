@@ -158,7 +158,7 @@ public:
     int val = 0;
     MOVE_TYPE moveType = NORMAL;
     bool isCheckingMove = false;
-    Piece starter{};
+    Piece attacker{};
     Piece captured{};
 };
 

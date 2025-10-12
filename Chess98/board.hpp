@@ -8,16 +8,16 @@ class Board : public BasicBoard
 public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
-    void doMove(Move move);
-    void undoMove();
-
-    void initEvaluate();
-    void vlOpenCalculator(int &vlOpen);
-    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
-
-    void initHashInfo();
-    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
-
+public:
+    int distance = 0;
+    int vlRed = 0;
+    int vlBlack = 0;
+    int32 hashKey = 0;
+    int32 hashLock = 0;
+    std::vector<int32> hashKeyList{};
+    std::vector<int32> hashLockList{};
+    
+public:
     bool isKingLive(TEAM team) const { return team == RED ? getPieceReg(R_KING).isLive : getPieceReg(B_KING).isLive; }
     int evaluate() const { return team == RED ? vlRed - vlBlack + vlAdvanced : vlBlack - vlRed + vlAdvanced; };
     void doNullMove() { team = -team; }
@@ -25,14 +25,14 @@ public:
     bool nullOkay() const { return team == RED ? vlRed : vlBlack > 10000 + 600; }
     bool nullSafe() const { return team == RED ? vlRed : vlBlack > 10000 + 1200; }
 
-    int distance = 0;
-    int vlRed = 0;
-    int vlBlack = 0;
-    int32 hashKey = 0;
-    int32 hashLock = 0;
-
-    std::vector<int32> hashKeyList{};
-    std::vector<int32> hashLockList{};
+public:
+    void doMove(Move move);
+    void undoMove();
+    void initEvaluate();
+    void vlOpenCalculator(int &vlOpen);
+    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
+    void initHashInfo();
+    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 };
 
 Board::Board(PIECEID_MAP pieceidMap, TEAM team) : BasicBoard(pieceidMap, team)
@@ -43,67 +43,67 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team) : BasicBoard(pieceidMap, team)
 
 void Board::doMove(Move move)
 {
-    const int x1 = move.x1;
-    const int x2 = move.x2;
-    const int y1 = move.y1;
-    const int y2 = move.y2;
-    const Piece eaten = this->piecePosition(x2, y2);
-    const Piece attackStarter = this->piecePosition(x1, y1);
+    const int& x1 = move.x1;
+    const int& x2 = move.x2;
+    const int& y1 = move.y1;
+    const int& y2 = move.y2;
+    const Piece& attacker = this->piecePosition(x1, y1);
+    const Piece& captured = this->piecePosition(x2, y2);
 
+    // 更新棋盘数据
+    this->team = -this->team;
+    this->distance += 1;
+    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
+    this->historyMoves.back().attacker = attacker;
+    this->historyMoves.back().captured = captured;
     // 维护棋盘的棋子追踪
     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
     this->pieceidMap[x1][y1] = 0;
     this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
     this->pieceIndexMap[x1][y1] = -1;
-    this->pieces[attackStarter.pieceIndex].x = x2;
-    this->pieces[attackStarter.pieceIndex].y = y2;
-    if (eaten.pieceIndex != -1)
+    this->pieces[attacker.pieceIndex].x = x2;
+    this->pieces[attacker.pieceIndex].y = y2;
+    if (captured.pieceIndex != -1)
     {
-        this->pieces[eaten.pieceIndex].isLive = false;
+        this->pieces[captured.pieceIndex].isLive = false;
     }
     this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
-    if (attackStarter.team == RED)
+    if (attacker.team == RED)
     {
-        int valNewPos = pieceWeights[attackStarter.pieceid][x2][y2];
-        int valOldPos = pieceWeights[attackStarter.pieceid][x1][y1];
+        int valNewPos = pieceWeights[attacker.pieceid][x2][y2];
+        int valOldPos = pieceWeights[attacker.pieceid][x1][y1];
         this->vlRed += (valNewPos - valOldPos);
-        if (eaten.pieceid != EMPTY_PIECEID)
+        if (captured.pieceid != EMPTY_PIECEID)
         {
-            this->vlBlack -= pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+            this->vlBlack -= pieceWeights[captured.pieceid][x2][size_t(9) - y2];
         }
     }
     else
     {
-        int valNewPos = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
-        int valOldPos = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
+        int valNewPos = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
+        int valOldPos = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
         this->vlBlack += (valNewPos - valOldPos);
-        if (eaten.pieceid != EMPTY_PIECEID)
+        if (captured.pieceid != EMPTY_PIECEID)
         {
-            this->vlRed -= pieceWeights[eaten.pieceid][x2][y2];
+            this->vlRed -= pieceWeights[captured.pieceid][x2][y2];
         }
     }
     // 记录旧哈希值
     this->hashKeyList.emplace_back(this->hashKey);
     this->hashLockList.emplace_back(this->hashLock);
     // 更新哈希值
-    this->hashKey ^= hashKeys[attackStarter.pieceid][x1][y1];
-    this->hashKey ^= hashKeys[attackStarter.pieceid][x2][y2];
-    this->hashLock ^= hashLocks[attackStarter.pieceid][x1][y1];
-    this->hashLock ^= hashLocks[attackStarter.pieceid][x2][y2];
-    if (eaten.pieceid != EMPTY_PIECEID)
+    this->hashKey ^= hashKeys[attacker.pieceid][x1][y1];
+    this->hashKey ^= hashKeys[attacker.pieceid][x2][y2];
+    this->hashLock ^= hashLocks[attacker.pieceid][x1][y1];
+    this->hashLock ^= hashLocks[attacker.pieceid][x2][y2];
+    if (captured.pieceid != EMPTY_PIECEID)
     {
-        this->hashKey ^= hashKeys[eaten.pieceid][x1][y1];
-        this->hashLock ^= hashLocks[eaten.pieceid][x2][y2];
+        this->hashKey ^= hashKeys[captured.pieceid][x1][y1];
+        this->hashLock ^= hashLocks[captured.pieceid][x2][y2];
     }
     this->hashKey ^= PLAYER_KEY;
     this->hashLock ^= PLAYER_LOCK;
-    // 更新棋盘数据
-    this->team = -this->team;
-    this->distance += 1;
-    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
-    this->historyMoves.back().starter = attackStarter;
-    this->historyMoves.back().captured = eaten;
 }
 
 void Board::undoMove()
@@ -113,8 +113,8 @@ void Board::undoMove()
     const int& x2 = back.x2;
     const int& y1 = back.y1;
     const int& y2 = back.y2;
-    const Piece attacker = this->historyMoves.back().starter;
-    const Piece captured = this->historyMoves.back().captured;
+    const Piece& attacker = this->historyMoves.back().attacker;
+    const Piece& captured = this->historyMoves.back().captured;
 
     // 更新棋盘数据
     this->distance -= 1;
