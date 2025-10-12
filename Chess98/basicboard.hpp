@@ -21,6 +21,10 @@ protected:
     std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
 
 public:
+    UINT32 getBitLineX(int x) const { return bitboard->getBitlineX(x); }
+    UINT32 getBitLineY(int y) const { return this->bitboard->getBitlineY(y); }
+
+public:
     PIECEID pieceidOn(int x, int y) const;
     TEAM teamOn(int x, int y) const;
     Piece pieceIndex(int i) const;

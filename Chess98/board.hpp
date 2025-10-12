@@ -12,50 +12,18 @@ public:
     void undoMove();
 
     void initEvaluate();
-
     void vlOpenCalculator(int &vlOpen);
-
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
 
     void initHashInfo();
-
     void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 
     bool isKingLive(TEAM team) const { return team == RED ? getPieceReg(R_KING).isLive : getPieceReg(B_KING).isLive; }
-
-    int evaluate() const;
-
-    void doNullMove()
-    {
-        this->team = -this->team;
-    }
-
-    void undoNullMove()
-    {
-        this->team = -this->team;
-    }
-
-    bool nullOkay() const
-    {
-        const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
-        return (vlSelf > 10000 + 600);
-    }
-
-    bool nullSafe() const
-    {
-        const int vlSelf = this->team == RED ? this->vlRed : this->vlBlack;
-        return (vlSelf > 10000 + 1200);
-    }
-
-    UINT32 getBitLineX(int x) const
-    {
-        return this->bitboard->getBitlineX(x);
-    }
-
-    UINT32 getBitLineY(int y) const
-    {
-        return this->bitboard->getBitlineY(y);
-    }
+    int evaluate() const { return team == RED ? vlRed - vlBlack + vlAdvanced : vlBlack - vlRed + vlAdvanced; };
+    void doNullMove() { team = -team; }
+    void undoNullMove() { team = -team; }
+    bool nullOkay() const { return team == RED ? vlRed : vlBlack > 10000 + 600; }
+    bool nullSafe() const { return team == RED ? vlRed : vlBlack > 10000 + 1200; }
 
     int distance = 0;
     int vlRed = 0;
@@ -140,48 +108,49 @@ void Board::doMove(Move move)
 
 void Board::undoMove()
 {
-    const int x1 = this->historyMoves.back().x1;
-    const int x2 = this->historyMoves.back().x2;
-    const int y1 = this->historyMoves.back().y1;
-    const int y2 = this->historyMoves.back().y2;
-    const Piece eaten = this->historyMoves.back().captured;
-    const Piece attackStarter = this->historyMoves.back().starter;
+    const Move& back = this->historyMoves.back();
+    const int& x1 = back.x1;
+    const int& x2 = back.x2;
+    const int& y1 = back.y1;
+    const int& y2 = back.y2;
+    const Piece attacker = this->historyMoves.back().starter;
+    const Piece captured = this->historyMoves.back().captured;
 
     // 更新棋盘数据
     this->distance -= 1;
     this->team = -this->team;
     this->historyMoves.pop_back();
-    this->bitboard->undoMove(x1, y1, x2, y2, eaten.pieceid != 0);
+    this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
     // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
-    this->pieceidMap[x2][y2] = eaten.pieceid;
+    this->pieceidMap[x2][y2] = captured.pieceid;
     this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
-    this->pieceIndexMap[x2][y2] = eaten.pieceIndex;
-    this->pieces[attackStarter.pieceIndex].x = x1;
-    this->pieces[attackStarter.pieceIndex].y = y1;
-    if (eaten.pieceIndex != -1)
+    this->pieceIndexMap[x2][y2] = captured.pieceIndex;
+    this->pieces[attacker.pieceIndex].x = x1;
+    this->pieces[attacker.pieceIndex].y = y1;
+    if (captured.pieceIndex != -1)
     {
-        this->pieces[eaten.pieceIndex].isLive = true;
+        this->pieces[captured.pieceIndex].isLive = true;
     }
     // 更新评估分
-    if (attackStarter.team == RED)
+    if (attacker.team == RED)
     {
-        int valPos1 = pieceWeights[attackStarter.pieceid][x1][y1];
-        int valPos2 = pieceWeights[attackStarter.pieceid][x2][y2];
+        int valPos1 = pieceWeights[attacker.pieceid][x1][y1];
+        int valPos2 = pieceWeights[attacker.pieceid][x2][y2];
         this->vlRed -= (valPos2 - valPos1);
-        if (eaten.pieceid != EMPTY_PIECEID)
+        if (captured.pieceid != EMPTY_PIECEID)
         {
-            this->vlBlack += pieceWeights[eaten.pieceid][x2][size_t(9) - y2];
+            this->vlBlack += pieceWeights[captured.pieceid][x2][size_t(9) - y2];
         }
     }
     else
     {
-        int valPos1 = pieceWeights[attackStarter.pieceid][x1][size_t(9) - y1];
-        int valPos2 = pieceWeights[attackStarter.pieceid][x2][size_t(9) - y2];
+        int valPos1 = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
+        int valPos2 = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
         this->vlBlack -= (valPos2 - valPos1);
-        if (eaten.pieceid != EMPTY_PIECEID)
+        if (captured.pieceid != EMPTY_PIECEID)
         {
-            this->vlRed += pieceWeights[eaten.pieceid][x2][y2];
+            this->vlRed += pieceWeights[captured.pieceid][x2][y2];
         }
     }
     // 回滚哈希值
@@ -412,9 +381,4 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
-}
-
-int Board::evaluate() const
-{
-    return this->team == RED ? (vlRed - vlBlack + vlAdvanced) : (vlBlack - vlRed + vlAdvanced);
 }
