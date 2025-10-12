@@ -53,7 +53,13 @@
     <ClInclude Include="bitboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="nnuefile.hpp">
+    <ClInclude Include="basicboard.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="genfiles.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="nnue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
