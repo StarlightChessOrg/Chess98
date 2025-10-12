@@ -56,7 +56,7 @@ void Board::doMove(Move move)
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyMoves.back().attacker = attacker;
     this->historyMoves.back().captured = captured;
-    // 维护棋盘的棋子追踪
+    this->bitboard->doMove(x1, y1, x2, y2);
     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
     this->pieceidMap[x1][y1] = 0;
     this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
@@ -67,7 +67,6 @@ void Board::doMove(Move move)
     {
         this->pieces[captured.pieceIndex].isLive = false;
     }
-    this->bitboard->doMove(x1, y1, x2, y2);
     // 更新评估分
     if (attacker.team == RED)
     {
@@ -121,7 +120,6 @@ void Board::undoMove()
     this->team = -this->team;
     this->historyMoves.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
-    // 维护棋盘的棋子追踪
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
     this->pieceidMap[x2][y2] = captured.pieceid;
     this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
