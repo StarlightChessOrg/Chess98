@@ -11,7 +11,8 @@
 using MODEL = torch::jit::script::Module;
 using TENSOR = torch::Tensor;
 
-class NNUE {
+class NNUE
+{
 public:
     NNUE(std::string model_path)
     {
@@ -25,7 +26,7 @@ public:
     MODEL model;
 
 public:
-    float evaluate(const PIECEID_MAP& pieceidMap, TEAM team)
+    float evaluate(const PIECEID_MAP &pieceidMap, TEAM team)
     {
         try
         {
@@ -34,7 +35,7 @@ public:
 
             // 2. 运行模型推理
             torch::NoGradGuard no_grad;
-            torch::jit::Stack input { test_input };
+            torch::jit::Stack input{test_input};
             torch::Tensor test_output = model.forward(input).toTensor();
 
             // 3. 提取并打印输出结果 (与Python的test_output[0].tolist()等价)
@@ -58,14 +59,18 @@ public:
 
 protected:
     // 获取输入数据，一个展平的棋盘向量
-    TENSOR nnueInput(const PIECEID_MAP& pieceidMap, TEAM team) {
+    TENSOR nnueInput(const PIECEID_MAP &pieceidMap, TEAM team)
+    {
         // 1. 创建 7×9×10 的三维张量并填充数据
-        TENSOR input = torch::zeros({ 7, 9, 10 }, torch::kFloat32);
-        for (int x = 0; x < 9; x++) {
-            for (int y = 0; y < 10; y++) {
+        TENSOR input = torch::zeros({7, 9, 10}, torch::kFloat32);
+        for (int x = 0; x < 9; x++)
+        {
+            for (int y = 0; y < 10; y++)
+            {
                 PIECEID pieceId = pieceidMap[x][y];
-                if (pieceId != EMPTY_PIECEID) {
-                    int pieceType = abs(pieceId) - 1;  // 转换为0-6的索引
+                if (pieceId != EMPTY_PIECEID)
+                {
+                    int pieceType = abs(pieceId) - 1; // 转换为0-6的索引
                     float value = (pieceId > 0) ? 1.0f : -1.0f;
                     input[pieceType][x][y] = value;
                 }
@@ -73,7 +78,7 @@ protected:
         }
 
         // 2. 展平为一维张量 [630]，然后添加批次维度 [1, 630]
-        return input.reshape({ 1, 630 });  // 或等价写法：.reshape({1, 630})
+        return input.reshape({1, 630}); // 或等价写法：.reshape({1, 630})
     }
 };
 

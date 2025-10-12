@@ -38,4 +38,3 @@ void testByUI()
 
     ui(team, aiFirst, maxDepth, maxTime, fenCode);
 }
-

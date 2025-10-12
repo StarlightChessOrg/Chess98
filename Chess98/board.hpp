@@ -16,7 +16,7 @@ public:
     int32 hashLock = 0;
     std::vector<int32> hashKeyList{};
     std::vector<int32> hashLockList{};
-    
+
 public:
     bool isKingLive(TEAM team) const { return team == RED ? getPieceReg(R_KING).isLive : getPieceReg(B_KING).isLive; }
     int evaluate() const { return team == RED ? vlRed - vlBlack + vlAdvanced : vlBlack - vlRed + vlAdvanced; };
@@ -43,12 +43,12 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team) : BasicBoard(pieceidMap, team)
 
 void Board::doMove(Move move)
 {
-    const int& x1 = move.x1;
-    const int& x2 = move.x2;
-    const int& y1 = move.y1;
-    const int& y2 = move.y2;
-    const Piece& attacker = this->piecePosition(x1, y1);
-    const Piece& captured = this->piecePosition(x2, y2);
+    const int &x1 = move.x1;
+    const int &x2 = move.x2;
+    const int &y1 = move.y1;
+    const int &y2 = move.y2;
+    const Piece &attacker = this->piecePosition(x1, y1);
+    const Piece &captured = this->piecePosition(x2, y2);
 
     // 更新棋盘数据
     this->team = -this->team;
@@ -107,13 +107,13 @@ void Board::doMove(Move move)
 
 void Board::undoMove()
 {
-    const Move& back = this->historyMoves.back();
-    const int& x1 = back.x1;
-    const int& x2 = back.x2;
-    const int& y1 = back.y1;
-    const int& y2 = back.y2;
-    const Piece& attacker = this->historyMoves.back().attacker;
-    const Piece& captured = this->historyMoves.back().captured;
+    const Move &back = this->historyMoves.back();
+    const int &x1 = back.x1;
+    const int &x2 = back.x2;
+    const int &y1 = back.y1;
+    const int &y2 = back.y2;
+    const Piece &attacker = this->historyMoves.back().attacker;
+    const Piece &captured = this->historyMoves.back().captured;
 
     // 更新棋盘数据
     this->distance -= 1;

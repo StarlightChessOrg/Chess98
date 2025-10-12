@@ -22,7 +22,7 @@ public:
         this->pTransportation->reset();
         this->log_nodecount = 0;
     }
-    
+
     static const int QUIESCENCE_EXTEND_DEPTH = 64;
     static const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
 

@@ -1,7 +1,7 @@
 #pragma once
 #include "board.hpp"
 
-bool isRivercrossedPawn(Board& board, int x, int y);
+bool isRivercrossedPawn(Board &board, int x, int y);
 bool hasCrossedRiver(Board &board, int x, int y);
 bool isInPalace(Board &board, int x, int y);
 bool inCheck(Board &board, TEAM judgeTeam);
