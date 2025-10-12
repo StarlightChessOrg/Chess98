@@ -9,7 +9,6 @@ public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
     void doMove(Move move);
-
     void undoMove();
 
     void initEvaluate();
@@ -70,10 +69,7 @@ public:
 
 Board::Board(PIECEID_MAP pieceidMap, TEAM team) : BasicBoard(pieceidMap, team)
 {
-    this->distance = 0;
-    // 初始化评估分
     initEvaluate();
-    // 初始化局面哈希
     initHashInfo();
 }
 
