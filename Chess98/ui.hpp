@@ -1,5 +1,4 @@
 #pragma once
-#include "board.hpp"
 #include "search.hpp"
 
 using BOARD_CODE = std::string;

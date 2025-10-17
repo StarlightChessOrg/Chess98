@@ -1,5 +1,4 @@
 #pragma once
-#include "board.hpp"
 #include "utils.hpp"
 
 class MovesGenerate

@@ -1,5 +1,4 @@
 #pragma once
-#include "hash.hpp"
 #include "heuristic.hpp"
 #include "moves.hpp"
 #include "utils.hpp"

@@ -1,8 +1,5 @@
 #pragma once
-#include "base.hpp"
 #include "board.hpp"
-#include "hash.hpp"
-#include "utils.hpp"
 #include "moves.hpp"
 
 // 历史启发
