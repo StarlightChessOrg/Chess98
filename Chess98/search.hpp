@@ -160,7 +160,6 @@ protected:
             // 若ply5和ply3都是将军着法, 且出现循环局面, 则直接判定违规
             if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
             {
-                std::cout << "Long Check!" << std::endl;
                 return true;
             }
             // 长捉情况比较特殊
@@ -182,7 +181,6 @@ protected:
                         if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
                             board.piecePosition(ply5.x2, regionX[0]).pieceIndex == target.pieceIndex)
                         {
-                            std::cout << "Long Rook Check!" << std::endl;
                             return true;
                         }
                     }
@@ -193,7 +191,6 @@ protected:
                         if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
                             board.piecePosition(regionY[1], ply5.y2).pieceIndex == target.pieceIndex)
                         {
-                            std::cout << "Long Rook Check!" << std::endl;
                             return true;
                         }
                     }
@@ -208,7 +205,6 @@ protected:
                         if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
                             board.piecePosition(ply5.x2, regionX[3]).pieceIndex == target.pieceIndex)
                         {
-                            std::cout << "Long Cannon Check!" << std::endl;
                             return true;
                         }
                     }
@@ -219,7 +215,6 @@ protected:
                         if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
                             board.piecePosition(regionY[3], ply5.y2).pieceIndex == target.pieceIndex)
                         {
-                            std::cout << "Long Cannon Check!" << std::endl;
                             return true;
                         }
                     }
@@ -237,7 +232,6 @@ protected:
                         (starter.x + 2 == target.x && starter.y - 1 == target.y) ||
                         (starter.x - 2 == target.x && starter.y - 1 == target.y)) // 这里有点担心, 但是我想不到什么局面
                     {
-                        std::cout << "Long Knight Check!" << std::endl;
                         return true;
                     }
                 }
@@ -262,7 +256,6 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     {
         // 是否重复局面
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
-        std::cout << " repeat situation!" << " vl: " << INF << std::endl;
         return Result{move, INF};
     }
 

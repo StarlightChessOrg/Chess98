@@ -35,7 +35,6 @@ void testByUI()
     // fenCode = "5R3/C3k4/5a3/p1P4cp/2r3b2/3N5/P2n4P/B8/4A4/4KAB2 w - - 0 1"; // 漏招 未解决
     // fenCode = "r1baka3/6R2/1c2b4/pC2p3p/2n3P2/9/P3r3P/3C5/4N4/R1BAKAB2 w - - 0 1"; // 漏招 - 深度问题 未解决
     // fenCode = "3k1ab1C/4a4/4Cc3/p3N4/7c1/P1B6/9/3AB4/4A1n2/3K5 w - - 0 1"; // 漏招 - 未解决
-    fenCode = "3a1a3/4k4/9/8p/1c7/6r2/P7P/9/3NA4/R2AK4 w - - 0 1";
 
     ui(team, aiFirst, maxDepth, maxTime, fenCode);
 }
