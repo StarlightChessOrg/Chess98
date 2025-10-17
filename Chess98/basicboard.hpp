@@ -12,8 +12,6 @@ public:
     MOVES historyMoves{};
     TEAM team{};
     std::unique_ptr<Bitboard> bitboard{};
-
-protected:
     PIECES pieces{};
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};

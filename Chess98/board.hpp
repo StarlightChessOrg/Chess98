@@ -1,9 +1,9 @@
 #pragma once
 #include "evaluate.hpp"
-#include "basicboard.hpp"
 #include "hash.hpp"
+#include "bitboard.hpp"
 
-class Board : public BasicBoard
+class Board
 {
 public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
@@ -18,16 +18,41 @@ public:
     std::vector<int32> hashLockList{};
 
 public:
+    PIECEID_MAP pieceidMap{};
+    MOVES historyMoves{};
+    TEAM team{};
+    std::unique_ptr<Bitboard> bitboard{};
+    PIECES pieces{};
+    std::vector<PIECE_INDEX> redPieces{};
+    std::vector<PIECE_INDEX> blackPieces{};
+    std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
+    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
+
+public:
     bool isKingLive(TEAM team) const { return team == RED ? getPieceReg(R_KING).isLive : getPieceReg(B_KING).isLive; }
     int evaluate() const { return team == RED ? vlRed - vlBlack + vlAdvanced : vlBlack - vlRed + vlAdvanced; };
     void doNullMove() { team = -team; }
     void undoNullMove() { team = -team; }
     bool nullOkay() const { return team == RED ? vlRed : vlBlack > 10000 + 600; }
     bool nullSafe() const { return team == RED ? vlRed : vlBlack > 10000 + 1200; }
+    UINT32 getBitLineX(int x) const { return bitboard->getBitlineX(x); }
+    UINT32 getBitLineY(int y) const { return this->bitboard->getBitlineY(y); }
+
+public:
+    PIECEID pieceidOn(int x, int y) const;
+    TEAM teamOn(int x, int y) const;
+    Piece pieceIndex(int i) const;
+    Piece piecePosition(int x, int y) const;
+    PIECES getAllLivePieces() const;
+    PIECES getPiecesByTeam(TEAM team) const;
+    Piece getPieceReg(PIECEID pieceid) const;
+    PIECES getPiecesReg(PIECEID pieceid) const;
 
 public:
     void doMove(Move move);
     void undoMove();
+    void doMoveSimple(Move move);
+    void undoMoveSimple();
     void initEvaluate();
     void vlOpenCalculator(int &vlOpen);
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
@@ -35,10 +60,137 @@ public:
     void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
 };
 
-Board::Board(PIECEID_MAP pieceidMap, TEAM team) : BasicBoard(pieceidMap, team)
+Board::Board(PIECEID_MAP pieceidMap, TEAM team)
 {
-    initEvaluate();
-    initHashInfo();
+    this->pieceidMap = pieceidMap;
+    this->team = team;
+    this->bitboard = std::make_unique<Bitboard>(pieceidMap);
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            PIECEID &pieceid = pieceidMap[x][y];
+            if (pieceid != 0)
+            {
+                const int &size = int(this->pieces.size());
+                Piece piece{pieceidMap[x][y], x, y, size};
+                PIECE_INDEX index = size;
+
+                this->pieces.emplace_back(piece);
+                this->pieceIndexMap[x][y] = index;
+                this->pieceRegistry[pieceid].emplace_back(this->pieces.back().pieceIndex);
+                if (pieceid > 0)
+                {
+                    this->redPieces.emplace_back(index);
+                }
+                else
+                {
+                    this->blackPieces.emplace_back(index);
+                }
+            }
+            else
+            {
+                this->pieceIndexMap[x][y] = -1;
+            }
+        }
+    }
+    this->initEvaluate();
+    this->initHashInfo();
+}
+
+PIECEID Board::pieceidOn(int x, int y) const
+{
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
+    {
+        return this->pieceidMap[x][y];
+    }
+    else
+    {
+        return OVERFLOW_PIECEID;
+    }
+}
+
+TEAM Board::teamOn(int x, int y) const
+{
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
+    {
+        const PIECEID pieceid = this->pieceidMap[x][y];
+        return pieceid > 0 ? RED : (pieceid < 0 ? BLACK : EMPTY_TEAM);
+    }
+    else
+    {
+        return OVERFLOW_TEAM;
+    }
+}
+
+Piece Board::pieceIndex(int i) const
+{
+    return this->pieces[i];
+}
+
+Piece Board::piecePosition(int x, int y) const
+{
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
+    {
+        if (this->pieceidMap[x][y] != 0)
+        {
+            return this->pieceIndex(this->pieceIndexMap[x][y]);
+        }
+        else
+        {
+            return Piece{EMPTY_PIECEID, -1, -1, EMPTY_INDEX};
+        }
+    }
+    else
+    {
+        return Piece{OVERFLOW_PIECEID, -1, -1, EMPTY_INDEX};
+    }
+}
+
+PIECES Board::getAllLivePieces() const
+{
+    PIECES result{};
+    for (Piece piece : this->pieces)
+    {
+        if (piece.isLive)
+        {
+            result.emplace_back(piece);
+        }
+    }
+    return result;
+}
+
+PIECES Board::getPiecesByTeam(TEAM team) const
+{
+    PIECES result{};
+    PIECES allPieces = this->getAllLivePieces();
+    for (Piece piece : allPieces)
+    {
+        if (piece.team == team)
+        {
+            result.emplace_back(piece);
+        }
+    }
+    return result;
+}
+
+Piece Board::getPieceReg(PIECEID pieceid) const
+{
+    return this->pieceIndex(this->pieceRegistry.at(pieceid)[0]);
+}
+
+PIECES Board::getPiecesReg(PIECEID pieceid) const
+{
+    PIECES result{};
+    for (PIECE_INDEX pieceindex : this->pieceRegistry.at(pieceid))
+    {
+        const Piece &piece = this->pieceIndex(pieceindex);
+        if (piece.isLive)
+        {
+            result.emplace_back(piece);
+        }
+    }
+    return result;
 }
 
 void Board::doMove(Move move)
@@ -156,6 +308,51 @@ void Board::undoMove()
     this->hashLock = this->hashLockList.back();
     this->hashKeyList.pop_back();
     this->hashLockList.pop_back();
+}
+
+void Board::doMoveSimple(Move move)
+{
+    const int &x1 = move.x1, &x2 = move.x2;
+    const int &y1 = move.y1, &y2 = move.y2;
+    const Piece &attacker = this->piecePosition(x1, y1);
+    const Piece &captured = this->piecePosition(x2, y2);
+    this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
+    this->pieceidMap[x1][y1] = 0;
+    this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
+    this->pieceIndexMap[x1][y1] = -1;
+    this->pieces[attacker.pieceIndex].x = x2;
+    this->pieces[attacker.pieceIndex].y = y2;
+    this->team = -this->team;
+    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
+    this->historyMoves.back().attacker = attacker;
+    this->historyMoves.back().captured = captured;
+    // this->bitboard->doMove(x1, y1, x2, y2);
+    if (captured.pieceIndex != -1)
+    {
+        this->pieces[captured.pieceIndex].isLive = false;
+    }
+}
+
+void Board::undoMoveSimple()
+{
+    const Move &back = this->historyMoves.back();
+    const int &x1 = back.x1, &x2 = back.x2;
+    const int &y1 = back.y1, &y2 = back.y2;
+    const Piece &attacker = back.attacker;
+    const Piece &captured = back.captured;
+    this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
+    this->pieceidMap[x2][y2] = captured.pieceid;
+    this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
+    this->pieceIndexMap[x2][y2] = captured.pieceIndex;
+    this->pieces[attacker.pieceIndex].x = x1;
+    this->pieces[attacker.pieceIndex].y = y1;
+    this->team = -this->team;
+    this->historyMoves.pop_back();
+    // this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
+    if (captured.pieceIndex != -1)
+    {
+        this->pieces[captured.pieceIndex].isLive = true;
+    }
 }
 
 void Board::initEvaluate()
