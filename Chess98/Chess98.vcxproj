@@ -160,7 +160,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.hpp" />
-    <ClInclude Include="basicboard.hpp" />
     <ClInclude Include="bitboard.hpp" />
     <ClInclude Include="board.hpp" />
     <ClInclude Include="evaluate.hpp" />

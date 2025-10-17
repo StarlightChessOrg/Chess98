@@ -53,9 +53,6 @@
     <ClInclude Include="bitboard.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="basicboard.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="genfiles.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
