@@ -81,7 +81,10 @@ const SEARCH_TYPE ROOT = 0;
 const SEARCH_TYPE PV = 1;
 const SEARCH_TYPE CUT = 2;
 const SEARCH_TYPE QUIESC = 3;
-
+const std::vector<PIECEID> ALL_PIECEIDS = {
+    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
+    B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
+};
 class Piece
 {
 public:

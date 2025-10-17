@@ -65,6 +65,10 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
     this->pieceidMap = pieceidMap;
     this->team = team;
     this->bitboard = std::make_unique<Bitboard>(pieceidMap);
+    for (const PIECEID& id : ALL_PIECEIDS)
+    {
+        this->pieceRegistry[id] = std::vector<PIECE_INDEX>{};
+    }
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
