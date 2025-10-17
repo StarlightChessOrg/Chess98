@@ -9,6 +9,9 @@ public:
     Search(PIECEID_MAP pieceidMap, TEAM team)
     {
         this->board = Board(pieceidMap, team);
+        this->pHistory = std::make_unique<HistoryTable>();
+        this->pKiller = std::make_unique<KillerTable>();
+        this->pTt = std::make_unique<Tt>();
     }
 
     void reset()
@@ -18,7 +21,7 @@ public:
         board.initEvaluate();
         this->pHistory->reset();
         this->pKiller->reset();
-        this->pTransportation->reset();
+        this->pTt->reset();
         this->log_nodecount = 0;
     }
 
@@ -26,13 +29,15 @@ public:
     static const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
 
 public:
-    Board board{PIECEID_MAP{}, EMPTY_TEAM};
+    Board board{};
 
 protected:
     MOVES rootMoves{};
-    HistoryTable *pHistory = new HistoryTable{};
-    KillerTable *pKiller = new KillerTable{};
-    TransportationTable *pTransportation = new TransportationTable{};
+    std::unique_ptr<HistoryTable> pHistory{};
+    std::unique_ptr<KillerTable> pKiller{};
+    std::unique_ptr<Tt> pTt{};
+
+protected:
     int log_nodecount = 0;
     std::vector<Result> log_rootresults{};
 
@@ -124,7 +129,7 @@ protected:
         return TrickResult{false, {}};
     }
 
-    bool repeatCheck()
+    bool repeatCheck() const
     {
         // 这个函数只判断对方有没有违规, 违规返回INF
         const Board &board = this->board;
@@ -533,7 +538,7 @@ Result Search::searchRoot(int depth)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, vlBest, EXACT_TYPE, depth);
+        this->pTt->add(board, bestMove, vlBest, EXACT_TYPE, depth);
     }
 
     this->pHistory->sort(rootMoves);
@@ -585,14 +590,14 @@ int Search::searchPV(int depth, int alpha, int beta)
     MOVES availableMoves;
 
     // 置换表着法
-    Move goodMove = this->pTransportation->getMove(board);
+    Move goodMove = this->pTt->getMove(board);
     if (goodMove.id == -1 && depth >= 2)
     {
         if (searchPV(depth / 2, alpha, beta) <= alpha)
         {
             searchPV(depth / 2, -INF, beta);
         }
-        goodMove = this->pTransportation->getMove(board);
+        goodMove = this->pTt->getMove(board);
     }
     if (goodMove.id != -1)
     {
@@ -708,7 +713,7 @@ int Search::searchPV(int depth, int alpha, int beta)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, vlBest, type, depth);
+        this->pTt->add(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);
@@ -729,7 +734,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // 置换表分数
-    int vlHash = this->pTransportation->getValue(board, -INF, beta, depth);
+    int vlHash = this->pTt->getValue(board, -INF, beta, depth);
     if (vlHash >= beta)
     {
         return vlHash;
@@ -795,7 +800,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     MOVES availableMoves;
 
     // 置换表着法
-    Move goodMove = this->pTransportation->getMove(board);
+    Move goodMove = this->pTt->getMove(board);
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
@@ -853,7 +858,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     else
     {
         this->pHistory->add(bestMove, depth);
-        this->pTransportation->add(board, bestMove, vlBest, type, depth);
+        this->pTt->add(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
             this->pKiller->add(board, bestMove);

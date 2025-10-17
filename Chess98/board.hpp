@@ -6,6 +6,7 @@
 class Board
 {
 public:
+    Board() = default;
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
 public:

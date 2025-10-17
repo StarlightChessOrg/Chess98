@@ -6,21 +6,25 @@
 class HistoryTable
 {
 public:
+    using TABLE = std::array<std::array<std::array<int, 90>, 90>, 2>;
+    using TABLE_1 = std::array<std::array<int, 90>, 90>;
+    using TABLE_2 = std::array<int, 90>;
+
+public:
     HistoryTable() = default;
 
     void reset()
     {
-        for (std::array<std::array<int, 90>, 90> &pos : this->historyTable)
+        for (TABLE_1 &pos : this->historyTable)
         {
-            for (std::array<int, 90> &pos2 : pos)
+            for (TABLE_2 &pos2 : pos)
             {
-                pos2 = std::array<int, 90>{};
+                pos2 = TABLE_2{};
             }
         }
     }
 
 protected:
-    using TABLE = std::array<std::array<std::array<int, 90>, 90>, 2>;
     TABLE historyTable{};
 
 public:
@@ -97,10 +101,10 @@ public:
 };
 
 // 置换表启发
-class TransportationTable
+class Tt
 {
 public:
-    TransportationTable(uint64 hashLevel = 16)
+    Tt(uint64 hashLevel = 16)
         : hashSize(1 << hashLevel),
           hashMask((1 << hashLevel) - 1),
           items(1ULL << hashLevel) {}
