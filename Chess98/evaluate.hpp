@@ -4,22 +4,36 @@
 
 using WEIGHT_MAP = std::array<std::array<int, 10>, 9>;
 
-// 权重表所记录的数值都是红方位置 -> 分数, 黑方评分则需要倒置这张表, 我的习惯是红在上, 横放
+std::map<PIECEID, WEIGHT_MAP> pieceWeights;
+int vlAdvanced = 0;
+int vlPawn = 0;
+
+const int MAX_SEARCH_DISTANCE = 32;
+const int DELTA_PRUNING_MARGIN = 300;
+const int FUTILITY_PRUNING_MARGIN = 400;
+
+const int INITIAL_BOTTOM_CANNON_REWARD = 40;
+const int TERMINAL_BOTTOM_CANNON_REWARD = 20;
+
+const int INITIAL_CENTER_CANNON_REWARD = 50;
+const int TERMINAL_CENTER_CANNON_REWARD = 20;
 
 // OPEN,END 开局, 残局
 // ATTACK, DEFEND 进攻, 防守
 // SAFE,DANGER 安全, 受到威胁的
 
 WEIGHT_MAP OPEN_ATTACK_KING_PAWN_WEIGHT = {
-    {{0, 0, 0, 21, 21, 67, 97, 97, 97, 7},
-     {0, 0, 0, 0, 0, 91, 118, 127, 127, 7},
-     {0, 0, 0, 21, 39, 103, 142, 172, 187, 7},
-     {10037, 10006, 10000, 0, 0, 142, 157, 202, 232, 13},
-     {10053, 10020, 10000, 45, 48, 157, 163, 202, 247, 19},
-     {10037, 10006, 10000, 0, 0, 142, 157, 202, 232, 13},
-     {0, 0, 0, 21, 39, 103, 142, 172, 187, 7},
-     {0, 0, 0, 0, 0, 91, 118, 127, 127, 7},
-     {0, 0, 0, 21, 21, 67, 97, 97, 97, 7}}};
+    {
+        {0, 0, 0, 21, 21, 67, 97, 97, 97, 7},
+        {0, 0, 0, 0, 0, 91, 118, 127, 127, 7},
+        {0, 0, 0, 21, 39, 103, 142, 172, 187, 7},
+        {10037, 10006, 10000, 0, 0, 142, 157, 202, 232, 13},
+        {10053, 10020, 10000, 45, 48, 157, 163, 202, 247, 19},
+        {10037, 10006, 10000, 0, 0, 142, 157, 202, 232, 13},
+        {0, 0, 0, 21, 39, 103, 142, 172, 187, 7},
+        {0, 0, 0, 0, 0, 91, 118, 127, 127, 7},
+        {0, 0, 0, 21, 21, 67, 97, 97, 97, 7},
+    }};
 
 WEIGHT_MAP OPEN_DEFEND_KING_PAWN_WEIGHT = {
     {
@@ -35,15 +49,17 @@ WEIGHT_MAP OPEN_DEFEND_KING_PAWN_WEIGHT = {
     }};
 
 WEIGHT_MAP END_ATTACK_KING_PAWN_WEIGHT = {
-    {{0, 0, 0, 120, 135, 190, 205, 175, 130, 10},
-     {0, 0, 0, 0, 0, 190, 220, 190, 145, 10},
-     {0, 0, 0, 105, 120, 175, 220, 190, 160, 10},
-     {10003, 10009, 10015, 120, 135, 190, 220, 205, 235, 25},
-     {10033, 10039, 10045, 120, 135, 190, 220, 205, 280, 25},
-     {10003, 10009, 10015, 120, 135, 190, 220, 205, 235, 25},
-     {0, 0, 0, 105, 120, 175, 220, 190, 160, 10},
-     {0, 0, 0, 0, 0, 190, 220, 190, 145, 10},
-     {0, 0, 0, 120, 135, 190, 205, 175, 130, 10}}};
+    {
+        {0, 0, 0, 120, 135, 190, 205, 175, 130, 10},
+        {0, 0, 0, 0, 0, 190, 220, 190, 145, 10},
+        {0, 0, 0, 105, 120, 175, 220, 190, 160, 10},
+        {10003, 10009, 10015, 120, 135, 190, 220, 205, 235, 25},
+        {10033, 10039, 10045, 120, 135, 190, 220, 205, 280, 25},
+        {10003, 10009, 10015, 120, 135, 190, 220, 205, 235, 25},
+        {0, 0, 0, 105, 120, 175, 220, 190, 160, 10},
+        {0, 0, 0, 0, 0, 190, 220, 190, 145, 10},
+        {0, 0, 0, 120, 135, 190, 205, 175, 130, 10},
+    }};
 
 WEIGHT_MAP END_DEFEND_KING_PAWN_WEIGHT = {
     {
@@ -302,19 +318,3 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
 
     return pieceWeights;
 }
-
-std::map<PIECEID, WEIGHT_MAP> pieceWeights;
-int vlAdvanced = 0;
-int vlPawn = 0;
-
-// 剪裁的边界参数
-
-const int MAX_SEARCH_DISTANCE = 32;
-const int DELTA_PRUNING_MARGIN = 300;
-const int FUTILITY_PRUNING_MARGIN = 400;
-
-const int INITIAL_BOTTOM_CANNON_REWARD = 40;
-const int TERMINAL_BOTTOM_CANNON_REWARD = 20;
-
-const int INITIAL_CENTER_CANNON_REWARD = 50;
-const int TERMINAL_CENTER_CANNON_REWARD = 20;
