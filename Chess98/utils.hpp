@@ -420,9 +420,9 @@ bool isValidMoveInSituation(Board &board, Move move)
             return false;
     }
 
-    board.doMove(move);
+    board.doMoveSimple(move);
     const bool skip = inCheck(board, -board.team);
-    board.undoMove();
+    board.undoMoveSimple();
 
     return !skip;
 }

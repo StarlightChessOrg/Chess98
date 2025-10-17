@@ -504,9 +504,9 @@ MOVES MovesGenerate::getMoves(Board &board)
     MOVES moves;
     for (Move move : result)
     {
-        board.doMove(move);
+        board.doMoveSimple(move);
         const bool skip = inCheck(board, -board.team);
-        board.undoMove();
+        board.undoMoveSimple();
         if (!skip)
         {
             move.attacker = board.piecePosition(move.x1, move.y1);
@@ -959,9 +959,9 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     MOVES moves;
     for (Move move : result)
     {
-        board.doMove(move);
+        board.doMoveSimple(move);
         const bool skip = inCheck(board, -board.team);
-        board.undoMove();
+        board.undoMoveSimple();
         if (!skip)
         {
             move.attacker = board.piecePosition(move.x1, move.y1);
