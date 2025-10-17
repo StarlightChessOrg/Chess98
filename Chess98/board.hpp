@@ -330,7 +330,7 @@ void Board::doMoveSimple(Move move)
     this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
     this->historyMoves.back().attacker = attacker;
     this->historyMoves.back().captured = captured;
-    // this->bitboard->doMove(x1, y1, x2, y2);
+    this->bitboard->doMove(x1, y1, x2, y2);
     if (captured.pieceIndex != -1)
     {
         this->pieces[captured.pieceIndex].isLive = false;
@@ -352,7 +352,7 @@ void Board::undoMoveSimple()
     this->pieces[attacker.pieceIndex].y = y1;
     this->team = -this->team;
     this->historyMoves.pop_back();
-    // this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
+    this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
     if (captured.pieceIndex != -1)
     {
         this->pieces[captured.pieceIndex].isLive = true;
