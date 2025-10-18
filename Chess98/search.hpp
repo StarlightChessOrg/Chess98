@@ -9,9 +9,6 @@ public:
     Search(PIECEID_MAP pieceidMap, TEAM team)
     {
         this->board = Board(pieceidMap, team);
-        this->pHistory = std::make_unique<HistoryTable>();
-        this->pKiller = std::make_unique<KillerTable>();
-        this->pTt = std::make_unique<Tt>();
     }
 
     void reset()
@@ -22,7 +19,6 @@ public:
         this->pHistory->reset();
         this->pKiller->reset();
         this->pTt->reset();
-        this->log_nodecount = 0;
     }
 
     static const int QUIESCENCE_EXTEND_DEPTH = 64;
@@ -30,16 +26,10 @@ public:
 
 public:
     Board board{};
-
-protected:
     MOVES rootMoves{};
-    std::unique_ptr<HistoryTable> pHistory{};
-    std::unique_ptr<KillerTable> pKiller{};
-    std::unique_ptr<Tt> pTt{};
-
-protected:
-    int log_nodecount = 0;
-    std::vector<Result> log_rootresults{};
+    std::unique_ptr<HistoryTable> pHistory = std::make_unique<HistoryTable>();
+    std::unique_ptr<KillerTable> pKiller = std::make_unique<KillerTable>();
+    std::unique_ptr<Tt> pTt = std::make_unique<Tt>();
 
 public:
     Result searchMain(int maxDepth, int maxTime);
@@ -248,8 +238,6 @@ protected:
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
-    log_nodecount++;
-
     // 预制条件检查
     this->reset();
     if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
@@ -275,7 +263,6 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 输出局面信息
     std::cout << "situation: " << pieceidmapToFen(board.pieceidMap, board.team) << std::endl;
     std::cout << "evaluate: " << board.evaluate() << std::endl;
-    log_rootresults = {};
 
     // 搜索
     this->rootMoves = MovesGenerate::getMoves(board);
@@ -293,8 +280,6 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         std::cout << " vl: " << bestNode.val;
         std::cout << " moveid: " << bestNode.move.id;
         std::cout << " duration(ms): " << duration;
-        std::cout << " count: " << log_nodecount;
-        std::cout << " nps: " << log_nodecount / (duration + 1) * 1000;
         std::cout << std::endl;
 
         // timeout break
@@ -302,8 +287,6 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         {
             break;
         }
-
-        this->log_rootresults = {};
     }
 
     // 防止没有可行着法
@@ -525,8 +508,6 @@ Result Search::searchRoot(int depth)
             bestMove = move;
         }
 
-        this->log_rootresults.emplace_back(Result(move, vl));
-
         board.undoMove();
     }
 
@@ -548,8 +529,6 @@ Result Search::searchRoot(int depth)
 
 int Search::searchPV(int depth, int alpha, int beta)
 {
-    log_nodecount++;
-
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
@@ -725,8 +704,6 @@ int Search::searchPV(int depth, int alpha, int beta)
 
 int Search::searchCut(int depth, int beta, bool banNullMove)
 {
-    log_nodecount++;
-
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
@@ -870,8 +847,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
 int Search::searchQ(int alpha, int beta, int leftDistance)
 {
-    log_nodecount++;
-
     // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {

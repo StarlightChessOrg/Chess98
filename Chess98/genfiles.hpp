@@ -7,17 +7,21 @@
 #include "base.hpp"
 #include "search.hpp"
 
+// 基本配置
 const std::string GENFILES_OUTPUT_DIR = "../nnue/data/"; // 首先你需要创建这个目录, 才能写这个目录。后面要加尾随斜杠
 const int GENFILES_DEPTH = 6;                            // 最大搜索深度
 const int GENFILES_RANDOM_MOVE_COUNT = 5;                // 每次随机走的步数
 const int MAX_MOVES = 120;                               // 最多走多少步就认定为死循环局面, 直接判和
 
-template <typename T>
-T getRandomFromVector(const std::vector<T> &vec)
+// 声明
+Move getRandomMoveFromVector(const MOVES &vec);
+
+// 工具函数
+Move getRandomMoveFromVector(const MOVES &vec)
 {
     std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
     if (vec.empty())
-        return T();
+        return {};
     std::uniform_int_distribution<size_t> dist(0, vec.size() - 1);
     return vec[dist(engine)];
 }
@@ -59,10 +63,6 @@ std::string getUniqueRandomFilename()
     return filename;
 }
 
-std::string GENFILES_filecontent = "[";
-bool GENFILES_appexit = false;
-std::string GENFILES_filename = getUniqueRandomFilename();
-
 void saveGENFILES()
 {
     if (GENFILES_filecontent.back() == ',')
@@ -73,105 +73,111 @@ void saveGENFILES()
     writeFile(GENFILES_OUTPUT_DIR + GENFILES_filename + ".json", GENFILES_filecontent + "]");
 }
 
+// 全局变量
+std::string GENFILES_filecontent = "[";
+bool GENFILES_appexit = false;
+std::string GENFILES_filename = getUniqueRandomFilename();
+
+// 搜索类
 class SearchGenfiles : public Search
 {
 public:
-    SearchGenfiles(PIECEID_MAP pieceidMap, TEAM team)
-        : Search(pieceidMap, team) {};
-    friend void genfiles();
+    SearchGenfiles(PIECEID_MAP pieceidMap, TEAM team) : Search(pieceidMap, team) {};
 
 public:
-    Result searchGenereateGENFILES(int maxDepth, int maxTime)
-    {
-        log_nodecount++;
+    std::vector<Result> rootresults{};
 
-        // 预制条件检查
-        this->reset();
-        if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
-        {
-            // 将帅是否在棋盘上
-            GENFILES_appexit = true;
-            return Result{Move{}, 0};
-        }
-        else if (this->repeatCheck())
-        {
-            // 是否重复局面
-            std::cout << " repeat situation!" << std::endl;
-            return Result{Move{}, 0};
-        }
-
-        // 输出局面信息
-        std::cout << "situation: " << pieceidmapToFen(board.pieceidMap, board.team) << std::endl;
-        std::cout << "evaluate: " << board.evaluate() << std::endl;
-
-        // 搜索
-        this->rootMoves = MovesGenerate::getMoves(board);
-        Result bestNode = Result(Move(), 0);
-        auto start = std::chrono::high_resolution_clock::now();
-
-        // nnue start
-        std::string historyStr = "";
-        for (const Move &move : board.historyMoves)
-        {
-            historyStr += std::to_string(move.id) + ",";
-        }
-        if (historyStr.size() > 0)
-        {
-            historyStr.pop_back();
-        }
-        std::string str = "";
-        for (int depth = 1; depth <= maxDepth; depth++)
-        {
-            str = "{\"fen\":\"" + pieceidmapToFen(board.pieceidMap, board.team) + "\",\"history\":[" + historyStr + "],\"data\":[";
-            bestNode = searchRoot(depth);
-
-            auto end = std::chrono::high_resolution_clock::now();
-            int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
-
-            // log
-            std::cout << " depth: " << depth;
-            std::cout << " vl: " << bestNode.val;
-            std::cout << " moveid: " << bestNode.move.id;
-            std::cout << " duration(ms): " << duration;
-            std::cout << " count: " << log_nodecount;
-            std::cout << " nps: " << log_nodecount / (duration + 1) * 1000;
-            std::cout << std::endl;
-
-            // nnue 记录根节点结果
-            str += "{\"depth\":" + std::to_string(depth) + ",\"data\":[";
-            for (const Result &result : log_rootresults)
-            {
-                str += "{";
-                str += "\"moveid\":" + std::to_string(result.move.id);
-                board.doMove(result.move);
-                str += ",\"fen_after_move\":\"" + pieceidmapToFen(board.pieceidMap, board.team) + "\"";
-                board.undoMove();
-                str += ",\"vl\":" + std::to_string(result.val);
-                str += "},";
-            }
-            if (str.back() == ',')
-            {
-                str.pop_back();
-            }
-            str += "]},";
-
-            this->log_rootresults = {};
-
-            // timeout break
-            if (duration >= maxTime * 1000 / 3)
-            {
-                break;
-            }
-        }
-
-        str.pop_back();
-        str += "]},";
-        GENFILES_filecontent += str;
-
-        return bestNode;
-    }
+public:
+    Result searchMain(int maxDepth, int maxTime);
 };
 
+Result SearchGenfiles::searchMain(int maxDepth, int maxTime)
+{
+    // 预制条件检查
+    this->reset();
+    if (!board.isKingLive(RED) || !board.isKingLive(BLACK))
+    {
+        // 将帅是否在棋盘上
+        GENFILES_appexit = true;
+        return Result{Move{}, 0};
+    }
+    else if (this->repeatCheck())
+    {
+        // 是否重复局面
+        std::cout << " repeat situation!" << std::endl;
+        return Result{Move{}, 0};
+    }
+
+    // 输出局面信息
+    std::cout << "situation: " << pieceidmapToFen(board.pieceidMap, board.team) << std::endl;
+    std::cout << "evaluate: " << board.evaluate() << std::endl;
+
+    // 搜索
+    this->rootMoves = MovesGenerate::getMoves(board);
+    Result bestNode = Result(Move(), 0);
+    auto start = std::chrono::high_resolution_clock::now();
+
+    // nnue start
+    std::string historyStr = "";
+    for (const Move &move : board.historyMoves)
+    {
+        historyStr += std::to_string(move.id) + ",";
+    }
+    if (historyStr.size() > 0)
+    {
+        historyStr.pop_back();
+    }
+    std::string str = "";
+    for (int depth = 1; depth <= maxDepth; depth++)
+    {
+        str = "{\"fen\":\"" + pieceidmapToFen(board.pieceidMap, board.team) + "\",\"history\":[" + historyStr + "],\"data\":[";
+        bestNode = searchRoot(depth);
+
+        auto end = std::chrono::high_resolution_clock::now();
+        int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+
+        // log
+        std::cout << " depth: " << depth;
+        std::cout << " vl: " << bestNode.val;
+        std::cout << " moveid: " << bestNode.move.id;
+        std::cout << " duration(ms): " << duration;
+        std::cout << std::endl;
+
+        // nnue 记录根节点结果
+        str += "{\"depth\":" + std::to_string(depth) + ",\"data\":[";
+        for (const Result &result : this->rootresults)
+        {
+            str += "{";
+            str += "\"moveid\":" + std::to_string(result.move.id);
+            board.doMove(result.move);
+            str += ",\"fen_after_move\":\"" + pieceidmapToFen(board.pieceidMap, board.team) + "\"";
+            board.undoMove();
+            str += ",\"vl\":" + std::to_string(result.val);
+            str += "},";
+        }
+        if (str.back() == ',')
+        {
+            str.pop_back();
+        }
+        str += "]},";
+
+        this->rootresults = {};
+
+        // timeout break
+        if (duration >= maxTime * 1000 / 3)
+        {
+            break;
+        }
+    }
+
+    str.pop_back();
+    str += "]},";
+    GENFILES_filecontent += str;
+
+    return bestNode;
+}
+
+// 生成函数
 void genfiles()
 {
     GENFILES_appexit = false;
@@ -188,10 +194,10 @@ void genfiles()
     {
         count++;
         std::cout << count << "---------------" << std::endl;
-        Result a = s->searchGenereateGENFILES(maxDepth, 3);
+        Result a = s->searchMain(maxDepth, 3);
         if (a.move.id != -1)
         {
-            Move m = getRandomFromVector<Move>(s->rootMoves);
+            Move m = getRandomMoveFromVector(s->rootMoves);
             s->board.doMove(m);
         }
         else
@@ -205,7 +211,7 @@ void genfiles()
     {
         count++;
         std::cout << count << "---------------" << std::endl;
-        Result a = s->searchGenereateGENFILES(maxDepth, 3);
+        Result a = s->searchMain(maxDepth, 3);
         if (a.move.id != -1)
         {
             s->board.doMove(a.move);
