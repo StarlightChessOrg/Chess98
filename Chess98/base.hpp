@@ -24,11 +24,11 @@
 class Piece;
 class Move;
 class Result;
-class TrickResult;
+class Trick;
 class TransItem;
 void wait(int ms);
 void command(std::string str);
-void readFile(std::string filename, std::string &content);
+void readFile(std::string filename, std::string& content);
 void writeFile(std::string filename, std::string content);
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
@@ -85,6 +85,7 @@ const std::vector<PIECEID> ALL_PIECEIDS = {
     R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
     B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
 };
+
 class Piece
 {
 public:
@@ -92,9 +93,9 @@ public:
     Piece(PIECEID pieceid) : pieceid(pieceid) {}
     Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
         : pieceid(pieceid),
-          x(x),
-          y(y),
-          pieceIndex(pieceIndex)
+        x(x),
+        y(y),
+        pieceIndex(pieceIndex)
     {
         if (this->pieceid == EMPTY_PIECEID)
         {
@@ -128,24 +129,25 @@ class Move
 {
 public:
     Move() = default;
+    Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL) :
+        x1(x1),
+        y1(y1),
+        x2(x2),
+        y2(y2),
+        val(val),
+        moveType(moveType)
+    {
+        this->id = x1 * 1000 + y1 * 100 + x2 * 10 + y2;
+        this->startpos = x1 * 10 + y1;
+        this->endpos = x2 * 10 + y2;
+    }
 
-    Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL)
-        : x1(x1),
-          y1(y1),
-          x2(x2),
-          y2(y2),
-          id(x1 * 1000 + y1 * 100 + x2 * 10 + y2),
-          startpos(x1 * 10 + y1),
-          endpos(x2 * 10 + y2),
-          val(val),
-          moveType(moveType) {};
-
-    constexpr bool operator==(const Move &move) const
+    constexpr bool operator==(const Move& move) const
     {
         return this->id == move.id;
     }
 
-    constexpr bool operator!=(const Move &move) const
+    constexpr bool operator!=(const Move& move) const
     {
         return this->id != move.id;
     }
@@ -168,25 +170,23 @@ public:
 class Result
 {
 public:
-    Result(Move move, int score)
-        : move(move),
-          val(score) {};
+    Result() = default;
+    Result(Move move, int vl) : move(move), vl(vl) {}
 
 public:
     Move move{};
-    int val = 0;
+    int vl = 0;
 };
 
-class TrickResult
+class Trick
 {
 public:
-    TrickResult(bool isSuccess, std::vector<int> data)
-        : isSuccess(isSuccess),
-          data(std::move(data)) {};
+    Trick() = default;
+    Trick(int result) : success(true), data(result) {}
 
 public:
-    bool isSuccess = false;
-    std::vector<int> data;
+    bool success = false;
+    int data = 0;
 };
 
 class TransItem
@@ -221,7 +221,7 @@ void command(std::string str)
     int res = system(str.c_str());
 }
 
-void readFile(std::string filename, std::string &content)
+void readFile(std::string filename, std::string& content)
 {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     if (!file)

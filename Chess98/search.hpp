@@ -16,9 +16,9 @@ public:
         this->rootMoves = MOVES{};
         board.distance = 0;
         board.initEvaluate();
-        this->pHistory->reset();
-        this->pKiller->reset();
-        this->pTt->reset();
+        this->history->reset();
+        this->killer->reset();
+        this->tt->reset();
     }
 
     static const int QUIESCENCE_EXTEND_DEPTH = 64;
@@ -27,9 +27,9 @@ public:
 public:
     Board board{};
     MOVES rootMoves{};
-    std::unique_ptr<HistoryTable> pHistory = std::make_unique<HistoryTable>();
-    std::unique_ptr<KillerTable> pKiller = std::make_unique<KillerTable>();
-    std::unique_ptr<Tt> pTt = std::make_unique<Tt>();
+    std::unique_ptr<HistoryTable> history = std::make_unique<HistoryTable>();
+    std::unique_ptr<KillerTable> killer = std::make_unique<KillerTable>();
+    std::unique_ptr<Tt> tt = std::make_unique<Tt>();
 
 public:
     Result searchMain(int maxDepth, int maxTime);
@@ -42,7 +42,7 @@ protected:
     int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
 
 protected:
-    void setCheckingMove(bool mChecking)
+    void validateCheckingMove(bool mChecking)
     {
         if (mChecking && !board.historyMoves.empty())
         {
@@ -50,14 +50,14 @@ protected:
         }
     }
 
-    TrickResult nullAndDeltaPruning(bool mChecking, int &alpha, int &beta, int &vlBest) const
+    Trick nullAndDeltaPruning(bool mChecking, int& alpha, int& beta, int& vlBest) const
     {
         if (!mChecking)
         {
             int vl = board.evaluate();
             if (vl >= beta)
             {
-                return TrickResult{true, {vl}};
+                return Trick{ vl };
             }
             vlBest = vl;
             if (vl > alpha)
@@ -65,10 +65,10 @@ protected:
                 alpha = vl;
             }
         }
-        return TrickResult{false, {}};
+        return {};
     }
 
-    TrickResult mateDistancePruning(int alpha, int &beta) const
+    Trick mateDistancePruning(int alpha, int& beta) const
     {
         const int vlDistanceMate = INF - board.distance;
         if (vlDistanceMate < beta)
@@ -76,26 +76,26 @@ protected:
             beta = vlDistanceMate;
             if (alpha >= vlDistanceMate)
             {
-                return TrickResult(true, {vlDistanceMate});
+                return Trick{ vlDistanceMate };
             }
         }
-        return {false, {}};
+        return {};
     }
 
-    TrickResult futilityPruning(int alpha, int beta, int depth) const
+    Trick futilityPruning(int alpha, int beta, int depth) const
     {
         if (depth == 1)
         {
             int vl = board.evaluate();
             if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
             {
-                return TrickResult{true, {vl}};
+                return Trick{ vl };
             }
         }
-        return TrickResult{false, {}};
+        return {};
     }
 
-    TrickResult multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
+    Trick multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
     {
         if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
         {
@@ -108,42 +108,37 @@ protected:
             const int lowerBound = int((-t * sigma + alpha - b) / a);
             if (this->searchCut(depth - 2, upperBound) >= upperBound)
             {
-                return TrickResult{true, {beta}};
+                return {beta};
             }
             else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
             {
-                return TrickResult{true, {alpha}};
+                return {alpha};
             }
         }
 
-        return TrickResult{false, {}};
+        return {};
     }
 
     bool repeatCheck() const
     {
-        // 这个函数只判断对方有没有违规, 违规返回INF
-        const Board &board = this->board;
-        const MOVES &history = board.historyMoves;
+        const Board& board = this->board;
+        const MOVES& history = board.historyMoves;
         const size_t size = history.size();
-        // 前面加一些快速判断的方法
-        const bool quickCheck = (false // TODO
-        );
-        // 总历史着法数5个及以上才可判定是否重复
-        if (quickCheck == false && size >= 5)
+        if (size >= 5)
         {
-            const Move &ply1 = history[size_t(size - 1)];
-            const Move &ply2 = history[size_t(size - 2)];
-            const Move &ply3 = history[size_t(size - 3)];
-            const Move &ply4 = history[size_t(size - 4)];
-            const Move &ply5 = history[size_t(size - 5)];
+            const Move& ply1 = history[size_t(size - 1)];
+            const Move& ply2 = history[size_t(size - 2)];
+            const Move& ply3 = history[size_t(size - 3)];
+            const Move& ply4 = history[size_t(size - 4)];
+            const Move& ply5 = history[size_t(size - 5)];
             // 判断是否出现重复局面, 没有则直接false
             // 试想如下重复局面：（格式：plyX: x1y1x2y2）
             // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
             const bool isRepeat = (ply1 == ply5 &&
-                                   ply1.startpos == ply3.endpos &&
-                                   ply1.endpos == ply3.startpos &&
-                                   ply2.startpos == ply4.endpos &&
-                                   ply2.endpos == ply4.startpos);
+                ply1.startpos == ply3.endpos &&
+                ply1.endpos == ply3.startpos &&
+                ply2.startpos == ply4.endpos &&
+                ply2.endpos == ply4.startpos);
             if (!isRepeat)
             {
                 return false;
@@ -164,17 +159,17 @@ protected:
                 abs(ply1.attacker.pieceid) == R_KNIGHT ||
                 abs(ply1.attacker.pieceid) == R_CANNON)
             {
-                const Piece &starter = ply1.attacker;
-                const Piece &target = ply2.attacker;
+                const Piece& attacker = ply1.attacker;
+                const Piece& captured = ply2.attacker;
                 // 车
-                if (abs(starter.pieceid) == R_ROOK)
+                if (abs(attacker.pieceid) == R_ROOK)
                 {
                     if (ply5.x2 == ply4.x1)
                     {
                         UINT32 bitlineX = board.getBitLineX(ply5.x2);
-                        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, starter.y, 9);
-                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
-                            board.piecePosition(ply5.x2, regionX[0]).pieceIndex == target.pieceIndex)
+                        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, attacker.y, 9);
+                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
+                            board.piecePosition(ply5.x2, regionX[0]).pieceIndex == captured.pieceIndex)
                         {
                             return true;
                         }
@@ -182,23 +177,23 @@ protected:
                     else if (ply5.y2 == ply4.y1)
                     {
                         UINT32 bitlineY = board.getBitLineY(ply5.y2);
-                        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, starter.x, 8);
-                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
-                            board.piecePosition(regionY[1], ply5.y2).pieceIndex == target.pieceIndex)
+                        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, attacker.x, 8);
+                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
+                            board.piecePosition(regionY[1], ply5.y2).pieceIndex == captured.pieceIndex)
                         {
                             return true;
                         }
                     }
                 }
                 // 炮
-                else if (abs(starter.pieceid) == R_CANNON)
+                else if (abs(attacker.pieceid) == R_CANNON)
                 {
                     if (ply5.x2 == ply4.x1)
                     {
                         UINT32 bitlineX = board.getBitLineX(ply5.x2);
-                        REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, starter.y, 9);
-                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == target.pieceIndex ||
-                            board.piecePosition(ply5.x2, regionX[3]).pieceIndex == target.pieceIndex)
+                        REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, attacker.y, 9);
+                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
+                            board.piecePosition(ply5.x2, regionX[3]).pieceIndex == captured.pieceIndex)
                         {
                             return true;
                         }
@@ -206,26 +201,26 @@ protected:
                     else if (ply5.y2 == ply4.y1)
                     {
                         UINT32 bitlineY = board.getBitLineY(ply5.y2);
-                        REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, starter.x, 8);
-                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == target.pieceIndex ||
-                            board.piecePosition(regionY[3], ply5.y2).pieceIndex == target.pieceIndex)
+                        REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, attacker.x, 8);
+                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
+                            board.piecePosition(regionY[3], ply5.y2).pieceIndex == captured.pieceIndex)
                         {
                             return true;
                         }
                     }
                 }
                 // 马
-                else if (abs(starter.pieceid) == R_KNIGHT)
+                else if (abs(attacker.pieceid) == R_KNIGHT)
                 {
                     if (
-                        (starter.x + 1 == target.x && starter.y + 2 == target.y) ||
-                        (starter.x - 1 == target.x && starter.y + 2 == target.y) ||
-                        (starter.x + 1 == target.x && starter.y - 2 == target.y) ||
-                        (starter.x - 1 == target.x && starter.y - 2 == target.y) ||
-                        (starter.x + 2 == target.x && starter.y + 1 == target.y) ||
-                        (starter.x - 2 == target.x && starter.y + 1 == target.y) ||
-                        (starter.x + 2 == target.x && starter.y - 1 == target.y) ||
-                        (starter.x - 2 == target.x && starter.y - 1 == target.y)) // 这里有点担心, 但是我想不到什么局面
+                        (attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) ||
+                        (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
+                        (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) ||
+                        (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
+                        (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) ||
+                        (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
+                        (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) ||
+                        (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y)) // 这里有点担心, 但是我想不到什么局面
                     {
                         return true;
                     }
@@ -249,12 +244,12 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     {
         // 是否重复局面
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
-        return Result{move, INF};
+        return Result{ move, INF };
     }
 
     // 开局库
     Result openbookResult = Search::searchOpenBook();
-    if (openbookResult.val != -1)
+    if (openbookResult.vl != -1)
     {
         std::cout << "Find a great move from OpenBook!" << std::endl;
         return openbookResult;
@@ -277,7 +272,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
         // log
         std::cout << " depth: " << depth;
-        std::cout << " vl: " << bestNode.val;
+        std::cout << " vl: " << bestNode.vl;
         std::cout << " moveid: " << bestNode.move.id;
         std::cout << " duration(ms): " << duration;
         std::cout << std::endl;
@@ -292,7 +287,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 防止没有可行着法
     if (bestNode.move.id == -1)
     {
-        const Piece &king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
+        const Piece& king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
         bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
     }
 
@@ -317,7 +312,7 @@ Result Search::searchOpenBook()
         bool isEdit = false;
         std::string filename;
 
-        bool open(const char *szFileName, bool bEdit = false)
+        bool open(const char* szFileName, bool bEdit = false)
         {
             isEdit = bEdit;
             filename = szFileName;
@@ -328,16 +323,16 @@ Result Search::searchOpenBook()
             return true;
         }
 
-        void read(BookStruct &bk, int nMid) const
+        void read(BookStruct& bk, int nMid) const
         {
             std::ifstream ifs(filename, std::ios::binary);
             if (!ifs.is_open())
                 return;
             ifs.seekg(nMid * sizeof(BookStruct), std::ios::beg);
-            ifs.read(reinterpret_cast<char *>(&bk), sizeof(BookStruct));
+            ifs.read(reinterpret_cast<char*>(&bk), sizeof(BookStruct));
         }
 
-        void write(const BookStruct &bk, int nMid) const
+        void write(const BookStruct& bk, int nMid) const
         {
             if (!isEdit)
                 return;
@@ -345,27 +340,27 @@ Result Search::searchOpenBook()
             if (!fstr.is_open())
                 return;
             fstr.seekp(nMid * sizeof(BookStruct), std::ios::beg);
-            fstr.write(reinterpret_cast<const char *>(&bk), sizeof(BookStruct));
+            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(BookStruct));
         }
     };
 
-    std::function<int(BookStruct &, int32)> bookPosCmp = [](BookStruct &bk, int32 hashLock) -> int
-    {
-        uint32_t bookLock = bk.dwZobristLock;
-        uint32_t boardLock = (uint32_t)hashLock;
-        if (bookLock < boardLock)
-            return -1;
-        else if (bookLock > boardLock)
-            return 1;
-        return 0;
-    };
+    std::function<int(BookStruct&, int32)> bookPosCmp = [](BookStruct& bk, int32 hashLock) -> int
+        {
+            uint32_t bookLock = bk.dwZobristLock;
+            uint32_t boardLock = (uint32_t)hashLock;
+            if (bookLock < boardLock)
+                return -1;
+            else if (bookLock > boardLock)
+                return 1;
+            return 0;
+        };
 
     BookStruct bk{};
     BookFileStruct pBookFileStruct{};
 
     if (!pBookFileStruct.open("BOOK.DAT"))
     {
-        return Result{Move{}, -1};
+        return Result{ Move{}, -1 };
     }
 
     // 二分法查找开局库
@@ -407,7 +402,7 @@ Result Search::searchOpenBook()
 
     if (nScan == 2)
     {
-        return Result{Move{}, -1};
+        return Result{ Move{}, -1 };
     }
 
     // 如果找到局面, 则向前查找第一个着法
@@ -451,20 +446,20 @@ Result Search::searchOpenBook()
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
-              { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b)
+        { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
     int vlSum = 0;
-    for (Move &move : bookMoves)
+    for (Move& move : bookMoves)
     {
         vlSum += move.val;
     }
     int vlRandom = std::rand() % vlSum;
 
     Move bookMove;
-    for (Move &move : bookMoves)
+    for (Move& move : bookMoves)
     {
         vlRandom -= move.val;
         if (vlRandom < 0)
@@ -477,7 +472,7 @@ Result Search::searchOpenBook()
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
-    return isValidMoveInSituation(board, bookMove) ? Result{bookMove, 1} : Result{Move{}, -1};
+    return isValidMoveInSituation(board, bookMove) ? Result{ bookMove, 1 } : Result{ Move{}, -1 };
 }
 
 Result Search::searchRoot(int depth)
@@ -487,7 +482,7 @@ Result Search::searchRoot(int depth)
     int vlBest = -INF;
 
     // 搜索
-    for (const Move &move : rootMoves)
+    for (const Move& move : rootMoves)
     {
         board.doMove(move);
         if (vlBest == -INF)
@@ -518,13 +513,13 @@ Result Search::searchRoot(int depth)
     }
     else
     {
-        this->pHistory->add(bestMove, depth);
-        this->pTt->add(board, bestMove, vlBest, EXACT_TYPE, depth);
+        this->history->add(bestMove, depth);
+        this->tt->set(board, bestMove, vlBest, EXACT_TYPE, depth);
     }
 
-    this->pHistory->sort(rootMoves);
+    this->history->sort(rootMoves);
 
-    return Result{bestMove, vlBest};
+    return Result{ bestMove, vlBest };
 }
 
 int Search::searchPV(int depth, int alpha, int beta)
@@ -543,17 +538,17 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
 
     // mate distance pruning
-    TrickResult result = this->mateDistancePruning(alpha, beta);
-    if (result.isSuccess)
+    Trick result = this->mateDistancePruning(alpha, beta);
+    if (result.success)
     {
-        return result.data[0];
+        return result.data;
     }
 
     // variables
     const bool mChecking = inCheck(board, board.team);
 
     // 验证上一步是否是将军着法
-    this->setCheckingMove(mChecking);
+    this->validateCheckingMove(mChecking);
 
     // 重复检测
     bool repeatResult = this->repeatCheck();
@@ -569,14 +564,14 @@ int Search::searchPV(int depth, int alpha, int beta)
     MOVES availableMoves;
 
     // 置换表着法
-    Move goodMove = this->pTt->getMove(board);
+    Move goodMove = this->tt->getMove(board);
     if (goodMove.id == -1 && depth >= 2)
     {
         if (searchPV(depth / 2, alpha, beta) <= alpha)
         {
             searchPV(depth / 2, -INF, beta);
         }
-        goodMove = this->pTt->getMove(board);
+        goodMove = this->tt->getMove(board);
     }
     if (goodMove.id != -1)
     {
@@ -599,8 +594,8 @@ int Search::searchPV(int depth, int alpha, int beta)
     if (type != BETA_TYPE)
     {
         int vl = -INF;
-        MOVES killerAvailableMoves = this->pKiller->get(board);
-        for (const Move &move : killerAvailableMoves)
+        MOVES killerAvailableMoves = this->killer->get(board);
+        for (const Move& move : killerAvailableMoves)
         {
             board.doMove(move);
             if (vlBest == -INF)
@@ -644,9 +639,9 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
 
         // 历史启发
-        this->pHistory->sort(availableMoves);
+        this->history->sort(availableMoves);
 
-        for (const Move &move : availableMoves)
+        for (const Move& move : availableMoves)
         {
             board.doMove(move);
 
@@ -691,11 +686,11 @@ int Search::searchPV(int depth, int alpha, int beta)
     }
     else
     {
-        this->pHistory->add(bestMove, depth);
-        this->pTt->add(board, bestMove, vlBest, type, depth);
+        this->history->add(bestMove, depth);
+        this->tt->set(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
-            this->pKiller->add(board, bestMove);
+            this->killer->set(board, bestMove);
         }
     }
 
@@ -711,7 +706,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // 置换表分数
-    int vlHash = this->pTt->getValue(board, -INF, beta, depth);
+    int vlHash = this->tt->getVl(board, -INF, beta, depth);
     if (vlHash >= beta)
     {
         return vlHash;
@@ -724,17 +719,17 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // mate distance pruning
-    TrickResult trickResult = this->mateDistancePruning(beta - 1, beta);
-    if (trickResult.isSuccess)
+    Trick trickResult = this->mateDistancePruning(beta - 1, beta);
+    if (trickResult.success)
     {
-        return trickResult.data[0];
+        return trickResult.data;
     }
 
     // variables
     const bool mChecking = inCheck(board, board.team);
 
     // 验证上一步是否是将军着法
-    this->setCheckingMove(mChecking);
+    this->validateCheckingMove(mChecking);
 
     // 重复检测
     bool repeatResult = this->repeatCheck();
@@ -746,27 +741,27 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     // tricks
     if (!mChecking)
     {
-        // multi probCut and null pruning
-        if (!banNullMove)
-        {
-            if (board.nullOkay())
-            {
-                board.doNullMove();
-                int vl = -searchCut(depth - 2, -beta + 1, true);
-                board.undoNullMove();
-                if (vl >= beta)
-                {
-                    if (board.nullSafe())
-                    {
-                        return vl;
-                    }
-                    else if (searchCut(depth - 2, beta, true) >= beta)
-                    {
-                        return vl;
-                    }
-                }
-            }
-        }
+       // multi probCut and null pruning
+       if (!banNullMove)
+       {
+           if (board.nullOkay())
+           {
+               board.doNullMove();
+               int vl = -searchCut(depth - 2, -beta + 1, true);
+               board.undoNullMove();
+               if (vl >= beta)
+               {
+                   if (board.nullSafe())
+                   {
+                       return vl;
+                   }
+                   else if (searchCut(depth - 2, beta, true) >= beta)
+                   {
+                       return vl;
+                   }
+               }
+           }
+       }
     }
 
     // variables
@@ -777,7 +772,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     MOVES availableMoves;
 
     // 置换表着法
-    Move goodMove = this->pTt->getMove(board);
+    Move goodMove = this->tt->getMove(board);
     if (goodMove.id != -1)
     {
         board.doMove(goodMove);
@@ -804,9 +799,9 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
 
         // 历史启发
-        this->pHistory->sort(availableMoves);
+        this->history->sort(availableMoves);
 
-        for (const Move &move : availableMoves)
+        for (const Move& move : availableMoves)
         {
             board.doMove(move);
             int vl = -searchCut(depth - 1, -beta + 1);
@@ -834,11 +829,11 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
     else
     {
-        this->pHistory->add(bestMove, depth);
-        this->pTt->add(board, bestMove, vlBest, type, depth);
+        this->history->add(bestMove, depth);
+        this->tt->set(board, bestMove, vlBest, type, depth);
         if (type != ALPHA_TYPE)
         {
-            this->pKiller->add(board, bestMove);
+            this->killer->set(board, bestMove);
         }
     }
 
@@ -860,23 +855,22 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // mate distance pruning
-    TrickResult trickresult = this->mateDistancePruning(alpha, beta);
-    if (trickresult.isSuccess)
+    Trick trickresult = this->mateDistancePruning(alpha, beta);
+    if (trickresult.success)
     {
-        return trickresult.data[0];
+        return trickresult.data;
     }
 
     // variables
     const bool mChecking = inCheck(board, board.team);
+    this->validateCheckingMove(mChecking);
     int vlBest = -INF;
 
-    // 验证上一步是否是将军着法
-    this->setCheckingMove(mChecking);
     // null and delta pruning
-    TrickResult nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
-    if (nullDeltaResult.isSuccess)
+    Trick nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
+    if (nullDeltaResult.success)
     {
-        return nullDeltaResult.data[0];
+        return nullDeltaResult.data;
     }
 
     // 重复检测
@@ -891,20 +885,19 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     if (mChecking)
     {
         availableMoves = MovesGenerate::getMoves(board);
-        pHistory->sort(availableMoves);
+        history->sort(availableMoves);
         leftDistance = std::min<int>(leftDistance, Search::QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
     }
     else
     {
         availableMoves = MovesGenerate::getCaptureMoves(board);
-        CaptureSort::sortCaptureMoves(board, availableMoves);
     }
 
     // variables
     Move bestMove{};
 
     // 搜索
-    for (const Move &move : availableMoves)
+    for (const Move& move : availableMoves)
     {
         board.doMove(move);
         int vl = -Search::searchQ(-beta, -alpha, leftDistance - 1);
