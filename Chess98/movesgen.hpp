@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "utils.hpp"
+#include "board.hpp"
 
 class MovesGen
 {
