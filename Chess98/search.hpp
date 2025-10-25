@@ -667,12 +667,11 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         for (const Move& move : killerAvailableMoves)
         {
             board.doMove(move);
-            vl = -searchCut(depth - 1, INF);
-            if (vl < beta)
-            {
-                vl = -searchCut(depth - 1, beta);
-            }
+
+            int vl = -searchCut(depth - 1, -beta + 1);
+
             board.undoMove();
+
             if (vl > vlBest)
             {
                 vlBest = vl;
