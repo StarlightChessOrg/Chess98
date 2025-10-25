@@ -108,11 +108,11 @@ protected:
             const int lowerBound = int((-t * sigma + alpha - b) / a);
             if (this->searchCut(depth - 2, upperBound) >= upperBound)
             {
-                return {beta};
+                return { beta };
             }
             else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
             {
-                return {alpha};
+                return { alpha };
             }
         }
 
@@ -546,9 +546,24 @@ int Search::searchPV(int depth, int alpha, int beta)
 
     // variables
     const bool mChecking = inCheck(board, board.team);
-
-    // 验证上一步是否是将军着法
     this->validateCheckingMove(mChecking);
+
+    if (!mChecking)
+    {
+        // null and delta pruning
+        int vlBest = -INF;
+        Trick trickResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
+        if (trickResult.success)
+        {
+            return trickResult.data;
+        }
+        // futility pruning
+        trickResult = this->futilityPruning(alpha, beta, depth);
+        if (trickResult.success)
+        {
+            return trickResult.data;
+        }
+    }
 
     // 重复检测
     bool repeatResult = this->repeatCheck();
@@ -738,30 +753,29 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         return INF - board.distance;
     }
 
-    // tricks
     if (!mChecking)
     {
-       // multi probCut and null pruning
-       if (!banNullMove)
-       {
-           if (board.nullOkay())
-           {
-               board.doNullMove();
-               int vl = -searchCut(depth - 2, -beta + 1, true);
-               board.undoNullMove();
-               if (vl >= beta)
-               {
-                   if (board.nullSafe())
-                   {
-                       return vl;
-                   }
-                   else if (searchCut(depth - 2, beta, true) >= beta)
-                   {
-                       return vl;
-                   }
-               }
-           }
-       }
+        // null pruning
+        if (!banNullMove)
+        {
+            if (board.nullOkay())
+            {
+                board.doNullMove();
+                int vl = -searchCut(depth - 2, -beta + 1, true);
+                board.undoNullMove();
+                if (vl >= beta)
+                {
+                    if (board.nullSafe())
+                    {
+                        return vl;
+                    }
+                    else if (searchCut(depth - 2, beta, true) >= beta)
+                    {
+                        return vl;
+                    }
+                }
+            }
+        }
     }
 
     // variables
@@ -848,20 +862,19 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         return -INF + board.distance;
     }
 
-    // 返回评估结果
+    // evaluate
     if (leftDistance <= 0)
     {
         return board.evaluate();
     }
 
-    // mate distance pruning
+    // mdp
     Trick trickresult = this->mateDistancePruning(alpha, beta);
     if (trickresult.success)
     {
         return trickresult.data;
     }
 
-    // variables
     const bool mChecking = inCheck(board, board.team);
     this->validateCheckingMove(mChecking);
     int vlBest = -INF;
@@ -892,8 +905,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     {
         availableMoves = MovesGenerate::getCaptureMoves(board);
     }
-
-    // variables
     Move bestMove{};
 
     // 搜索

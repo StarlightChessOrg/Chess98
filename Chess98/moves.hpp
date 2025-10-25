@@ -28,7 +28,6 @@ public:
 MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
 {
     MOVES result;
-    result.reserve(8);
 
     // 横坐标应当在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
@@ -73,7 +72,6 @@ MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::guard(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 横坐标也应在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
@@ -137,7 +135,6 @@ MOVES MovesGenerate::guard(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::bishop(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 横坐标应在0, 9之间, 纵坐标的话, 红方在0, 4之间, 黑方在5, 9之间
     if (team == RED)
@@ -185,7 +182,6 @@ MOVES MovesGenerate::bishop(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::knight(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(16);
 
     if (board.teamOn(x, y - 1) == EMPTY_TEAM)
     {
@@ -246,7 +242,6 @@ MOVES MovesGenerate::knight(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::rook(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(64);
 
     // 纵向着法
     UINT32 bitlineX = board.getBitLineX(x);
@@ -294,7 +289,6 @@ MOVES MovesGenerate::rook(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::cannon(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(64);
 
     // 横向着法
     UINT32 bitlineY = board.getBitLineY(y);
@@ -342,7 +336,6 @@ MOVES MovesGenerate::cannon(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::pawn(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     if (team == RED)
     {
@@ -388,8 +381,8 @@ MOVES MovesGenerate::pawn(TEAM team, Board &board, int x, int y)
 
 MOVES MovesGenerate::generateMovesOn(Board &board, int x, int y)
 {
-    PIECEID pieceid = abs(board.pieceidOn(x, y));
-    TEAM team = board.teamOn(x, y);
+    const PIECEID pieceid = abs(board.pieceidOn(x, y));
+    const TEAM team = board.teamOn(x, y);
 
     if (pieceid == R_KING)
     {
@@ -451,25 +444,9 @@ MOVES MovesGenerate::getMoves(Board &board)
         }
     }
 
-    const std::map<PIECEID, int> weightPairs{
-        {R_KING, 4},
-        {R_ROOK, 4},
-        {R_CANNON, 3},
-        {R_KNIGHT, 3},
-        {R_BISHOP, 2},
-        {R_GUARD, 2},
-        {R_PAWN, 1},
-    };
-
     MOVES result{};
-    result.reserve(64);
 
     for (const Piece &piece : board.getPiecesReg(board.team * R_ROOK))
-    {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
-    }
-    for (const Piece &piece : board.getPiecesReg(board.team * R_PAWN))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
@@ -480,6 +457,11 @@ MOVES MovesGenerate::getMoves(Board &board)
         result.insert(result.end(), moves.begin(), moves.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_KNIGHT))
+    {
+        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
+        result.insert(result.end(), moves.begin(), moves.end());
+    }
+    for (const Piece& piece : board.getPiecesReg(board.team* R_PAWN))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
@@ -510,11 +492,6 @@ MOVES MovesGenerate::getMoves(Board &board)
         {
             move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
-            if (move.captured.pieceid != EMPTY_PIECEID)
-            {
-                move.moveType = CAPTURE;
-                move.val = weightPairs.at(abs(move.captured.pieceid)) - weightPairs.at(abs(move.attacker.pieceid));
-            }
             moves.emplace_back(move);
         }
     }
@@ -525,7 +502,6 @@ MOVES MovesGenerate::getMoves(Board &board)
 MOVES MovesGenerate::kingCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 横坐标应当在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
@@ -570,7 +546,6 @@ MOVES MovesGenerate::kingCapture(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::guardCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 横坐标也应在3, 5之间, 纵坐标的话, 红方在0, 2之间, 黑方在7, 9之间
     const int left = x - 1;
@@ -634,7 +609,6 @@ MOVES MovesGenerate::guardCapture(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::bishopCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 横坐标应在0, 9之间, 纵坐标的话, 红方在0, 4之间, 黑方在5, 9之间
     if (team == RED)
@@ -682,7 +656,6 @@ MOVES MovesGenerate::bishopCapture(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::knightCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(16);
 
     if (board.teamOn(x, y - 1) == EMPTY_TEAM)
     {
@@ -743,7 +716,6 @@ MOVES MovesGenerate::knightCapture(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::rookCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 纵向着法
     UINT32 bitlineX = board.getBitLineX(x);
@@ -775,7 +747,6 @@ MOVES MovesGenerate::rookCapture(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::cannonCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     // 横向着法
     UINT32 bitlineY = board.getBitLineY(y);
@@ -807,7 +778,6 @@ MOVES MovesGenerate::cannonCapture(TEAM team, Board &board, int x, int y)
 MOVES MovesGenerate::pawnCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
-    result.reserve(8);
 
     if (team == RED)
     {
@@ -853,8 +823,8 @@ MOVES MovesGenerate::pawnCapture(TEAM team, Board &board, int x, int y)
 
 MOVES MovesGenerate::generateCaptureMovesOn(Board &board, int x, int y)
 {
-    PIECEID pieceid = board.pieceidOn(x, y);
-    TEAM team = board.teamOn(x, y);
+    const PIECEID pieceid = board.pieceidOn(x, y);
+    const TEAM team = board.teamOn(x, y);
 
     if (pieceid == R_KING || pieceid == B_KING)
     {
@@ -917,7 +887,6 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     }
 
     MOVES result{};
-    result.reserve(64);
 
     for (const Piece &piece : board.getPiecesReg(board.team * R_ROOK))
     {
@@ -955,7 +924,7 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
         result.insert(result.end(), moves.begin(), moves.end());
     }
 
-    MOVES moves;
+    MOVES moves{};
     for (Move move : result)
     {
         board.doMoveSimple(move);
