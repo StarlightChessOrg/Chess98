@@ -1,7 +1,7 @@
 #pragma once
 #include "utils.hpp"
 
-class MovesGenerate
+class MovesGen
 {
 public:
     static MOVES king(TEAM team, Board &board, int x, int y);
@@ -28,7 +28,7 @@ protected:
     static MOVES facedKings(const Board &board);
 };
 
-MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::king(TEAM team, Board &board, int x, int y)
 {
     MOVES result;
 
@@ -72,7 +72,7 @@ MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::guard(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::guard(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -135,7 +135,7 @@ MOVES MovesGenerate::guard(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::bishop(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::bishop(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -182,7 +182,7 @@ MOVES MovesGenerate::bishop(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::knight(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::knight(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -242,7 +242,7 @@ MOVES MovesGenerate::knight(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::rook(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::rook(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -289,7 +289,7 @@ MOVES MovesGenerate::rook(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::cannon(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::cannon(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -336,7 +336,7 @@ MOVES MovesGenerate::cannon(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::pawn(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::pawn(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -382,38 +382,38 @@ MOVES MovesGenerate::pawn(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::generateMovesOn(Board &board, int x, int y)
+MOVES MovesGen::generateMovesOn(Board &board, int x, int y)
 {
     const PIECEID pieceid = abs(board.pieceidOn(x, y));
     const TEAM team = board.teamOn(x, y);
 
     if (pieceid == R_KING)
     {
-        return MovesGenerate::king(team, board, x, y);
+        return MovesGen::king(team, board, x, y);
     }
     else if (pieceid == R_GUARD)
     {
-        return MovesGenerate::guard(team, board, x, y);
+        return MovesGen::guard(team, board, x, y);
     }
     else if (pieceid == R_BISHOP)
     {
-        return MovesGenerate::bishop(team, board, x, y);
+        return MovesGen::bishop(team, board, x, y);
     }
     else if (pieceid == R_KNIGHT)
     {
-        return MovesGenerate::knight(team, board, x, y);
+        return MovesGen::knight(team, board, x, y);
     }
     else if (pieceid == R_ROOK)
     {
-        return MovesGenerate::rook(team, board, x, y);
+        return MovesGen::rook(team, board, x, y);
     }
     else if (pieceid == R_CANNON)
     {
-        return MovesGenerate::cannon(team, board, x, y);
+        return MovesGen::cannon(team, board, x, y);
     }
     else if (pieceid == R_PAWN)
     {
-        return MovesGenerate::pawn(team, board, x, y);
+        return MovesGen::pawn(team, board, x, y);
     }
     else
     {
@@ -421,55 +421,55 @@ MOVES MovesGenerate::generateMovesOn(Board &board, int x, int y)
     }
 }
 
-MOVES MovesGenerate::getMoves(Board &board)
+MOVES MovesGen::getMoves(Board &board)
 {
     // 对面笑
-    const MOVES facedkings = MovesGenerate::facedKings(board);
+    const MOVES facedkings = MovesGen::facedKings(board);
     if (facedkings.size() != 0)
     {
         return facedkings;
     }
 
-    MOVES result{};
+    MOVES moves{};
 
     for (const Piece &piece : board.getPiecesReg(board.team * R_ROOK))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_CANNON))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_KNIGHT))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_PAWN))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_BISHOP))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_GUARD))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_KING))
     {
-        std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
 
-    MOVES moves{};
-    for (Move move : result)
+    MOVES result{};
+    for (Move move : moves)
     {
         board.doMoveSimple(move);
         const bool skip = inCheck(board, -board.team);
@@ -478,14 +478,14 @@ MOVES MovesGenerate::getMoves(Board &board)
         {
             move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
-            moves.emplace_back(move);
+            result.emplace_back(move);
         }
     }
 
-    return moves;
+    return result;
 }
 
-MOVES MovesGenerate::kingCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::kingCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -529,7 +529,7 @@ MOVES MovesGenerate::kingCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::guardCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::guardCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -592,7 +592,7 @@ MOVES MovesGenerate::guardCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::bishopCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::bishopCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -639,7 +639,7 @@ MOVES MovesGenerate::bishopCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::knightCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::knightCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -699,7 +699,7 @@ MOVES MovesGenerate::knightCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::rookCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::rookCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -730,7 +730,7 @@ MOVES MovesGenerate::rookCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::cannonCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::cannonCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -761,7 +761,7 @@ MOVES MovesGenerate::cannonCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::pawnCapture(TEAM team, Board &board, int x, int y)
+MOVES MovesGen::pawnCapture(TEAM team, Board &board, int x, int y)
 {
     MOVES result{};
 
@@ -807,38 +807,38 @@ MOVES MovesGenerate::pawnCapture(TEAM team, Board &board, int x, int y)
     return result;
 }
 
-MOVES MovesGenerate::generateCaptureMovesOn(Board &board, int x, int y)
+MOVES MovesGen::generateCaptureMovesOn(Board &board, int x, int y)
 {
     const PIECEID pieceid = board.pieceidOn(x, y);
     const TEAM team = board.teamOn(x, y);
 
     if (pieceid == R_KING || pieceid == B_KING)
     {
-        return MovesGenerate::kingCapture(team, board, x, y);
+        return MovesGen::kingCapture(team, board, x, y);
     }
     else if (pieceid == R_GUARD || pieceid == B_GUARD)
     {
-        return MovesGenerate::guardCapture(team, board, x, y);
+        return MovesGen::guardCapture(team, board, x, y);
     }
     else if (pieceid == R_BISHOP || pieceid == B_BISHOP)
     {
-        return MovesGenerate::bishopCapture(team, board, x, y);
+        return MovesGen::bishopCapture(team, board, x, y);
     }
     else if (pieceid == R_KNIGHT || pieceid == B_KNIGHT)
     {
-        return MovesGenerate::knightCapture(team, board, x, y);
+        return MovesGen::knightCapture(team, board, x, y);
     }
     else if (pieceid == R_ROOK || pieceid == B_ROOK)
     {
-        return MovesGenerate::rookCapture(team, board, x, y);
+        return MovesGen::rookCapture(team, board, x, y);
     }
     else if (pieceid == R_CANNON || pieceid == B_CANNON)
     {
-        return MovesGenerate::cannonCapture(team, board, x, y);
+        return MovesGen::cannonCapture(team, board, x, y);
     }
     else if (pieceid == R_PAWN || pieceid == B_PAWN)
     {
-        return MovesGenerate::pawnCapture(team, board, x, y);
+        return MovesGen::pawnCapture(team, board, x, y);
     }
     else
     {
@@ -846,55 +846,55 @@ MOVES MovesGenerate::generateCaptureMovesOn(Board &board, int x, int y)
     }
 }
 
-MOVES MovesGenerate::getCaptureMoves(Board &board)
+MOVES MovesGen::getCaptureMoves(Board &board)
 {
     // 对面笑
-    const MOVES facedkings = MovesGenerate::facedKings(board);
+    const MOVES facedkings = MovesGen::facedKings(board);
     if (facedkings.size() != 0)
     {
         return facedkings;
     }
     
-    MOVES result{};
+    MOVES moves{};
 
     for (const Piece &piece : board.getPiecesReg(board.team * R_ROOK))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_PAWN))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_CANNON))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_KNIGHT))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_BISHOP))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_GUARD))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
     for (const Piece &piece : board.getPiecesReg(board.team * R_KING))
     {
-        std::vector<Move> moves = MovesGenerate::generateCaptureMovesOn(board, piece.x, piece.y);
-        result.insert(result.end(), moves.begin(), moves.end());
+        std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
+        moves.insert(moves.end(), ret.begin(), ret.end());
     }
 
-    MOVES moves{};
-    for (Move move : result)
+    MOVES result{};
+    for (Move move : moves)
     {
         board.doMoveSimple(move);
         const bool skip = inCheck(board, -board.team);
@@ -903,14 +903,13 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
         {
             move.attacker = board.piecePosition(move.x1, move.y1);
             move.captured = board.piecePosition(move.x2, move.y2);
-            moves.emplace_back(move);
+            result.emplace_back(move);
         }
     }
-
-    return result;
+    return moves;
 }
 
-MOVES MovesGenerate::facedKings(const Board&board)
+MOVES MovesGen::facedKings(const Board&board)
 {
     const Piece &rKing = board.getPieceReg(board.team * R_KING);
     const Piece &bKing = board.getPieceReg(board.team * B_KING);

@@ -1,6 +1,6 @@
 #pragma once
 #include "board.hpp"
-#include "moves.hpp"
+#include "movesgen.hpp"
 
 // 历史启发
 class HistoryTable

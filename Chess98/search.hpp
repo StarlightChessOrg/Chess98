@@ -1,7 +1,6 @@
 #pragma once
 #include "heuristic.hpp"
-#include "moves.hpp"
-#include "utils.hpp"
+#include "movesgen.hpp"
 
 class Search
 {
@@ -260,7 +259,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     std::cout << "evaluate: " << board.evaluate() << std::endl;
 
     // 搜索
-    this->rootMoves = MovesGenerate::getMoves(board);
+    this->rootMoves = MovesGen::getMoves(board);
     Result bestNode = Result(Move(), 0);
     auto start = std::chrono::high_resolution_clock::now();
     for (int depth = 1; depth <= maxDepth; depth++)
@@ -288,7 +287,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     if (bestNode.move.id == -1)
     {
         const Piece& king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
-        bestNode.move = MovesGenerate::generateMovesOn(board, king.x, king.y)[0];
+        bestNode.move = MovesGen::generateMovesOn(board, king.x, king.y)[0];
     }
 
     return bestNode;
@@ -650,7 +649,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         int vl = -INF;
         if (availableMoves.size() == 0)
         {
-            availableMoves = MovesGenerate::getMoves(board);
+            availableMoves = MovesGen::getMoves(board);
         }
 
         // 历史启发
@@ -809,7 +808,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         // 获取所有可行着法
         if (availableMoves.size() == 0)
         {
-            availableMoves = MovesGenerate::getMoves(board);
+            availableMoves = MovesGen::getMoves(board);
         }
 
         // 历史启发
@@ -897,13 +896,13 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     MOVES availableMoves;
     if (mChecking)
     {
-        availableMoves = MovesGenerate::getMoves(board);
+        availableMoves = MovesGen::getMoves(board);
         history->sort(availableMoves);
         leftDistance = std::min<int>(leftDistance, Search::QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
     }
     else
     {
-        availableMoves = MovesGenerate::getCaptureMoves(board);
+        availableMoves = MovesGen::getCaptureMoves(board);
     }
     Move bestMove{};
 

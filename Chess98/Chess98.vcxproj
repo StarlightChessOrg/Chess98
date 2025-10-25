@@ -166,7 +166,7 @@
     <ClInclude Include="genfiles.hpp" />
     <ClInclude Include="hash.hpp" />
     <ClInclude Include="heuristic.hpp" />
-    <ClInclude Include="moves.hpp" />
+    <ClInclude Include="movesgen.hpp" />
     <ClInclude Include="nnue.hpp" />
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />

@@ -26,7 +26,7 @@
     <ClInclude Include="search.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="moves.hpp">
+    <ClInclude Include="movesgen.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="evaluate.hpp">
