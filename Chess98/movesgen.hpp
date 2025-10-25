@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "utils.hpp"
 
 class MovesGen
@@ -472,7 +472,7 @@ MOVES MovesGen::getMoves(Board &board)
     for (Move move : moves)
     {
         board.doMoveSimple(move);
-        const bool skip = inCheck(board, -board.team);
+        const bool skip = board.inCheck(-board.team);
         board.undoMoveSimple();
         if (!skip)
         {
@@ -897,7 +897,7 @@ MOVES MovesGen::getCaptureMoves(Board &board)
     for (Move move : moves)
     {
         board.doMoveSimple(move);
-        const bool skip = inCheck(board, -board.team);
+        const bool skip = board.inCheck(-board.team);
         board.undoMoveSimple();
         if (!skip)
         {

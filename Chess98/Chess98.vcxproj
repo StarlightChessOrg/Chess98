@@ -171,7 +171,6 @@
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />
     <ClInclude Include="ui.hpp" />
-    <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="nnue.pt" />

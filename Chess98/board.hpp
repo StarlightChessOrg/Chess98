@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "evaluate.hpp"
 #include "hash.hpp"
 #include "bitboard.hpp"
@@ -48,7 +48,11 @@ public:
     PIECES getPiecesByTeam(TEAM team) const;
     Piece getPieceReg(PIECEID pieceid) const;
     PIECES getPiecesReg(PIECEID pieceid) const;
-    bool repeatCheck() const;
+    bool repeatCheck() const; 
+    bool hasCrossedRiver(int x, int y) const;
+    bool isInPalace(int x, int y) const;
+    bool inCheck(TEAM judgeTeam) const;
+    bool hasProtector(int x, int y) const;
 
 public:
     void doMove(Move move);
@@ -60,6 +64,7 @@ public:
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
     void initHashInfo();
     void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
+    bool isValidMoveInSituation(Move move);
 };
 
 Board::Board(PIECEID_MAP pieceidMap, TEAM team)
@@ -305,6 +310,332 @@ bool Board::repeatCheck() const
                 }
             }
         }
+    }
+    return false;
+}
+
+bool Board::hasCrossedRiver(int x, int y) const
+{
+    TEAM team = this->teamOn(x, y);
+    if (team == RED)
+    {
+        return y >= 5 && y <= 9;
+    }
+    else if (team == BLACK)
+    {
+        return y >= 0 && y <= 4;
+    }
+    return false;
+}
+
+bool Board::isInPalace(int x, int y) const
+{
+    TEAM team = this->teamOn(x, y);
+    if (team == RED)
+    {
+        return x >= 3 && x <= 5 && y >= 7 && y <= 9;
+    }
+    else if (team == BLACK)
+    {
+        return x >= 3 && x <= 5 && y >= 0 && y <= 2;
+    }
+    return false;
+}
+
+bool Board::inCheck(TEAM judgeTeam) const
+{
+    const Piece& king = judgeTeam == RED ? this->getPieceReg(R_KING) : this->getPieceReg(B_KING);
+    const int& x = king.x;
+    const int& y = king.y;
+    const TEAM& team = king.team;
+
+    // 兵
+    const PIECEID ENEMY_PAWN = R_PAWN * -team;
+    if (this->pieceidOn(x + 1, y) == ENEMY_PAWN)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x - 1, y) == ENEMY_PAWN)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, (team == RED ? y - 1 : y + 1)) == ENEMY_PAWN)
+    {
+        return true;
+    }
+
+    // 马
+    const PIECEID ENEMY_KNIGHT = R_KNIGHT * -team;
+    if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x + 2, y + 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x + 1, y + 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+    }
+    if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x - 2, y + 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x - 1, y + 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+    }
+    if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x + 2, y - 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x + 1, y - 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+    }
+    if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x - 2, y - 1) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x - 1, y - 2) == ENEMY_KNIGHT)
+        {
+            return true;
+        }
+    }
+
+    // 将、车、炮
+    const PIECEID ENEMY_ROOK = R_ROOK * -team;
+    const PIECEID ENEMY_CANNON = R_CANNON * -team;
+    const PIECEID ENEMY_KING = R_KING * -team;
+
+    UINT32 bitlineY = this->getBitLineY(y);
+    REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, x, 8);
+    if (this->pieceidOn(regionY[1] - 1, y) == ENEMY_ROOK)
+    {
+        return true;
+    }
+    if (this->pieceidOn(regionY[2] + 1, y) == ENEMY_ROOK)
+    {
+        return true;
+    }
+    if (this->pieceidOn(regionY[0], y) == ENEMY_CANNON)
+    {
+        return true;
+    }
+    if (this->pieceidOn(regionY[3], y) == ENEMY_CANNON)
+    {
+        return true;
+    }
+
+    UINT32 bitlineX = this->getBitLineX(x);
+    REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, y, 9);
+    const PIECEID& p1 = this->pieceidOn(x, regionX[1] - 1);
+    if (p1 == ENEMY_ROOK || p1 == ENEMY_KING)
+    {
+        return true;
+    }
+    const PIECEID& p2 = this->pieceidOn(x, regionX[2] + 1);
+    if (p2 == ENEMY_ROOK || p2 == ENEMY_KING)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, regionX[0]) == ENEMY_CANNON)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, regionX[3]) == ENEMY_CANNON)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool Board::hasProtector(int x, int y) const
+{
+    const Piece& piece = this->piecePosition(x, y);
+    const TEAM& team = piece.team;
+
+    // 兵
+    const PIECEID MY_PAWN = R_PAWN * team;
+    if (this->hasCrossedRiver(x + 1, y) && this->pieceidOn(x + 1, y) == MY_PAWN)
+    {
+        return true;
+    }
+    if (this->hasCrossedRiver(x - 1, y) && this->pieceidOn(x - 1, y) == MY_PAWN)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, team == RED ? y - 1 : y + 1) == MY_PAWN)
+    {
+        return true;
+    }
+
+    // 马
+    const PIECEID MY_KNIGHT = R_KNIGHT * team;
+    if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x + 2, y + 1) == MY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x + 1, y + 2) == MY_KNIGHT)
+        {
+            return true;
+        }
+    }
+    if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x - 2, y + 1) == MY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x - 1, y + 2) == MY_KNIGHT)
+        {
+            return true;
+        }
+    }
+    if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x + 2, y - 1) == MY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x + 1, y - 2) == MY_KNIGHT)
+        {
+            return true;
+        }
+    }
+    if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
+    {
+        if (this->pieceidOn(x - 2, y - 1) == MY_KNIGHT)
+        {
+            return true;
+        }
+        if (this->pieceidOn(x - 1, y - 2) == MY_KNIGHT)
+        {
+            return true;
+        }
+    }
+
+    // 士、象、将
+    const PIECEID MY_BISHOP = R_BISHOP * team;
+    const PIECEID MY_GUARD = R_GUARD * team;
+    const PIECEID MY_KING = R_KING * team;
+    if (hasCrossedRiver(x, y) == false)
+    {
+        if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
+        {
+            if (this->pieceidOn(x + 2, y + 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
+        {
+            if (this->pieceidOn(x - 2, y + 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
+        {
+            if (this->pieceidOn(x + 2, y - 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
+        {
+            if (this->pieceidOn(x - 2, y - 2) == MY_BISHOP)
+            {
+                return true;
+            }
+        }
+        if (isInPalace(x, y))
+        {
+            if (this->pieceidOn(x + 1, y) == MY_GUARD)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x - 1, y) == MY_GUARD)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x, y + 1) == MY_GUARD)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x, y - 1) == MY_GUARD)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x + 1, y) == MY_KING)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x - 1, y) == MY_KING)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x, y + 1) == MY_KING)
+            {
+                return true;
+            }
+            if (this->pieceidOn(x, y - 1) == MY_KING)
+            {
+                return true;
+            }
+        }
+    }
+
+    // 车、炮
+    const PIECEID MY_ROOK = R_ROOK * team;
+    const PIECEID MY_CANNON = R_CANNON * team;
+
+    UINT32 bitlineY = this->getBitLineY(y);
+    REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, x, 8);
+    if (this->pieceidOn(regionY[1] - 1, y) == MY_ROOK)
+    {
+        return true;
+    }
+    if (this->pieceidOn(regionY[2] + 1, y) == MY_ROOK)
+    {
+        return true;
+    }
+    if (this->pieceidOn(regionY[0], y) == MY_CANNON)
+    {
+        return true;
+    }
+    if (this->pieceidOn(regionY[3], y) == MY_CANNON)
+    {
+        return true;
+    }
+    UINT32 bitlineX = this->getBitLineX(x);
+    REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, y, 9);
+    if (this->pieceidOn(x, regionX[1] - 1) == MY_ROOK)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, regionX[2] + 1) == MY_ROOK)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, regionX[0]) == MY_CANNON)
+    {
+        return true;
+    }
+    if (this->pieceidOn(x, regionX[3]) == MY_CANNON)
+    {
+        return true;
     }
     return false;
 }
@@ -692,4 +1023,81 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
         mirrorHashKey ^= PLAYER_KEY;
         mirrorHashLock ^= PLAYER_LOCK;
     }
+}
+
+bool Board::isValidMoveInSituation(Move move)
+{
+    PIECEID attacker = this->pieceidOn(move.x1, move.y1);
+    if (attacker == 0) // 若攻击者不存在, 则一定是不合理着法
+        return false;
+    if (attacker != move.attacker.pieceid) // 若攻击者不一致, 则一定是不合理着法
+        return false;
+    if (move.attacker.team != this->team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
+        return false;
+    PIECEID captured = this->pieceidOn(move.x2, move.y2);
+    if (captured != 0 && this->teamOn(move.x2, move.y2) ==
+        this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
+        return false;
+
+    // 分类
+    if (abs(attacker) == R_ROOK)
+    {
+        if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法, 若横纵坐标都不相同, 则一定不合理
+            return false;
+        // 生成车的着法范围, 看是否有障碍物
+        UINT32 bitlineX = this->getBitLineX(move.x1);
+        REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, move.y1, 9);
+        if (move.y2 < regionX[0] || move.y2 > regionX[1])
+            return false;
+        // 横向
+        UINT32 bitlineY = this->getBitLineY(move.y1);
+        REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, move.x1, 8);
+        if (move.x2 < regionY[0] || move.x2 > regionY[1])
+            return false;
+    }
+    else if (abs(attacker) == R_KNIGHT)
+    {
+        if (move.x1 - 1 == move.x2 || move.x1 + 1 == move.x2) // 向哪一边走就判断那一边有没有障碍物
+        {
+            if (move.y1 - 2 == move.y2 && this->pieceidOn(move.x1, move.y1 - 1) != 0) // 若有障碍物则不合理
+                return false;
+            if (move.y1 + 2 == move.y2 && this->pieceidOn(move.x1, move.y1 + 1) != 0)
+                return false;
+        }
+        else
+        {
+            if (move.x1 - 2 == move.x2 && this->pieceidOn(move.x1 - 1, move.y1) != 0) // 若有障碍物则不合理
+                return false;
+            if (move.x1 + 2 == move.x2 && this->pieceidOn(move.x1 + 1, move.y1) != 0)
+                return false;
+        }
+        return true;
+    }
+    else if (abs(attacker) == R_BISHOP)
+    {
+        // 象走法, 不能有障碍物
+        if (this->pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0)
+            return false;
+    }
+    else if (abs(attacker) == R_CANNON)
+    {
+        if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法, 若横纵坐标都不同, 则一定不合理
+            return false;
+        // 生成炮的着法范围
+        UINT32 bitlineX = this->getBitLineX(move.x1);
+        REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, move.y1, 9);
+        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
+            return false;
+        // 横向
+        UINT32 bitlineY = this->getBitLineY(move.y1);
+        REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, move.x1, 8);
+        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
+            return false;
+    }
+
+    this->doMoveSimple(move);
+    const bool skip = inCheck(-this->team);
+    this->undoMoveSimple();
+
+    return !skip;
 }

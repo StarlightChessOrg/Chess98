@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "board.hpp"
 #include "movesgen.hpp"
 
@@ -60,7 +60,7 @@ public:
         MOVES results{};
         for (const Move& move : this->killerMoves->at(board.distance))
         {
-            if (isValidMoveInSituation(board, move))
+            if (board.isValidMoveInSituation(move))
             {
                 results.emplace_back(move);
             }
@@ -174,15 +174,15 @@ public:
         const TransItem& t = this->items[pos];
         if (t.hashLock == board.hashLock)
         {
-            if (isValidMoveInSituation(board, t.exactMove))
+            if (board.isValidMoveInSituation(t.exactMove))
             {
                 return t.exactMove;
             }
-            else if (isValidMoveInSituation(board, t.betaMove))
+            else if (board.isValidMoveInSituation(t.betaMove))
             {
                 return t.betaMove;
             }
-            else if (isValidMoveInSituation(board, t.alphaMove))
+            else if (board.isValidMoveInSituation(t.alphaMove))
             {
                 return t.alphaMove;
             }

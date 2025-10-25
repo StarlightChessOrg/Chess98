@@ -44,9 +44,6 @@
     <ClInclude Include="ui.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="utils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="hash.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

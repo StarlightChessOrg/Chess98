@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "heuristic.hpp"
 #include "movesgen.hpp"
 
@@ -359,7 +359,7 @@ Result Search::searchOpenBook()
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
-    return isValidMoveInSituation(board, bookMove) ? Result{ bookMove, 1 } : Result{ Move{}, -1 };
+    return board.isValidMoveInSituation(bookMove) ? Result{ bookMove, 1 } : Result{ Move{}, -1 };
 }
 
 Result Search::searchRoot(int depth)
@@ -429,8 +429,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         return result.data;
     }
 
-    // variables
-    const bool mChecking = inCheck(board, board.team);
+    const bool mChecking = board.inCheck(board.team);
     this->validateCheckingMove(mChecking);
 
     if (!mChecking)
@@ -626,7 +625,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     }
 
     // variables
-    const bool mChecking = inCheck(board, board.team);
+    const bool mChecking = board.inCheck(board.team);
 
     // 验证上一步是否是将军着法
     this->validateCheckingMove(mChecking);
@@ -759,7 +758,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         return trickresult.data;
     }
 
-    const bool mChecking = inCheck(board, board.team);
+    const bool mChecking = board.inCheck(board.team);
     this->validateCheckingMove(mChecking);
     int vlBest = -INF;
 
@@ -790,8 +789,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         availableMoves = MovesGen::getCaptureMoves(board);
     }
     Move bestMove{};
-
-    // 搜索
     for (const Move& move : availableMoves)
     {
         board.doMove(move);

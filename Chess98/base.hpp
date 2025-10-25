@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -26,10 +26,6 @@ class Move;
 class Result;
 class Trick;
 class TransItem;
-void wait(int ms);
-void command(std::string str);
-void readFile(std::string filename, std::string& content);
-void writeFile(std::string filename, std::string content);
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
@@ -85,6 +81,12 @@ const std::vector<PIECEID> ALL_PIECEIDS = {
     R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
     B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
 };
+void wait(int ms);
+void command(std::string str);
+void readFile(std::string filename, std::string& content);
+void writeFile(std::string filename, std::string content);
+PIECEID_MAP fenToPieceidmap(std::string fenCode);
+std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team);
 
 class Piece
 {
@@ -241,4 +243,109 @@ void writeFile(std::string filename, std::string content)
         return;
     }
     file.write(content.c_str(), content.size());
+}
+
+PIECEID_MAP fenToPieceidmap(std::string fenCode)
+{
+    PIECEID_MAP pieceidMap = PIECEID_MAP{};
+    int colNum = 9;
+    int rowNum = 0;
+    std::map<char, PIECEID> pairs{
+        {'R', R_ROOK},
+        {'N', R_KNIGHT},
+        {'H', R_KNIGHT},
+        {'B', R_BISHOP},
+        {'E', R_BISHOP},
+        {'G', R_GUARD},
+        {'A', R_GUARD},
+        {'K', R_KING},
+        {'C', R_CANNON},
+        {'P', R_PAWN},
+        {'r', B_ROOK},
+        {'n', B_KNIGHT},
+        {'h', B_KNIGHT},
+        {'b', B_BISHOP},
+        {'e', B_BISHOP},
+        {'g', B_GUARD},
+        {'a', B_GUARD},
+        {'k', B_KING},
+        {'c', B_CANNON},
+        {'p', B_PAWN} };
+    for (int i = 0; i < fenCode.size(); i++)
+    {
+        if (fenCode[i] >= '1' && fenCode[i] <= '9')
+        {
+            rowNum += fenCode[i] - '0';
+            continue;
+        }
+        else if (fenCode[i] == '/')
+        {
+            rowNum = 0;
+            colNum--;
+            continue;
+        }
+        else if (fenCode[i] == ' ')
+        {
+            break;
+        }
+        else
+        {
+            pieceidMap[rowNum][colNum] = pairs.at(fenCode[i]);
+        }
+        rowNum++;
+    }
+
+    return pieceidMap;
+}
+
+std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
+{
+    std::string result = "";
+    int spaceCount = 0;
+    std::map<PIECEID, char> pairs{
+        {R_KING, 'K'},
+        {R_GUARD, 'A'},
+        {R_BISHOP, 'B'},
+        {R_KNIGHT, 'N'},
+        {R_ROOK, 'R'},
+        {R_CANNON, 'C'},
+        {R_PAWN, 'P'},
+        {B_KING, 'k'},
+        {B_GUARD, 'a'},
+        {B_BISHOP, 'b'},
+        {B_KNIGHT, 'n'},
+        {B_ROOK, 'r'},
+        {B_CANNON, 'c'},
+        {B_PAWN, 'p'} };
+    for (int x = 9; x >= 0; x--)
+    {
+        for (int y = 0; y < 9; y++)
+        {
+            PIECEID pieceid = pieceidMap[y][x];
+            if (pieceid == EMPTY_PIECEID)
+            {
+                spaceCount++;
+            }
+            else
+            {
+                if (spaceCount > 0)
+                {
+                    result += std::to_string(spaceCount);
+                    spaceCount = 0;
+                }
+                result += pairs.at(pieceid);
+            }
+        }
+        if (spaceCount > 0)
+        {
+            result += std::to_string(spaceCount);
+            spaceCount = 0;
+        }
+        result += "/";
+    }
+    result.pop_back();
+    result += team == RED ? " w" : " b";
+    result += " - - 0 1";
+
+    return result;
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "search.hpp"
 
 using BOARD_CODE = std::string;
@@ -199,7 +199,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
             board.doMove(node.move);
-            if (inCheck(board, board.team))
+            if (board.inCheck(board.team))
                 board.historyMoves.back().isCheckingMove = true;
 
             setBoardCode(board);
