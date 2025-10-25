@@ -117,117 +117,6 @@ protected:
 
         return {};
     }
-
-    bool repeatCheck() const
-    {
-        const Board& board = this->board;
-        const MOVES& history = board.historyMoves;
-        const size_t size = history.size();
-        if (size >= 5)
-        {
-            const Move& ply1 = history[size_t(size - 1)];
-            const Move& ply2 = history[size_t(size - 2)];
-            const Move& ply3 = history[size_t(size - 3)];
-            const Move& ply4 = history[size_t(size - 4)];
-            const Move& ply5 = history[size_t(size - 5)];
-            // 判断是否出现重复局面, 没有则直接false
-            // 试想如下重复局面：（格式：plyX: x1y1x2y2）
-            // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
-            const bool isRepeat = (ply1 == ply5 &&
-                ply1.startpos == ply3.endpos &&
-                ply1.endpos == ply3.startpos &&
-                ply2.startpos == ply4.endpos &&
-                ply2.endpos == ply4.startpos);
-            if (!isRepeat)
-            {
-                return false;
-            }
-
-            // 长将在任何情况下都会判负
-            // 由于性能原因, isCheckingMove是被延迟设置的, ply1可能还没有被设成checkingMove
-            // 但是若判定了循环局面, ply1必然等于ply5
-            // 若ply5和ply3都是将军着法, 且出现循环局面, 则直接判定违规
-            if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
-            {
-                return true;
-            }
-            // 长捉情况比较特殊
-            // 只有车、马、炮能作为长捉的发起者
-            // 发起者不断捉同一个子, 判负
-            if (abs(ply1.attacker.pieceid) == R_ROOK ||
-                abs(ply1.attacker.pieceid) == R_KNIGHT ||
-                abs(ply1.attacker.pieceid) == R_CANNON)
-            {
-                const Piece& attacker = ply1.attacker;
-                const Piece& captured = ply2.attacker;
-                // 车
-                if (abs(attacker.pieceid) == R_ROOK)
-                {
-                    if (ply5.x2 == ply4.x1)
-                    {
-                        UINT32 bitlineX = board.getBitLineX(ply5.x2);
-                        REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, attacker.y, 9);
-                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
-                            board.piecePosition(ply5.x2, regionX[0]).pieceIndex == captured.pieceIndex)
-                        {
-                            return true;
-                        }
-                    }
-                    else if (ply5.y2 == ply4.y1)
-                    {
-                        UINT32 bitlineY = board.getBitLineY(ply5.y2);
-                        REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, attacker.x, 8);
-                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
-                            board.piecePosition(regionY[1], ply5.y2).pieceIndex == captured.pieceIndex)
-                        {
-                            return true;
-                        }
-                    }
-                }
-                // 炮
-                else if (abs(attacker.pieceid) == R_CANNON)
-                {
-                    if (ply5.x2 == ply4.x1)
-                    {
-                        UINT32 bitlineX = board.getBitLineX(ply5.x2);
-                        REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, attacker.y, 9);
-                        if (board.piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
-                            board.piecePosition(ply5.x2, regionX[3]).pieceIndex == captured.pieceIndex)
-                        {
-                            return true;
-                        }
-                    }
-                    else if (ply5.y2 == ply4.y1)
-                    {
-                        UINT32 bitlineY = board.getBitLineY(ply5.y2);
-                        REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, attacker.x, 8);
-                        if (board.piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
-                            board.piecePosition(regionY[3], ply5.y2).pieceIndex == captured.pieceIndex)
-                        {
-                            return true;
-                        }
-                    }
-                }
-                // 马
-                else if (abs(attacker.pieceid) == R_KNIGHT)
-                {
-                    if (
-                        (attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) ||
-                        (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
-                        (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) ||
-                        (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
-                        (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) ||
-                        (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
-                        (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) ||
-                        (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y)) // 这里有点担心, 但是我想不到什么局面
-                    {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
 };
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
@@ -239,7 +128,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         // 将帅是否在棋盘上
         exit(0);
     }
-    else if (this->repeatCheck())
+    else if (board.repeatCheck())
     {
         // 是否重复局面
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
@@ -295,18 +184,29 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
 Result Search::searchOpenBook()
 {
-    struct BookStruct
+    class Book
     {
-        union
-        {
-            uint32_t dwZobristLock;
-            int nPtr;
-        };
+    public:
+        uint32_t dwZobristLock;
+        int nPtr;
         uint16_t wmv, wvl;
+
+    public:
+        int bookPosCmp(int32 hashLock) const
+        {
+            const uint32_t bookLock = this->dwZobristLock;
+            const uint32_t boardLock = (uint32_t)hashLock;
+            if (bookLock < boardLock)
+                return -1;
+            else if (bookLock > boardLock)
+                return 1;
+            return 0;
+        }
     };
 
-    struct BookFileStruct
+    class BookFile
     {
+    public:
         int nLen = 0;
         bool isEdit = false;
         std::string filename;
@@ -318,44 +218,33 @@ Result Search::searchOpenBook()
             std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
             if (!ifs.is_open())
                 return false;
-            nLen = int(ifs.tellg() / sizeof(BookStruct));
+            nLen = int(ifs.tellg() / sizeof(Book));
             return true;
         }
 
-        void read(BookStruct& bk, int nMid) const
+        void read(Book& bk, int nMid) const
         {
             std::ifstream ifs(filename, std::ios::binary);
             if (!ifs.is_open())
                 return;
-            ifs.seekg(nMid * sizeof(BookStruct), std::ios::beg);
-            ifs.read(reinterpret_cast<char*>(&bk), sizeof(BookStruct));
+            ifs.seekg(nMid * sizeof(Book), std::ios::beg);
+            ifs.read(reinterpret_cast<char*>(&bk), sizeof(Book));
         }
 
-        void write(const BookStruct& bk, int nMid) const
+        void write(const Book& bk, int nMid) const
         {
             if (!isEdit)
                 return;
             std::fstream fstr(filename, std::ios::in | std::ios::out | std::ios::binary);
             if (!fstr.is_open())
                 return;
-            fstr.seekp(nMid * sizeof(BookStruct), std::ios::beg);
-            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(BookStruct));
+            fstr.seekp(nMid * sizeof(Book), std::ios::beg);
+            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(Book));
         }
     };
 
-    std::function<int(BookStruct&, int32)> bookPosCmp = [](BookStruct& bk, int32 hashLock) -> int
-        {
-            uint32_t bookLock = bk.dwZobristLock;
-            uint32_t boardLock = (uint32_t)hashLock;
-            if (bookLock < boardLock)
-                return -1;
-            else if (bookLock > boardLock)
-                return 1;
-            return 0;
-        };
-
-    BookStruct bk{};
-    BookFileStruct pBookFileStruct{};
+    Book bk{};
+    BookFile pBookFileStruct{};
 
     if (!pBookFileStruct.open("BOOK.DAT"))
     {
@@ -380,11 +269,11 @@ Result Search::searchOpenBook()
         {
             nMid = (nHigh + nLow) / 2;
             pBookFileStruct.read(bk, nMid);
-            if (bookPosCmp(bk, nowHashLock) < 0)
+            if (bk.bookPosCmp(nowHashLock) < 0)
             {
                 nLow = nMid + 1;
             }
-            else if (bookPosCmp(bk, nowHashLock) > 0)
+            else if (bk.bookPosCmp(nowHashLock) > 0)
             {
                 nHigh = nMid - 1;
             }
@@ -408,7 +297,7 @@ Result Search::searchOpenBook()
     for (nMid--; nMid >= 0; nMid--)
     {
         pBookFileStruct.read(bk, nMid);
-        if (bookPosCmp(bk, nowHashLock) < 0)
+        if (bk.bookPosCmp(nowHashLock) < 0)
         {
             break;
         }
@@ -420,7 +309,7 @@ Result Search::searchOpenBook()
     for (nMid++; nMid < pBookFileStruct.nLen; nMid++)
     {
         pBookFileStruct.read(bk, nMid);
-        if (bookPosCmp(bk, nowHashLock) > 0)
+        if (bk.bookPosCmp(nowHashLock) > 0)
         {
             break;
         }
@@ -445,8 +334,7 @@ Result Search::searchOpenBook()
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b)
-        { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b) { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
@@ -480,7 +368,6 @@ Result Search::searchRoot(int depth)
     int vl = -INF;
     int vlBest = -INF;
 
-    // 搜索
     for (const Move& move : rootMoves)
     {
         board.doMove(move);
@@ -505,7 +392,6 @@ Result Search::searchRoot(int depth)
         board.undoMove();
     }
 
-    // 记录数据, 为杀棋添加distance
     if (bestMove.id == -1)
     {
         vlBest += board.distance;
@@ -536,7 +422,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         return vl;
     }
 
-    // mate distance pruning
+    // mdp
     Trick result = this->mateDistancePruning(alpha, beta);
     if (result.success)
     {
@@ -562,13 +448,6 @@ int Search::searchPV(int depth, int alpha, int beta)
         {
             return trickResult.data;
         }
-    }
-
-    // 重复检测
-    bool repeatResult = this->repeatCheck();
-    if (repeatResult == true)
-    {
-        return INF - board.distance;
     }
 
     // variables
@@ -641,6 +520,13 @@ int Search::searchPV(int depth, int alpha, int beta)
                 }
             }
         }
+    }
+
+    // 重复检测
+    bool repeatResult = board.repeatCheck();
+    if (repeatResult == true)
+    {
+        return INF - board.distance;
     }
 
     // 搜索
@@ -745,13 +631,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     // 验证上一步是否是将军着法
     this->validateCheckingMove(mChecking);
 
-    // 重复检测
-    bool repeatResult = this->repeatCheck();
-    if (repeatResult == true)
-    {
-        return INF - board.distance;
-    }
-
     if (!mChecking)
     {
         // null pruning
@@ -777,7 +656,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    // variables
     int vlBest = -INF;
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
@@ -800,6 +678,13 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                 type = BETA_TYPE;
             }
         }
+    }
+
+    // 重复检测
+    bool repeatResult = board.repeatCheck();
+    if (repeatResult == true)
+    {
+        return INF - board.distance;
     }
 
     // 搜索
@@ -886,7 +771,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 重复检测
-    bool repeatResult = this->repeatCheck();
+    bool repeatResult = board.repeatCheck();
     if (repeatResult == true)
     {
         return INF - board.distance;

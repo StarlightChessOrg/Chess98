@@ -48,6 +48,7 @@ public:
     PIECES getPiecesByTeam(TEAM team) const;
     Piece getPieceReg(PIECEID pieceid) const;
     PIECES getPiecesReg(PIECEID pieceid) const;
+    bool repeatCheck() const;
 
 public:
     void doMove(Move move);
@@ -196,6 +197,116 @@ PIECES Board::getPiecesReg(PIECEID pieceid) const
         }
     }
     return result;
+}
+
+bool Board::repeatCheck() const
+{
+    const MOVES& history = this->historyMoves;
+    const size_t size = history.size();
+    if (size >= 5)
+    {
+        const Move& ply1 = history[size_t(size - 1)];
+        const Move& ply2 = history[size_t(size - 2)];
+        const Move& ply3 = history[size_t(size - 3)];
+        const Move& ply4 = history[size_t(size - 4)];
+        const Move& ply5 = history[size_t(size - 5)];
+        // 判断是否出现重复局面, 没有则直接false
+        // 试想如下重复局面：（格式：plyX: x1y1x2y2）
+        // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
+        const bool isRepeat = (ply1 == ply5 &&
+            ply1.startpos == ply3.endpos &&
+            ply1.endpos == ply3.startpos &&
+            ply2.startpos == ply4.endpos &&
+            ply2.endpos == ply4.startpos);
+        if (!isRepeat)
+        {
+            return false;
+        }
+
+        // 长将在任何情况下都会判负
+        // 由于性能原因, isCheckingMove是被延迟设置的, ply1可能还没有被设成checkingMove
+        // 但是若判定了循环局面, ply1必然等于ply5
+        // 若ply5和ply3都是将军着法, 且出现循环局面, 则直接判定违规
+        if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
+        {
+            return true;
+        }
+        // 长捉情况比较特殊
+        // 只有车、马、炮能作为长捉的发起者
+        // 发起者不断捉同一个子, 判负
+        if (abs(ply1.attacker.pieceid) == R_ROOK ||
+            abs(ply1.attacker.pieceid) == R_KNIGHT ||
+            abs(ply1.attacker.pieceid) == R_CANNON)
+        {
+            const Piece& attacker = ply1.attacker;
+            const Piece& captured = ply2.attacker;
+            // 车
+            if (abs(attacker.pieceid) == R_ROOK)
+            {
+                if (ply5.x2 == ply4.x1)
+                {
+                    UINT32 bitlineX = this->getBitLineX(ply5.x2);
+                    REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, attacker.y, 9);
+                    if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
+                        this->piecePosition(ply5.x2, regionX[0]).pieceIndex == captured.pieceIndex)
+                    {
+                        return true;
+                    }
+                }
+                else if (ply5.y2 == ply4.y1)
+                {
+                    UINT32 bitlineY = this->getBitLineY(ply5.y2);
+                    REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, attacker.x, 8);
+                    if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
+                        this->piecePosition(regionY[1], ply5.y2).pieceIndex == captured.pieceIndex)
+                    {
+                        return true;
+                    }
+                }
+            }
+            // 炮
+            else if (abs(attacker.pieceid) == R_CANNON)
+            {
+                if (ply5.x2 == ply4.x1)
+                {
+                    UINT32 bitlineX = this->getBitLineX(ply5.x2);
+                    REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, attacker.y, 9);
+                    if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
+                        this->piecePosition(ply5.x2, regionX[3]).pieceIndex == captured.pieceIndex)
+                    {
+                        return true;
+                    }
+                }
+                else if (ply5.y2 == ply4.y1)
+                {
+                    UINT32 bitlineY = this->getBitLineY(ply5.y2);
+                    REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, attacker.x, 8);
+                    if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
+                        this->piecePosition(regionY[3], ply5.y2).pieceIndex == captured.pieceIndex)
+                    {
+                        return true;
+                    }
+                }
+            }
+            // 马
+            else if (abs(attacker.pieceid) == R_KNIGHT)
+            {
+                if (
+                    (attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) ||
+                    (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
+                    (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) ||
+                    (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
+                    (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) ||
+                    (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
+                    (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) ||
+                    (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y))
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
 }
 
 void Board::doMove(Move move)
