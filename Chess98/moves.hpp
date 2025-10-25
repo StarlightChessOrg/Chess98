@@ -23,6 +23,9 @@ public:
     static MOVES pawnCapture(TEAM team, Board &board, int x, int y);
     static MOVES generateCaptureMovesOn(Board &board, int x, int y);
     static MOVES getCaptureMoves(Board &board);
+
+protected:
+    static MOVES facedKings(const Board &board);
 };
 
 MOVES MovesGenerate::king(TEAM team, Board &board, int x, int y)
@@ -421,27 +424,10 @@ MOVES MovesGenerate::generateMovesOn(Board &board, int x, int y)
 MOVES MovesGenerate::getMoves(Board &board)
 {
     // 对面笑
-    const Piece &rKing = board.getPieceReg(board.team * R_KING);
-    const Piece &bKing = board.getPieceReg(board.team * B_KING);
-    if (rKing.x == bKing.x)
+    const MOVES facedkings = MovesGenerate::facedKings(board);
+    if (facedkings.size() != 0)
     {
-        UINT32 bitlineX = board.getBitLineX(rKing.x);
-        REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
-        if (region[1] == bKing.y)
-        {
-            MOVES result;
-            if (board.team == RED)
-            {
-                result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
-                result[0].attacker = rKing;
-            }
-            else
-            {
-                result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
-                result[0].attacker = bKing;
-            }
-            return result;
-        }
+        return facedkings;
     }
 
     MOVES result{};
@@ -461,7 +447,7 @@ MOVES MovesGenerate::getMoves(Board &board)
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team* R_PAWN))
+    for (const Piece &piece : board.getPiecesReg(board.team * R_PAWN))
     {
         std::vector<Move> moves = MovesGenerate::generateMovesOn(board, piece.x, piece.y);
         result.insert(result.end(), moves.begin(), moves.end());
@@ -482,7 +468,7 @@ MOVES MovesGenerate::getMoves(Board &board)
         result.insert(result.end(), moves.begin(), moves.end());
     }
 
-    MOVES moves;
+    MOVES moves{};
     for (Move move : result)
     {
         board.doMoveSimple(move);
@@ -863,29 +849,12 @@ MOVES MovesGenerate::generateCaptureMovesOn(Board &board, int x, int y)
 MOVES MovesGenerate::getCaptureMoves(Board &board)
 {
     // 对面笑
-    const Piece &rKing = board.getPieceReg(board.team * R_KING);
-    const Piece &bKing = board.getPieceReg(board.team * B_KING);
-    if (rKing.x == bKing.x)
+    const MOVES facedkings = MovesGenerate::facedKings(board);
+    if (facedkings.size() != 0)
     {
-        UINT32 bitlineX = board.getBitLineX(rKing.x);
-        REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
-        if (region[1] == bKing.y)
-        {
-            MOVES result;
-            if (board.team == RED)
-            {
-                result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
-                result[0].attacker = rKing;
-            }
-            else
-            {
-                result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
-                result[0].attacker = bKing;
-            }
-            return result;
-        }
+        return facedkings;
     }
-
+    
     MOVES result{};
 
     for (const Piece &piece : board.getPiecesReg(board.team * R_ROOK))
@@ -939,4 +908,31 @@ MOVES MovesGenerate::getCaptureMoves(Board &board)
     }
 
     return result;
+}
+
+MOVES MovesGenerate::facedKings(const Board&board)
+{
+    const Piece &rKing = board.getPieceReg(board.team * R_KING);
+    const Piece &bKing = board.getPieceReg(board.team * B_KING);
+    if (rKing.x == bKing.x)
+    {
+        UINT32 bitlineX = board.getBitLineX(rKing.x);
+        REGION_ROOK region = board.bitboard->getRookRegion(bitlineX, rKing.y, 9);
+        if (region[1] == bKing.y)
+        {
+            MOVES result;
+            if (board.team == RED)
+            {
+                result = MOVES{Move{rKing.x, rKing.y, bKing.x, bKing.y}};
+                result[0].attacker = rKing;
+            }
+            else
+            {
+                result = MOVES{Move{bKing.x, bKing.y, rKing.x, rKing.y}};
+                result[0].attacker = bKing;
+            }
+            return result;
+        }
+    }
+    return {};
 }
