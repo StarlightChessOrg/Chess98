@@ -128,7 +128,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         // 将帅是否在棋盘上
         exit(0);
     }
-    else if (board.repeatCheck())
+    else if (board.isRepeated())
     {
         // 是否重复局面
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
@@ -409,13 +409,11 @@ Result Search::searchRoot(int depth)
 
 int Search::searchPV(int depth, int alpha, int beta)
 {
-    // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
         return -INF + board.distance;
     }
 
-    // 静态搜索
     if (depth <= 0)
     {
         int vl = Search::searchQ(alpha, beta);
@@ -429,9 +427,12 @@ int Search::searchPV(int depth, int alpha, int beta)
         return result.data;
     }
 
+    int vlBest = -INF;
+    Move bestMove{};
+    NODE_TYPE type = ALPHA_TYPE;
     const bool mChecking = board.inCheck(board.team);
-    this->validateCheckingMove(mChecking);
 
+    this->validateCheckingMove(mChecking);
     if (!mChecking)
     {
         // null and delta pruning
@@ -448,12 +449,6 @@ int Search::searchPV(int depth, int alpha, int beta)
             return trickResult.data;
         }
     }
-
-    // variables
-    int vlBest = -INF;
-    Move bestMove{};
-    NODE_TYPE type = ALPHA_TYPE;
-    MOVES availableMoves;
 
     // 置换表着法
     Move goodMove = this->tt->getMove(board);
@@ -482,7 +477,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
-    // 杀手启发
+    // killer
     if (type != BETA_TYPE)
     {
         int vl = -INF;
@@ -521,21 +516,15 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
-    // 重复检测
-    bool repeatResult = board.repeatCheck();
-    if (repeatResult == true)
+    if (board.isRepeated())
     {
-        return INF - board.distance;
+        return INF;
     }
 
-    // 搜索
     if (type != BETA_TYPE)
     {
         int vl = -INF;
-        if (availableMoves.size() == 0)
-        {
-            availableMoves = MovesGen::getMoves(board);
-        }
+        MOVES availableMoves = MovesGen::getMoves(board);
 
         // 历史启发
         this->history->sort(availableMoves);
@@ -559,7 +548,6 @@ int Search::searchPV(int depth, int alpha, int beta)
 
             board.undoMove();
 
-            // 更新最佳值
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -578,7 +566,6 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
-    // 结果
     if (bestMove.id == -1)
     {
         vlBest += board.distance;
@@ -598,10 +585,15 @@ int Search::searchPV(int depth, int alpha, int beta)
 
 int Search::searchCut(int depth, int beta, bool banNullMove)
 {
-    // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
         return -INF + board.distance;
+    }
+
+    // searchq
+    if (depth <= 0)
+    {
+        return Search::searchQ(beta - 1, beta);
     }
 
     // 置换表分数
@@ -611,25 +603,19 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         return vlHash;
     }
 
-    // 静态搜索
-    if (depth <= 0)
-    {
-        return Search::searchQ(beta - 1, beta);
-    }
-
-    // mate distance pruning
+    // mdp
     Trick trickResult = this->mateDistancePruning(beta - 1, beta);
     if (trickResult.success)
     {
         return trickResult.data;
     }
 
-    // variables
+    int vlBest = -INF;
+    Move bestMove{};
+    NODE_TYPE type = ALPHA_TYPE;
     const bool mChecking = board.inCheck(board.team);
 
-    // 验证上一步是否是将军着法
     this->validateCheckingMove(mChecking);
-
     if (!mChecking)
     {
         // null pruning
@@ -655,12 +641,6 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    int vlBest = -INF;
-    Move bestMove{};
-    NODE_TYPE type = ALPHA_TYPE;
-    int searchedCnt = 0;
-    MOVES availableMoves;
-
     // 置换表着法
     Move goodMove = this->tt->getMove(board);
     if (goodMove.id != -1)
@@ -679,32 +659,20 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    // 重复检测
-    bool repeatResult = board.repeatCheck();
-    if (repeatResult == true)
-    {
-        return INF - board.distance;
-    }
-
-    // 搜索
+    // killer
     if (type != BETA_TYPE)
     {
-        // 获取所有可行着法
-        if (availableMoves.size() == 0)
-        {
-            availableMoves = MovesGen::getMoves(board);
-        }
-
-        // 历史启发
-        this->history->sort(availableMoves);
-
-        for (const Move& move : availableMoves)
+        int vl = -INF;
+        MOVES killerAvailableMoves = this->killer->get(board);
+        for (const Move& move : killerAvailableMoves)
         {
             board.doMove(move);
-            int vl = -searchCut(depth - 1, -beta + 1);
+            vl = -searchCut(depth - 1, INF);
+            if (vl < beta)
+            {
+                vl = -searchCut(depth - 1, beta);
+            }
             board.undoMove();
-
-            // 更新最佳值
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -715,7 +683,40 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
                     break;
                 }
             }
-            searchedCnt++;
+        }
+    }
+
+    // repeat
+    bool repeatResult = board.isRepeated();
+    if (repeatResult == true)
+    {
+        return INF - board.distance;
+    }
+
+    if (type != BETA_TYPE)
+    {
+        MOVES availableMoves = MovesGen::getMoves(board);
+
+        this->history->sort(availableMoves);
+
+        for (const Move& move : availableMoves)
+        {
+            board.doMove(move);
+
+            int vl = -searchCut(depth - 1, -beta + 1);
+
+            board.undoMove();
+
+            if (vl > vlBest)
+            {
+                vlBest = vl;
+                bestMove = move;
+                if (vl >= beta)
+                {
+                    type = BETA_TYPE;
+                    break;
+                }
+            }
         }
     }
 
@@ -770,7 +771,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     }
 
     // 重复检测
-    bool repeatResult = board.repeatCheck();
+    bool repeatResult = board.isRepeated();
     if (repeatResult == true)
     {
         return INF - board.distance;

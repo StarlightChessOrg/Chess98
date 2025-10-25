@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // #define GENFILES
 
@@ -101,7 +101,7 @@ Result SearchGenfiles::searchMain(int maxDepth, int maxTime)
         GENFILES_appexit = true;
         return Result{Move{}, 0};
     }
-    else if (this->repeatCheck())
+    else if (this->isRepeated())
     {
         // 是否重复局面
         std::cout << " repeat situation!" << std::endl;

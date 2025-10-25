@@ -48,7 +48,7 @@ public:
     PIECES getPiecesByTeam(TEAM team) const;
     Piece getPieceReg(PIECEID pieceid) const;
     PIECES getPiecesReg(PIECEID pieceid) const;
-    bool repeatCheck() const; 
+    bool isRepeated() const; 
     bool hasCrossedRiver(int x, int y) const;
     bool isInPalace(int x, int y) const;
     bool inCheck(TEAM judgeTeam) const;
@@ -204,7 +204,7 @@ PIECES Board::getPiecesReg(PIECEID pieceid) const
     return result;
 }
 
-bool Board::repeatCheck() const
+bool Board::isRepeated() const
 {
     const MOVES& history = this->historyMoves;
     const size_t size = history.size();
