@@ -60,10 +60,10 @@ public:
     void doMoveSimple(Move move);
     void undoMoveSimple();
     void initEvaluate();
-    void vlOpenCalculator(int &vlOpen);
-    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack);
+    void vlOpenCalculator(int &vlOpen) const;
+    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const;
     void initHashInfo();
-    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock);
+    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock) const;
     bool isValidMoveInSituation(Move move);
 };
 
@@ -691,14 +691,14 @@ void Board::doMove(Move move)
     this->hashKeyList.emplace_back(this->hashKey);
     this->hashLockList.emplace_back(this->hashLock);
     // 更新哈希值
-    this->hashKey ^= hashKeys[attacker.pieceid][x1][y1];
-    this->hashKey ^= hashKeys[attacker.pieceid][x2][y2];
-    this->hashLock ^= hashLocks[attacker.pieceid][x1][y1];
-    this->hashLock ^= hashLocks[attacker.pieceid][x2][y2];
+    this->hashKey ^= HASHKEYS[attacker.pieceid][x1][y1];
+    this->hashKey ^= HASHKEYS[attacker.pieceid][x2][y2];
+    this->hashLock ^= HASHLOCKS[attacker.pieceid][x1][y1];
+    this->hashLock ^= HASHLOCKS[attacker.pieceid][x2][y2];
     if (captured.pieceid != EMPTY_PIECEID)
     {
-        this->hashKey ^= hashKeys[captured.pieceid][x1][y1];
-        this->hashLock ^= hashLocks[captured.pieceid][x2][y2];
+        this->hashKey ^= HASHKEYS[captured.pieceid][x1][y1];
+        this->hashLock ^= HASHLOCKS[captured.pieceid][x2][y2];
     }
     this->hashKey ^= PLAYER_KEY;
     this->hashLock ^= PLAYER_LOCK;
@@ -856,7 +856,7 @@ void Board::initEvaluate()
     }
 }
 
-void Board::vlOpenCalculator(int &vlOpen)
+void Board::vlOpenCalculator(int &vlOpen) const
 {
     // 首先判断局势处于开中局还是残局阶段, 方法是计算各种棋子的数量, 按照车=6、马炮=3、其它=1相加
     int rookLiveSum = 0;
@@ -884,7 +884,7 @@ void Board::vlOpenCalculator(int &vlOpen)
     vlOpen /= TOTAL_MIDGAME_VALUE;
 }
 
-void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack)
+void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const
 {
     // 然后判断各方是否处于进攻状态, 方法是计算各种过河棋子的数量, 按照车马2炮兵1相加
     int redAttackLiveRookSum = 0;
@@ -990,8 +990,8 @@ void Board::initHashInfo()
             PIECEID pid = this->pieceidMap[x][y];
             if (pid != EMPTY_PIECEID)
             {
-                this->hashKey ^= hashKeys[pid][x][y];
-                this->hashLock ^= hashLocks[pid][x][y];
+                this->hashKey ^= HASHKEYS[pid][x][y];
+                this->hashLock ^= HASHLOCKS[pid][x][y];
             }
         }
     }
@@ -1002,7 +1002,7 @@ void Board::initHashInfo()
     }
 }
 
-void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
+void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock) const
 {
     mirrorHashKey = 0;
     mirrorHashLock = 0;
@@ -1010,11 +1010,11 @@ void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock)
     {
         for (int y = 0; y < 10; y++)
         {
-            PIECEID pid = this->pieceidMap[x][y];
+            const PIECEID& pid = this->pieceidMap[x][y];
             if (pid != EMPTY_PIECEID)
             {
-                mirrorHashKey ^= hashKeys[pid][size_t(8) - x][y];
-                mirrorHashLock ^= hashLocks[pid][size_t(8) - x][y];
+                mirrorHashKey ^= HASHKEYS[pid][size_t(8) - x][y];
+                mirrorHashLock ^= HASHLOCKS[pid][size_t(8) - x][y];
             }
         }
     }
