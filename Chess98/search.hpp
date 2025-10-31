@@ -771,6 +771,10 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     Move bestMove{};
     const bool mChecking = board.inCheck(board.team);
     this->validateCheckingMove(mChecking);
+    if (mChecking)
+    {
+        leftDistance = std::min<int>(leftDistance, this->Q_DEPTH_CHECKING);
+    }
 
     if (!mChecking)
     {
@@ -788,19 +792,9 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         return INF;
     }
 
-    MOVES availableMoves{};
-    if (mChecking)
-    {
-        availableMoves = MovesGen::getMoves(board);
-        leftDistance = std::min<int>(leftDistance, this->Q_DEPTH_CHECKING);
-    }
-    else
-    {
-        availableMoves = MovesGen::getCaptureMoves(board);
-    }
-
+    // 搜索
+    MOVES availableMoves = mChecking ? MovesGen::getMoves(board) : MovesGen::getCaptureMoves(board);
     this->history->sort(availableMoves);
-
     for (const Move &move : availableMoves)
     {
         board.doMove(move);
@@ -826,6 +820,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         }
     }
 
+    // 结果
     if (vlBest == -INF)
     {
         vlBest += board.distance;
