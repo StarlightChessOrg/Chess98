@@ -20,9 +20,6 @@ public:
         this->tt->reset();
     }
 
-    static const int QUIESCENCE_EXTEND_DEPTH = 64;
-    static const int QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING = 8;
-
 public:
     Board board{};
     MOVES rootMoves{};
@@ -34,11 +31,15 @@ public:
     Result searchMain(int maxDepth, int maxTime);
 
 protected:
+    const int Q_DEPTH = 64;
+    const int Q_DEPTH_CHECKING = 8;
+
+protected:
     Result searchOpenBook();
     Result searchRoot(int depth);
     int searchPV(int depth, int alpha, int beta);
     int searchCut(int depth, int beta, bool banNullMove = false);
-    int searchQ(int alpha, int beta, int leftDistance = QUIESCENCE_EXTEND_DEPTH);
+    int searchQ(int alpha, int beta, int leftDistance);
 
 protected:
     void validateCheckingMove(bool mChecking)
@@ -49,25 +50,22 @@ protected:
         }
     }
 
-    Trick nullAndDeltaPruning(bool mChecking, int& alpha, int& beta, int& vlBest) const
+    Trick nullAndDeltaPruning(int &alpha, int &beta, int &vlBest) const
     {
-        if (!mChecking)
+        int vl = board.evaluate();
+        if (vl >= beta)
         {
-            int vl = board.evaluate();
-            if (vl >= beta)
-            {
-                return Trick{ vl };
-            }
-            vlBest = vl;
-            if (vl > alpha)
-            {
-                alpha = vl;
-            }
+            return Trick{vl};
+        }
+        vlBest = vl;
+        if (vl > alpha)
+        {
+            alpha = vl;
         }
         return {};
     }
 
-    Trick mateDistancePruning(int alpha, int& beta) const
+    Trick mateDistancePruning(int alpha, int &beta) const
     {
         const int vlDistanceMate = INF - board.distance;
         if (vlDistanceMate < beta)
@@ -75,7 +73,7 @@ protected:
             beta = vlDistanceMate;
             if (alpha >= vlDistanceMate)
             {
-                return Trick{ vlDistanceMate };
+                return Trick{vlDistanceMate};
             }
         }
         return {};
@@ -88,7 +86,7 @@ protected:
             int vl = board.evaluate();
             if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
             {
-                return Trick{ vl };
+                return Trick{vl};
             }
         }
         return {};
@@ -107,11 +105,11 @@ protected:
             const int lowerBound = int((-t * sigma + alpha - b) / a);
             if (this->searchCut(depth - 2, upperBound) >= upperBound)
             {
-                return { beta };
+                return {beta};
             }
             else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
             {
-                return { alpha };
+                return {alpha};
             }
         }
 
@@ -132,7 +130,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     {
         // 是否重复局面
         Move move = board.historyMoves[size_t(board.historyMoves.size() - 4)];
-        return Result{ move, INF };
+        return Result{move, INF};
     }
 
     // 开局库
@@ -175,7 +173,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 防止没有可行着法
     if (bestNode.move.id == -1)
     {
-        const Piece& king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
+        const Piece &king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
         bestNode.move = MovesGen::generateMovesOn(board, king.x, king.y)[0];
     }
 
@@ -211,7 +209,7 @@ Result Search::searchOpenBook()
         bool isEdit = false;
         std::string filename;
 
-        bool open(const char* szFileName, bool bEdit = false)
+        bool open(const char *szFileName, bool bEdit = false)
         {
             isEdit = bEdit;
             filename = szFileName;
@@ -222,16 +220,16 @@ Result Search::searchOpenBook()
             return true;
         }
 
-        void read(Book& bk, int nMid) const
+        void read(Book &bk, int nMid) const
         {
             std::ifstream ifs(filename, std::ios::binary);
             if (!ifs.is_open())
                 return;
             ifs.seekg(nMid * sizeof(Book), std::ios::beg);
-            ifs.read(reinterpret_cast<char*>(&bk), sizeof(Book));
+            ifs.read(reinterpret_cast<char *>(&bk), sizeof(Book));
         }
 
-        void write(const Book& bk, int nMid) const
+        void write(const Book &bk, int nMid) const
         {
             if (!isEdit)
                 return;
@@ -239,7 +237,7 @@ Result Search::searchOpenBook()
             if (!fstr.is_open())
                 return;
             fstr.seekp(nMid * sizeof(Book), std::ios::beg);
-            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(Book));
+            fstr.write(reinterpret_cast<const char *>(&bk), sizeof(Book));
         }
     };
 
@@ -248,7 +246,7 @@ Result Search::searchOpenBook()
 
     if (!pBookFileStruct.open("BOOK.DAT"))
     {
-        return Result{ Move{}, -1 };
+        return Result{Move{}, -1};
     }
 
     // 二分法查找开局库
@@ -290,7 +288,7 @@ Result Search::searchOpenBook()
 
     if (nScan == 2)
     {
-        return Result{ Move{}, -1 };
+        return Result{Move{}, -1};
     }
 
     // 如果找到局面, 则向前查找第一个着法
@@ -334,19 +332,20 @@ Result Search::searchOpenBook()
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b) { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
+              { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
     int vlSum = 0;
-    for (Move& move : bookMoves)
+    for (Move &move : bookMoves)
     {
         vlSum += move.val;
     }
     int vlRandom = std::rand() % vlSum;
 
     Move bookMove;
-    for (Move& move : bookMoves)
+    for (Move &move : bookMoves)
     {
         vlRandom -= move.val;
         if (vlRandom < 0)
@@ -359,7 +358,7 @@ Result Search::searchOpenBook()
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
-    return board.isValidMoveInSituation(bookMove) ? Result{ bookMove, 1 } : Result{ Move{}, -1 };
+    return board.isValidMoveInSituation(bookMove) ? Result{bookMove, 1} : Result{Move{}, -1};
 }
 
 Result Search::searchRoot(int depth)
@@ -368,7 +367,7 @@ Result Search::searchRoot(int depth)
     int vl = -INF;
     int vlBest = -INF;
 
-    for (const Move& move : rootMoves)
+    for (const Move &move : rootMoves)
     {
         board.doMove(move);
         if (vlBest == -INF)
@@ -404,7 +403,7 @@ Result Search::searchRoot(int depth)
 
     this->history->sort(rootMoves);
 
-    return Result{ bestMove, vlBest };
+    return Result{bestMove, vlBest};
 }
 
 int Search::searchPV(int depth, int alpha, int beta)
@@ -414,9 +413,10 @@ int Search::searchPV(int depth, int alpha, int beta)
         return -INF + board.distance;
     }
 
+    // 静态搜索
     if (depth <= 0)
     {
-        int vl = Search::searchQ(alpha, beta);
+        int vl = Search::searchQ(alpha, beta, this->Q_DEPTH);
         return vl;
     }
 
@@ -431,13 +431,13 @@ int Search::searchPV(int depth, int alpha, int beta)
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
     const bool mChecking = board.inCheck(board.team);
-
     this->validateCheckingMove(mChecking);
+
     if (!mChecking)
     {
         // null and delta pruning
         int vlBest = -INF;
-        Trick trickResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
+        Trick trickResult = this->nullAndDeltaPruning(alpha, beta, vlBest);
         if (trickResult.success)
         {
             return trickResult.data;
@@ -477,14 +477,16 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
-    // killer
+    // 杀手启发
     if (type != BETA_TYPE)
     {
         int vl = -INF;
         MOVES killerAvailableMoves = this->killer->get(board);
-        for (const Move& move : killerAvailableMoves)
+
+        for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
+
             if (vlBest == -INF)
             {
                 vl = -searchPV(depth - 1, -beta, -alpha);
@@ -497,7 +499,9 @@ int Search::searchPV(int depth, int alpha, int beta)
                     vl = -searchPV(depth - 1, -beta, -alpha);
                 }
             }
+
             board.undoMove();
+
             if (vl > vlBest)
             {
                 vlBest = vl;
@@ -516,20 +520,21 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
+    // 重复检测
     if (board.isRepeated())
     {
         return INF;
     }
 
+    // 搜索
     if (type != BETA_TYPE)
     {
         int vl = -INF;
         MOVES availableMoves = MovesGen::getMoves(board);
 
-        // 历史启发
         this->history->sort(availableMoves);
 
-        for (const Move& move : availableMoves)
+        for (const Move &move : availableMoves)
         {
             board.doMove(move);
 
@@ -566,6 +571,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         }
     }
 
+    // 结果
     if (bestMove.id == -1)
     {
         vlBest += board.distance;
@@ -590,10 +596,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         return -INF + board.distance;
     }
 
-    // searchq
+    // 静态搜索
     if (depth <= 0)
     {
-        return Search::searchQ(beta - 1, beta);
+        return Search::searchQ(beta - 1, beta, this->Q_DEPTH);
     }
 
     // 置换表分数
@@ -614,11 +620,11 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
     const bool mChecking = board.inCheck(board.team);
-
     this->validateCheckingMove(mChecking);
+
     if (!mChecking)
     {
-        // null pruning
+        // 空着裁剪
         if (!banNullMove)
         {
             if (board.nullOkay())
@@ -659,12 +665,12 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    // killer
+    // 杀手启发
     if (type != BETA_TYPE)
     {
         int vl = -INF;
         MOVES killerAvailableMoves = this->killer->get(board);
-        for (const Move& move : killerAvailableMoves)
+        for (const Move &move : killerAvailableMoves)
         {
             board.doMove(move);
 
@@ -685,20 +691,20 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
         }
     }
 
-    // repeat
-    bool repeatResult = board.isRepeated();
-    if (repeatResult == true)
+    // 重复检测
+    if (board.isRepeated())
     {
         return INF - board.distance;
     }
 
+    // 搜索
     if (type != BETA_TYPE)
     {
         MOVES availableMoves = MovesGen::getMoves(board);
 
         this->history->sort(availableMoves);
 
-        for (const Move& move : availableMoves)
+        for (const Move &move : availableMoves)
         {
             board.doMove(move);
 
@@ -739,13 +745,12 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
 int Search::searchQ(int alpha, int beta, int leftDistance)
 {
-    // 检查将帅是否在棋盘上
     if (!board.isKingLive(board.team))
     {
         return -INF + board.distance;
     }
 
-    // evaluate
+    // 评估
     if (leftDistance <= 0)
     {
         return board.evaluate();
@@ -758,50 +763,58 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         return trickresult.data;
     }
 
+    int vlBest = -INF;
+    Move bestMove{};
     const bool mChecking = board.inCheck(board.team);
     this->validateCheckingMove(mChecking);
-    int vlBest = -INF;
 
-    // null and delta pruning
-    Trick nullDeltaResult = this->nullAndDeltaPruning(mChecking, alpha, beta, vlBest);
-    if (nullDeltaResult.success)
+    if (!mChecking)
     {
-        return nullDeltaResult.data;
+        // null and delta pruning
+        Trick nullDeltaResult = this->nullAndDeltaPruning(alpha, beta, vlBest);
+        if (nullDeltaResult.success)
+        {
+            return nullDeltaResult.data;
+        }
     }
 
     // 重复检测
-    bool repeatResult = board.isRepeated();
-    if (repeatResult == true)
+    if (board.isRepeated())
     {
-        return INF - board.distance;
+        return INF;
     }
 
-    // 搜索
-    MOVES availableMoves;
+    MOVES availableMoves{};
     if (mChecking)
     {
         availableMoves = MovesGen::getMoves(board);
-        history->sort(availableMoves);
-        leftDistance = std::min<int>(leftDistance, Search::QUIESCENCE_EXTEND_DEPTH_WHEN_FACE_CHECKING);
+        leftDistance = std::min<int>(leftDistance, this->Q_DEPTH_CHECKING);
     }
     else
     {
         availableMoves = MovesGen::getCaptureMoves(board);
     }
-    Move bestMove{};
-    for (const Move& move : availableMoves)
+
+    this->history->sort(availableMoves);
+
+    for (const Move &move : availableMoves)
     {
         board.doMove(move);
+
         int vl = -Search::searchQ(-beta, -alpha, leftDistance - 1);
+
         board.undoMove();
+
         if (vl > vlBest)
         {
             if (vl >= beta)
             {
                 return vl;
             }
+
             vlBest = vl;
             bestMove = move;
+
             if (vl > alpha)
             {
                 alpha = vl;
@@ -809,7 +822,6 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
         }
     }
 
-    // 结果
     if (vlBest == -INF)
     {
         vlBest += board.distance;
