@@ -63,7 +63,6 @@ public:
     void vlOpenCalculator(int &vlOpen) const;
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const;
     void initHashInfo();
-    void getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock) const;
     bool isValidMoveInSituation(Move move);
 };
 
@@ -987,7 +986,7 @@ void Board::initHashInfo()
     {
         for (int y = 0; y < 10; y++)
         {
-            PIECEID pid = this->pieceidMap[x][y];
+            const PIECEID &pid = this->pieceidMap[x][y];
             if (pid != EMPTY_PIECEID)
             {
                 this->hashKey ^= HASHKEYS[pid][x][y];
@@ -999,29 +998,6 @@ void Board::initHashInfo()
     {
         this->hashKey ^= PLAYER_KEY;
         this->hashLock ^= PLAYER_LOCK;
-    }
-}
-
-void Board::getMirrorHashinfo(int32 &mirrorHashKey, int32 &mirrorHashLock) const
-{
-    mirrorHashKey = 0;
-    mirrorHashLock = 0;
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            const PIECEID& pid = this->pieceidMap[x][y];
-            if (pid != EMPTY_PIECEID)
-            {
-                mirrorHashKey ^= HASHKEYS[pid][size_t(8) - x][y];
-                mirrorHashLock ^= HASHLOCKS[pid][size_t(8) - x][y];
-            }
-        }
-    }
-    if (this->team == BLACK)
-    {
-        mirrorHashKey ^= PLAYER_KEY;
-        mirrorHashLock ^= PLAYER_LOCK;
     }
 }
 

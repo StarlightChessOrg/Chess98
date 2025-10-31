@@ -256,9 +256,26 @@ Result Search::searchOpenBook()
     // 二分法查找开局库
     int nMid = 0;
     int32 hashLock = board.hashLock;
+    // mirrorhash
     int32 mirrorHashLock = 0;
     int32 mirrorHashKey = 0;
-    board.getMirrorHashinfo(mirrorHashKey, mirrorHashLock);
+    for (int x = 0; x < 9; x++)
+    {
+        for (int y = 0; y < 10; y++)
+        {
+            const PIECEID& pid = board.pieceidOn(x, y);
+            if (pid != EMPTY_PIECEID)
+            {
+                mirrorHashKey ^= HASHKEYS[pid][size_t(8) - x][y];
+                mirrorHashLock ^= HASHLOCKS[pid][size_t(8) - x][y];
+            }
+        }
+    }
+    if (board.team == BLACK)
+    {
+        mirrorHashKey ^= PLAYER_KEY;
+        mirrorHashLock ^= PLAYER_LOCK;
+    }
 
     int nScan = 0;
     int32 nowHashLock = 0;
