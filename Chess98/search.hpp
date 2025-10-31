@@ -29,12 +29,6 @@ public:
 
 public:
     Result searchMain(int maxDepth, int maxTime);
-
-protected:
-    const int Q_DEPTH = 64;
-    const int Q_DEPTH_CHECKING = 8;
-
-protected:
     Result searchOpenBook();
     Result searchRoot(int depth);
     int searchPV(int depth, int alpha, int beta);
@@ -42,80 +36,90 @@ protected:
     int searchQ(int alpha, int beta, int leftDistance);
 
 protected:
-    void validateCheckingMove(bool mChecking)
+    const int Q_DEPTH = 64;
+    const int Q_DEPTH_CHECKING = 8;
+
+protected:
+    void validateCheckingMove(bool mChecking);
+    Trick nullAndDeltaPruning(int& alpha, int& beta, int& vlBest) const;
+    Trick mateDistancePruning(int alpha, int& beta) const;
+    Trick futilityPruning(int alpha, int beta, int depth) const;
+    Trick multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth);
+};
+
+void Search::validateCheckingMove(bool mChecking)
+{
+    if (mChecking && !board.historyMoves.empty())
     {
-        if (mChecking && !board.historyMoves.empty())
+        board.historyMoves.back().isCheckingMove = true;
+    }
+}
+
+Trick Search::nullAndDeltaPruning(int& alpha, int& beta, int& vlBest) const
+{
+    int vl = board.evaluate();
+    if (vl >= beta)
+    {
+        return Trick{ vl };
+    }
+    vlBest = vl;
+    if (vl > alpha)
+    {
+        alpha = vl;
+    }
+    return {};
+}
+
+Trick Search::mateDistancePruning(int alpha, int& beta) const
+{
+    const int vlDistanceMate = INF - board.distance;
+    if (vlDistanceMate < beta)
+    {
+        beta = vlDistanceMate;
+        if (alpha >= vlDistanceMate)
         {
-            board.historyMoves.back().isCheckingMove = true;
+            return Trick{ vlDistanceMate };
         }
     }
+    return {};
+}
 
-    Trick nullAndDeltaPruning(int &alpha, int &beta, int &vlBest) const
+Trick Search::futilityPruning(int alpha, int beta, int depth) const
+{
+    if (depth == 1)
     {
         int vl = board.evaluate();
-        if (vl >= beta)
+        if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
         {
-            return Trick{vl};
+            return Trick{ vl };
         }
-        vlBest = vl;
-        if (vl > alpha)
-        {
-            alpha = vl;
-        }
-        return {};
     }
+    return {};
+}
 
-    Trick mateDistancePruning(int alpha, int &beta) const
+Trick Search::multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
+{
+    if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
     {
-        const int vlDistanceMate = INF - board.distance;
-        if (vlDistanceMate < beta)
+        const double vlScale = (double)vlPawn / 100.0;
+        const double a = 1.02 * vlScale;
+        const double b = 2.36 * vlScale;
+        const double sigma = 82.0 * vlScale;
+        const double t = 1.5;
+        const int upperBound = int((t * sigma + beta - b) / a);
+        const int lowerBound = int((-t * sigma + alpha - b) / a);
+        if (this->searchCut(depth - 2, upperBound) >= upperBound)
         {
-            beta = vlDistanceMate;
-            if (alpha >= vlDistanceMate)
-            {
-                return Trick{vlDistanceMate};
-            }
+            return { beta };
         }
-        return {};
+        else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
+        {
+            return { alpha };
+        }
     }
 
-    Trick futilityPruning(int alpha, int beta, int depth) const
-    {
-        if (depth == 1)
-        {
-            int vl = board.evaluate();
-            if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
-            {
-                return Trick{vl};
-            }
-        }
-        return {};
-    }
-
-    Trick multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth)
-    {
-        if ((depth % 4 == 0 && searchType == CUT) || searchType == PV)
-        {
-            const double vlScale = (double)vlPawn / 100.0;
-            const double a = 1.02 * vlScale;
-            const double b = 2.36 * vlScale;
-            const double sigma = 82.0 * vlScale;
-            const double t = 1.5;
-            const int upperBound = int((t * sigma + beta - b) / a);
-            const int lowerBound = int((-t * sigma + alpha - b) / a);
-            if (this->searchCut(depth - 2, upperBound) >= upperBound)
-            {
-                return {beta};
-            }
-            else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
-            {
-                return {alpha};
-            }
-        }
-
-        return {};
-    }
-};
+    return {};
+}
 
 Result Search::searchMain(int maxDepth, int maxTime = 3)
 {
