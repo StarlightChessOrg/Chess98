@@ -60,7 +60,7 @@ public:
     void doMoveSimple(Move move);
     void undoMoveSimple();
     void initEvaluate();
-    void vlOpenCalculator(int &vlOpen) const;
+    void calculateVlOpen(int &vlOpen) const;
     void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const;
     void initHashInfo();
     bool isValidMoveInSituation(Move move);
@@ -807,31 +807,12 @@ void Board::initEvaluate()
     int vlOpen = 0;
     int vlRedAttack = 0;
     int vlBlackAttack = 0;
-    this->vlOpenCalculator(vlOpen);
+    this->calculateVlOpen(vlOpen);
     this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
 
     pieceWeights = getBasicEvaluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
     vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
     vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
-
-    const int BOTTOM_CANNON_REWARD = (vlOpen * INITIAL_BOTTOM_CANNON_REWARD + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_BOTTOM_CANNON_REWARD) / TOTAL_MIDGAME_VALUE;
-    const int CENTER_CANNON_REWARD = (vlOpen * INITIAL_CENTER_CANNON_REWARD + (TOTAL_MIDGAME_VALUE - vlOpen) * TERMINAL_CENTER_CANNON_REWARD) / TOTAL_MIDGAME_VALUE;
-
-    // 底炮
-    const std::vector<int> bottomCannonXList = {0, 1, 7, 8};
-    for (auto x : bottomCannonXList)
-    {
-        pieceWeights[R_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_REWARD : BOTTOM_CANNON_REWARD / 2;
-        pieceWeights[B_CANNON][x][9] += (x == 0 || x == 8) ? BOTTOM_CANNON_REWARD : BOTTOM_CANNON_REWARD / 2;
-    }
-
-    // 中炮
-    const std::vector<int> centerCannonYList = {2, 4, 5, 6};
-    for (auto y : centerCannonYList)
-    {
-        pieceWeights[R_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
-        pieceWeights[B_CANNON][4][y] += CENTER_CANNON_REWARD / (y - 1);
-    }
 
     // 调整不受威胁方少掉的士象分
     this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
@@ -855,7 +836,7 @@ void Board::initEvaluate()
     }
 }
 
-void Board::vlOpenCalculator(int &vlOpen) const
+void Board::calculateVlOpen(int &vlOpen) const
 {
     // 首先判断局势处于开中局还是残局阶段, 方法是计算各种棋子的数量, 按照车=6、马炮=3、其它=1相加
     int rookLiveSum = 0;
