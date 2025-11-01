@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "nnue.hpp"
 #include "base.hpp"
 
@@ -7,20 +7,6 @@ using WEIGHT_MAP = std::array<std::array<int, 10>, 9>;
 std::map<PIECEID, WEIGHT_MAP> pieceWeights;
 int vlAdvanced = 0;
 int vlPawn = 0;
-
-const int MAX_SEARCH_DISTANCE = 32;
-const int DELTA_PRUNING_MARGIN = 300;
-const int FUTILITY_PRUNING_MARGIN = 400;
-
-const int INITIAL_BOTTOM_CANNON_REWARD = 40;
-const int TERMINAL_BOTTOM_CANNON_REWARD = 20;
-
-const int INITIAL_CENTER_CANNON_REWARD = 50;
-const int TERMINAL_CENTER_CANNON_REWARD = 20;
-
-// OPEN,END 开局, 残局
-// ATTACK, DEFEND 进攻, 防守
-// SAFE,DANGER 安全, 受到威胁的
 
 WEIGHT_MAP OPEN_ATTACK_KING_PAWN_WEIGHT = {
     {
@@ -179,18 +165,15 @@ WEIGHT_MAP END_CANNON_WEIGHT = {
     }};
 
 // 越接近残局, 子力会越来越少, 因此可以按照给车马炮等棋子的加权分判断对局进程
-
 const int ROOK_MIDGAME_VALUE = 6;
 const int KNIGHT_CANNON_MIDGAME_VALUE = 3;
 const int OTHER_MIDGAME_VALUE = 1;
 const int TOTAL_MIDGAME_VALUE = ROOK_MIDGAME_VALUE * 4 + KNIGHT_CANNON_MIDGAME_VALUE * 8 + OTHER_MIDGAME_VALUE * 18;
 
 // 先行权的基础分值, 可以按照出子效率的紧迫程度去调整（开局更紧迫）
-
-const int TOTAL_ADVANCED_VALUE = 3;
+const int TOTAL_ADVANCED_VALUE = 10;
 
 // 对方越偏向进攻, 过河进入我方地界的棋子就越多, 因此可以按照敌方过河子数量调整攻防策略
-
 const int TOTAL_ATTACK_VALUE = 8;
 const int ADVISOR_BISHOP_ATTACKLESS_VALUE = 60 * 4;
 

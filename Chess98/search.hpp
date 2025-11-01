@@ -86,6 +86,7 @@ Trick Search::mateDistancePruning(int alpha, int& beta) const
 
 Trick Search::futilityPruning(int alpha, int beta, int depth) const
 {
+    const int FUTILITY_PRUNING_MARGIN = 400;
     if (depth == 1)
     {
         int vl = board.evaluate();
