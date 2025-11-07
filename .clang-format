@@ -1,0 +1,45 @@
+# 基于 Visual Studio 代码风格
+BasedOnStyle: Microsoft
+
+# 语言设置（注释掉以兼容 C/C++，或明确设置）
+Language: Cpp
+
+# 注释要求：确保 "//" 后始终有一个空格
+SpacesInLineCommentPrefix:
+  Minimum: 1   # 注释前缀后至少保留 1 个空格
+  Maximum: 1   # 注释前缀后最多保留 1 个空格
+
+# 基本缩进设置
+AccessModifierOffset: -4       # 访问修饰符偏移量为 0 个空格
+IndentWidth: 4                 # 缩进宽度为 4 个空格
+TabWidth: 4                    # Tab 宽度为 4 个空格
+UseTab: Never                  # 不使用 Tab，仅用空格缩进
+ColumnLimit: 160               # 每行最大字符数（Visual Studio 常用值）
+
+# 指针和引用对齐（Visual Studio 风格通常靠左）
+PointerAlignment: Left
+
+# 大括号换行风格（Visual Studio 风格：类/函数后换行，控制语句后不换行）
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true             # 类定义后大括号换行
+  AfterFunction: true          # 函数定义后大括号换行
+  AfterControlStatement: true  # if/for 等控制语句后不换行
+  AfterStruct: true           # 结构体定义后不换行
+  AfterEnum: true             # 枚举定义后不换行
+
+# 函数和语句的紧凑性
+AllowShortFunctionsOnASingleLine: Inline  # 短函数可放在一行（如类内函数）
+AllowShortIfStatementsOnASingleLine: true  # if 语句不强制单行
+AllowShortLoopsOnASingleLine: true       # 循环不强制单行
+BinPackArguments: true         # 函数参数过多时自动打包换行
+
+# 注释格式化相关
+ReflowComments: true           # 允许重新排版注释
+AlignTrailingComments: true    # 对齐连续行尾的注释
+SpacesBeforeTrailingComments: 1  # 尾随注释前的空格数
+
+# 其他常见设置
+SpaceBeforeParens: ControlStatements  # 仅控制语句（if/for）的括号前加空格
+SpaceInEmptyParentheses: false        # 空括号内不加空格
+SortIncludes: false                   # 不自动排序 #include 语句

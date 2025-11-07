@@ -14,14 +14,13 @@ const int GENFILES_RANDOM_MOVE_COUNT = 5;                // 每次随机走的�
 const int MAX_MOVES = 120;                               // 最多走多少步就认定为死循环局面, 直接判和
 
 // 声明
-Move getRandomMoveFromVector(const MOVES &vec);
+Move getRandomMoveFromVector(const MOVES& vec);
 
 // 工具函数
-Move getRandomMoveFromVector(const MOVES &vec)
+Move getRandomMoveFromVector(const MOVES& vec)
 {
     std::mt19937_64 engine(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-    if (vec.empty())
-        return {};
+    if (vec.empty()) return {};
     std::uniform_int_distribution<size_t> dist(0, vec.size() - 1);
     return vec[dist(engine)];
 }
@@ -119,7 +118,7 @@ Result SearchGenfiles::searchMain(int maxDepth, int maxTime)
 
     // nnue start
     std::string historyStr = "";
-    for (const Move &move : board.historyMoves)
+    for (const Move& move : board.historyMoves)
     {
         historyStr += std::to_string(move.id) + ",";
     }
@@ -145,7 +144,7 @@ Result SearchGenfiles::searchMain(int maxDepth, int maxTime)
 
         // nnue 记录根节点结果
         str += "{\"depth\":" + std::to_string(depth) + ",\"data\":[";
-        for (const Result &result : this->rootresults)
+        for (const Result& result : this->rootresults)
         {
             str += "{";
             str += "\"moveid\":" + std::to_string(result.move.id);
@@ -186,7 +185,7 @@ void genfiles()
     int maxDepth = GENFILES_DEPTH;
 
     const std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-    SearchGenfiles *s = new SearchGenfiles(fenToPieceidmap(fenCode), RED);
+    SearchGenfiles* s = new SearchGenfiles(fenToPieceidmap(fenCode), RED);
     int count = 0;
 
     // 前几步随机

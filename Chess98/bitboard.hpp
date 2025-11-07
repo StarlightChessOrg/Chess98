@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "base.hpp"
 
 class Bitboard;
@@ -44,8 +44,7 @@ Bitboard::Bitboard(PIECEID_MAP pieceidMap)
     {
         for (int y = 0; y < 10; y++)
         {
-            if (pieceidMap[x][y] != EMPTY_PIECEID)
-                this->setBit(x, y);
+            if (pieceidMap[x][y] != EMPTY_PIECEID) this->setBit(x, y);
         }
     }
     // 初始化车、炮的着法缓存

@@ -79,25 +79,12 @@ server.on('error', () => { })\n\
 server.listen(9494)\n\
 ";
 
-BOARD_CODE generateCode(Board &board)
+BOARD_CODE generateCode(Board& board)
 {
-    const std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
-        {R_KING, "RK"},
-        {R_GUARD, "RG"},
-        {R_BISHOP, "RB"},
-        {R_KNIGHT, "RN"},
-        {R_ROOK, "RR"},
-        {R_CANNON, "RC"},
-        {R_PAWN, "RP"},
-        {B_KING, "BK"},
-        {B_GUARD, "BG"},
-        {B_BISHOP, "BB"},
-        {B_KNIGHT, "BN"},
-        {B_ROOK, "BR"},
-        {B_CANNON, "BC"},
-        {B_PAWN, "BP"},
-        {EMPTY_PIECEID, "__"},
-        {OVERFLOW_PIECEID, "  "}};
+    const std::map<PIECEID, std::string> PIECE_NAME_PAIRS{{R_KING, "RK"},   {R_GUARD, "RG"},  {R_BISHOP, "RB"},      {R_KNIGHT, "RN"},
+                                                          {R_ROOK, "RR"},   {R_CANNON, "RC"}, {R_PAWN, "RP"},        {B_KING, "BK"},
+                                                          {B_GUARD, "BG"},  {B_BISHOP, "BB"}, {B_KNIGHT, "BN"},      {B_ROOK, "BR"},
+                                                          {B_CANNON, "BC"}, {B_PAWN, "BP"},   {EMPTY_PIECEID, "__"}, {OVERFLOW_PIECEID, "  "}};
     BOARD_CODE code = "";
     for (int i = 0; i < 9; i++)
     {
@@ -113,23 +100,10 @@ BOARD_CODE generateCode(Board &board)
 
 PIECEID_MAP decode(BOARD_CODE code)
 {
-    const std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
-        {"RK", R_KING},
-        {"RG", R_GUARD},
-        {"RB", R_BISHOP},
-        {"RN", R_KNIGHT},
-        {"RR", R_ROOK},
-        {"RC", R_CANNON},
-        {"RP", R_PAWN},
-        {"BK", B_KING},
-        {"BG", B_GUARD},
-        {"BB", B_BISHOP},
-        {"BN", B_KNIGHT},
-        {"BR", B_ROOK},
-        {"BC", B_CANNON},
-        {"BP", B_PAWN},
-        {"__", EMPTY_PIECEID},
-        {"  ", OVERFLOW_PIECEID}};
+    const std::map<std::string, PIECEID> NAME_PIECE_PAIRS{{"RK", R_KING},   {"RG", R_GUARD},  {"RB", R_BISHOP},      {"RN", R_KNIGHT},
+                                                          {"RR", R_ROOK},   {"RC", R_CANNON}, {"RP", R_PAWN},        {"BK", B_KING},
+                                                          {"BG", B_GUARD},  {"BB", B_BISHOP}, {"BN", B_KNIGHT},      {"BR", B_ROOK},
+                                                          {"BC", B_CANNON}, {"BP", B_PAWN},   {"__", EMPTY_PIECEID}, {"  ", OVERFLOW_PIECEID}};
     PIECEID_MAP result{};
     for (int i = 0; i < 90; i++)
     {
@@ -143,11 +117,10 @@ PIECEID_MAP decode(BOARD_CODE code)
     return result;
 }
 
-void setBoardCode(Board &board)
+void setBoardCode(Board& board)
 {
     const BOARD_CODE code = generateCode(board);
-    const std::string historyMovesBack =
-        board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
+    const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
     const std::string jsPutCode = "\
         const http = require('http')\n\
         const options = {\n\
@@ -181,7 +154,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     // variables
     int count = 0;
     Search s = Search(pieceidMap, team);
-    Board &board = s.board;
+    Board& board = s.board;
 
     // 界面
     writeFile("./_server_.js", SERVER_CODE);
@@ -199,8 +172,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
             board.doMove(node.move);
-            if (board.inCheck(board.team))
-                board.historyMoves.back().isCheckingMove = true;
+            if (board.inCheck(board.team)) board.historyMoves.back().isCheckingMove = true;
 
             setBoardCode(board);
             readFile("./_move_.txt", moveFileContent);
@@ -236,7 +208,7 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
                     Move move{x1, y1, x2, y2};
                     board.doMove(move);
                 }
-                catch (std::exception &e)
+                catch (std::exception& e)
                 {
                     // 避免转换失败导致崩溃
                     std::cerr << "Invalid move: " << moveFileContent << std::endl;

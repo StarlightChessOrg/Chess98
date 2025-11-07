@@ -48,7 +48,7 @@ public:
     PIECES getPiecesByTeam(TEAM team) const;
     Piece getPieceReg(PIECEID pieceid) const;
     PIECES getPiecesReg(PIECEID pieceid) const;
-    bool isRepeated() const; 
+    bool isRepeated() const;
     bool hasCrossedRiver(int x, int y) const;
     bool isInPalace(int x, int y) const;
     bool inCheck(TEAM judgeTeam) const;
@@ -60,8 +60,8 @@ public:
     void doMoveSimple(Move move);
     void undoMoveSimple();
     void initEvaluate();
-    void calculateVlOpen(int &vlOpen) const;
-    void vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const;
+    void calculateVlOpen(int& vlOpen) const;
+    void vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const;
     void initHashInfo();
     bool isValidMoveInSituation(Move move);
 };
@@ -79,10 +79,10 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
     {
         for (int y = 0; y < 10; y++)
         {
-            PIECEID &pieceid = pieceidMap[x][y];
+            PIECEID& pieceid = pieceidMap[x][y];
             if (pieceid != 0)
             {
-                const int &size = int(this->pieces.size());
+                const int& size = int(this->pieces.size());
                 Piece piece{pieceidMap[x][y], x, y, size};
                 PIECE_INDEX index = size;
 
@@ -194,7 +194,7 @@ PIECES Board::getPiecesReg(PIECEID pieceid) const
     PIECES result{};
     for (PIECE_INDEX pieceindex : this->pieceRegistry.at(pieceid))
     {
-        const Piece &piece = this->pieceIndex(pieceindex);
+        const Piece& piece = this->pieceIndex(pieceindex);
         if (piece.isLive)
         {
             result.emplace_back(piece);
@@ -217,11 +217,8 @@ bool Board::isRepeated() const
         // 判断是否出现重复局面, 没有则直接false
         // 试想如下重复局面：（格式：plyX: x1y1x2y2）
         // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
-        const bool isRepeat = (ply1 == ply5 &&
-            ply1.startpos == ply3.endpos &&
-            ply1.endpos == ply3.startpos &&
-            ply2.startpos == ply4.endpos &&
-            ply2.endpos == ply4.startpos);
+        const bool isRepeat =
+            (ply1 == ply5 && ply1.startpos == ply3.endpos && ply1.endpos == ply3.startpos && ply2.startpos == ply4.endpos && ply2.endpos == ply4.startpos);
         if (!isRepeat)
         {
             return false;
@@ -238,9 +235,7 @@ bool Board::isRepeated() const
         // 长捉情况比较特殊
         // 只有车、马、炮能作为长捉的发起者
         // 发起者不断捉同一个子, 判负
-        if (abs(ply1.attacker.pieceid) == R_ROOK ||
-            abs(ply1.attacker.pieceid) == R_KNIGHT ||
-            abs(ply1.attacker.pieceid) == R_CANNON)
+        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT || abs(ply1.attacker.pieceid) == R_CANNON)
         {
             const Piece& attacker = ply1.attacker;
             const Piece& captured = ply2.attacker;
@@ -295,15 +290,10 @@ bool Board::isRepeated() const
             // 马
             else if (abs(attacker.pieceid) == R_KNIGHT)
             {
-                if (
-                    (attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) ||
-                    (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
-                    (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) ||
-                    (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
-                    (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) ||
-                    (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
-                    (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) ||
-                    (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y))
+                if ((attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) || (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
+                    (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) || (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
+                    (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) || (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
+                    (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) || (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y))
                 {
                     return true;
                 }
@@ -641,12 +631,12 @@ bool Board::hasProtector(int x, int y) const
 
 void Board::doMove(Move move)
 {
-    const int &x1 = move.x1;
-    const int &x2 = move.x2;
-    const int &y1 = move.y1;
-    const int &y2 = move.y2;
-    const Piece &attacker = this->piecePosition(x1, y1);
-    const Piece &captured = this->piecePosition(x2, y2);
+    const int& x1 = move.x1;
+    const int& x2 = move.x2;
+    const int& y1 = move.y1;
+    const int& y2 = move.y2;
+    const Piece& attacker = this->piecePosition(x1, y1);
+    const Piece& captured = this->piecePosition(x2, y2);
 
     // 更新棋盘数据
     this->team = -this->team;
@@ -705,13 +695,13 @@ void Board::doMove(Move move)
 
 void Board::undoMove()
 {
-    const Move &back = this->historyMoves.back();
-    const int &x1 = back.x1;
-    const int &x2 = back.x2;
-    const int &y1 = back.y1;
-    const int &y2 = back.y2;
-    const Piece &attacker = this->historyMoves.back().attacker;
-    const Piece &captured = this->historyMoves.back().captured;
+    const Move& back = this->historyMoves.back();
+    const int& x1 = back.x1;
+    const int& x2 = back.x2;
+    const int& y1 = back.y1;
+    const int& y2 = back.y2;
+    const Piece& attacker = this->historyMoves.back().attacker;
+    const Piece& captured = this->historyMoves.back().captured;
 
     // 更新棋盘数据
     this->distance -= 1;
@@ -760,8 +750,8 @@ void Board::doMoveSimple(Move move)
 {
     const int &x1 = move.x1, &x2 = move.x2;
     const int &y1 = move.y1, &y2 = move.y2;
-    const Piece &attacker = this->piecePosition(x1, y1);
-    const Piece &captured = this->piecePosition(x2, y2);
+    const Piece& attacker = this->piecePosition(x1, y1);
+    const Piece& captured = this->piecePosition(x2, y2);
     this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
     this->pieceidMap[x1][y1] = 0;
     this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
@@ -781,11 +771,11 @@ void Board::doMoveSimple(Move move)
 
 void Board::undoMoveSimple()
 {
-    const Move &back = this->historyMoves.back();
+    const Move& back = this->historyMoves.back();
     const int &x1 = back.x1, &x2 = back.x2;
     const int &y1 = back.y1, &y2 = back.y2;
-    const Piece &attacker = back.attacker;
-    const Piece &captured = back.captured;
+    const Piece& attacker = back.attacker;
+    const Piece& captured = back.captured;
     this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
     this->pieceidMap[x2][y2] = captured.pieceid;
     this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
@@ -836,13 +826,13 @@ void Board::initEvaluate()
     }
 }
 
-void Board::calculateVlOpen(int &vlOpen) const
+void Board::calculateVlOpen(int& vlOpen) const
 {
     // 首先判断局势处于开中局还是残局阶段, 方法是计算各种棋子的数量, 按照车=6、马炮=3、其它=1相加
     int rookLiveSum = 0;
     int knightCannonLiveSum = 0;
     int otherLiveSum = 0;
-    for (const Piece &piece : this->getAllLivePieces())
+    for (const Piece& piece : this->getAllLivePieces())
     {
         PIECEID pid = std::abs(piece.pieceid);
         if (pid == R_ROOK)
@@ -864,7 +854,7 @@ void Board::calculateVlOpen(int &vlOpen) const
     vlOpen /= TOTAL_MIDGAME_VALUE;
 }
 
-void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const
+void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const
 {
     // 然后判断各方是否处于进攻状态, 方法是计算各种过河棋子的数量, 按照车马2炮兵1相加
     int redAttackLiveRookSum = 0;
@@ -875,7 +865,7 @@ void Board::vlAttackCalculator(int &vlRedAttack, int &vlBlackAttack) const
     int blackAttackLiveCannonSum = 0;
     int redAttackLivePawnSum = 0;
     int blackAttackLivePawnSum = 0;
-    for (const Piece &piece : this->getAllLivePieces())
+    for (const Piece& piece : this->getAllLivePieces())
     {
         PIECEID pid = std::abs(piece.pieceid);
         if (piece.team == RED)
@@ -967,7 +957,7 @@ void Board::initHashInfo()
     {
         for (int y = 0; y < 10; y++)
         {
-            const PIECEID &pid = this->pieceidMap[x][y];
+            const PIECEID& pid = this->pieceidMap[x][y];
             if (pid != EMPTY_PIECEID)
             {
                 this->hashKey ^= HASHKEYS[pid][x][y];
@@ -992,8 +982,7 @@ bool Board::isValidMoveInSituation(Move move)
     if (move.attacker.team != this->team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
         return false;
     PIECEID captured = this->pieceidOn(move.x2, move.y2);
-    if (captured != 0 && this->teamOn(move.x2, move.y2) ==
-        this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
+    if (captured != 0 && this->teamOn(move.x2, move.y2) == this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
         return false;
 
     // 分类
@@ -1004,13 +993,11 @@ bool Board::isValidMoveInSituation(Move move)
         // 生成车的着法范围, 看是否有障碍物
         UINT32 bitlineX = this->getBitLineX(move.x1);
         REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, move.y1, 9);
-        if (move.y2 < regionX[0] || move.y2 > regionX[1])
-            return false;
+        if (move.y2 < regionX[0] || move.y2 > regionX[1]) return false;
         // 横向
         UINT32 bitlineY = this->getBitLineY(move.y1);
         REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, move.x1, 8);
-        if (move.x2 < regionY[0] || move.x2 > regionY[1])
-            return false;
+        if (move.x2 < regionY[0] || move.x2 > regionY[1]) return false;
     }
     else if (abs(attacker) == R_KNIGHT)
     {
@@ -1018,23 +1005,20 @@ bool Board::isValidMoveInSituation(Move move)
         {
             if (move.y1 - 2 == move.y2 && this->pieceidOn(move.x1, move.y1 - 1) != 0) // 若有障碍物则不合理
                 return false;
-            if (move.y1 + 2 == move.y2 && this->pieceidOn(move.x1, move.y1 + 1) != 0)
-                return false;
+            if (move.y1 + 2 == move.y2 && this->pieceidOn(move.x1, move.y1 + 1) != 0) return false;
         }
         else
         {
             if (move.x1 - 2 == move.x2 && this->pieceidOn(move.x1 - 1, move.y1) != 0) // 若有障碍物则不合理
                 return false;
-            if (move.x1 + 2 == move.x2 && this->pieceidOn(move.x1 + 1, move.y1) != 0)
-                return false;
+            if (move.x1 + 2 == move.x2 && this->pieceidOn(move.x1 + 1, move.y1) != 0) return false;
         }
         return true;
     }
     else if (abs(attacker) == R_BISHOP)
     {
         // 象走法, 不能有障碍物
-        if (this->pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0)
-            return false;
+        if (this->pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0) return false;
     }
     else if (abs(attacker) == R_CANNON)
     {
@@ -1043,13 +1027,11 @@ bool Board::isValidMoveInSituation(Move move)
         // 生成炮的着法范围
         UINT32 bitlineX = this->getBitLineX(move.x1);
         REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, move.y1, 9);
-        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
-            return false;
+        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3]) return false;
         // 横向
         UINT32 bitlineY = this->getBitLineY(move.y1);
         REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, move.x1, 8);
-        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
-            return false;
+        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3]) return false;
     }
 
     this->doMoveSimple(move);

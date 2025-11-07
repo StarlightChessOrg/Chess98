@@ -26,7 +26,7 @@ public:
     MODEL model;
 
 public:
-    float evaluate(const PIECEID_MAP &pieceidMap, TEAM team)
+    float evaluate(const PIECEID_MAP& pieceidMap, TEAM team)
     {
         try
         {
@@ -59,7 +59,7 @@ public:
 
 protected:
     // 获取输入数据，一个展平的棋盘向量
-    TENSOR nnueInput(const PIECEID_MAP &pieceidMap, TEAM team)
+    TENSOR nnueInput(const PIECEID_MAP& pieceidMap, TEAM team)
     {
         // 1. 创建 7×9×10 的三维张量并填充数据
         TENSOR input = torch::zeros({7, 9, 10}, torch::kFloat32);

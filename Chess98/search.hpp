@@ -5,10 +5,7 @@
 class Search
 {
 public:
-    Search(PIECEID_MAP pieceidMap, TEAM team)
-    {
-        this->board = Board(pieceidMap, team);
-    }
+    Search(PIECEID_MAP pieceidMap, TEAM team) { this->board = Board(pieceidMap, team); }
 
     void reset()
     {
@@ -60,7 +57,7 @@ Trick Search::nullAndDeltaPruning(int& alpha, int& beta, int& vlBest) const
     int vl = board.evaluate();
     if (vl >= beta)
     {
-        return Trick{ vl };
+        return Trick{vl};
     }
     vlBest = vl;
     if (vl > alpha)
@@ -78,7 +75,7 @@ Trick Search::mateDistancePruning(int alpha, int& beta) const
         beta = vlDistanceMate;
         if (alpha >= vlDistanceMate)
         {
-            return Trick{ vlDistanceMate };
+            return Trick{vlDistanceMate};
         }
     }
     return {};
@@ -92,7 +89,7 @@ Trick Search::futilityPruning(int alpha, int beta, int depth) const
         int vl = board.evaluate();
         if (vl <= beta - FUTILITY_PRUNING_MARGIN || vl >= beta + FUTILITY_PRUNING_MARGIN)
         {
-            return Trick{ vl };
+            return Trick{vl};
         }
     }
     return {};
@@ -111,11 +108,11 @@ Trick Search::multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int dept
         const int lowerBound = int((-t * sigma + alpha - b) / a);
         if (this->searchCut(depth - 2, upperBound) >= upperBound)
         {
-            return { beta };
+            return {beta};
         }
         else if (searchType == PV && this->searchCut(depth - 2, lowerBound + 1) <= lowerBound)
         {
-            return { alpha };
+            return {alpha};
         }
     }
 
@@ -178,7 +175,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     // 防止没有可行着法
     if (bestNode.move.id == -1)
     {
-        const Piece &king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
+        const Piece& king = board.getPieceReg(board.team == RED ? R_KING : B_KING);
         bestNode.move = MovesGen::generateMovesOn(board, king.x, king.y)[0];
     }
 
@@ -214,35 +211,31 @@ Result Search::searchOpenBook()
         bool isEdit = false;
         std::string filename;
 
-        bool open(const char *szFileName, bool bEdit = false)
+        bool open(const char* szFileName, bool bEdit = false)
         {
             isEdit = bEdit;
             filename = szFileName;
             std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
-            if (!ifs.is_open())
-                return false;
+            if (!ifs.is_open()) return false;
             nLen = int(ifs.tellg() / sizeof(Book));
             return true;
         }
 
-        void read(Book &bk, int nMid) const
+        void read(Book& bk, int nMid) const
         {
             std::ifstream ifs(filename, std::ios::binary);
-            if (!ifs.is_open())
-                return;
+            if (!ifs.is_open()) return;
             ifs.seekg(nMid * sizeof(Book), std::ios::beg);
-            ifs.read(reinterpret_cast<char *>(&bk), sizeof(Book));
+            ifs.read(reinterpret_cast<char*>(&bk), sizeof(Book));
         }
 
-        void write(const Book &bk, int nMid) const
+        void write(const Book& bk, int nMid) const
         {
-            if (!isEdit)
-                return;
+            if (!isEdit) return;
             std::fstream fstr(filename, std::ios::in | std::ios::out | std::ios::binary);
-            if (!fstr.is_open())
-                return;
+            if (!fstr.is_open()) return;
             fstr.seekp(nMid * sizeof(Book), std::ios::beg);
-            fstr.write(reinterpret_cast<const char *>(&bk), sizeof(Book));
+            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(Book));
         }
     };
 
@@ -354,20 +347,19 @@ Result Search::searchOpenBook()
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
-              { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b) { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
     int vlSum = 0;
-    for (Move &move : bookMoves)
+    for (Move& move : bookMoves)
     {
         vlSum += move.val;
     }
     int vlRandom = std::rand() % vlSum;
 
     Move bookMove;
-    for (Move &move : bookMoves)
+    for (Move& move : bookMoves)
     {
         vlRandom -= move.val;
         if (vlRandom < 0)
@@ -389,7 +381,7 @@ Result Search::searchRoot(int depth)
     int vl = -INF;
     int vlBest = -INF;
 
-    for (const Move &move : rootMoves)
+    for (const Move& move : rootMoves)
     {
         board.doMove(move);
         if (vlBest == -INF)
@@ -505,7 +497,7 @@ int Search::searchPV(int depth, int alpha, int beta)
         int vl = -INF;
         MOVES killerAvailableMoves = this->killer->get(board);
 
-        for (const Move &move : killerAvailableMoves)
+        for (const Move& move : killerAvailableMoves)
         {
             board.doMove(move);
 
@@ -556,7 +548,7 @@ int Search::searchPV(int depth, int alpha, int beta)
 
         this->history->sort(availableMoves);
 
-        for (const Move &move : availableMoves)
+        for (const Move& move : availableMoves)
         {
             board.doMove(move);
 
@@ -692,7 +684,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     {
         int vl = -INF;
         MOVES killerAvailableMoves = this->killer->get(board);
-        for (const Move &move : killerAvailableMoves)
+        for (const Move& move : killerAvailableMoves)
         {
             board.doMove(move);
 
@@ -726,7 +718,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
         this->history->sort(availableMoves);
 
-        for (const Move &move : availableMoves)
+        for (const Move& move : availableMoves)
         {
             board.doMove(move);
 
@@ -813,7 +805,7 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     // 搜索
     MOVES availableMoves = mChecking ? MovesGen::getMoves(board) : MovesGen::getCaptureMoves(board);
     this->history->sort(availableMoves);
-    for (const Move &move : availableMoves)
+    for (const Move& move : availableMoves)
     {
         board.doMove(move);
 
