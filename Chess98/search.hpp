@@ -83,7 +83,7 @@ Trick Search::mateDistancePruning(int alpha, int& beta) const
 
 Trick Search::futilityPruning(int alpha, int beta, int depth) const
 {
-    const int FUTILITY_PRUNING_MARGIN = 400;
+    const int FUTILITY_PRUNING_MARGIN = 200;
     if (depth == 1)
     {
         int vl = board.evaluate();
@@ -449,18 +449,11 @@ int Search::searchPV(int depth, int alpha, int beta)
 
     if (!mChecking)
     {
-        // null and delta pruning
-        int vlBest = -INF;
-        Trick trickResult = this->nullAndDeltaPruning(alpha, beta, vlBest);
-        if (trickResult.success)
-        {
-            return trickResult.data;
-        }
         // futility pruning
-        trickResult = this->futilityPruning(alpha, beta, depth);
-        if (trickResult.success)
+        Trick futilityResult = this->futilityPruning(alpha, beta, depth);
+        if (futilityResult.success)
         {
-            return trickResult.data;
+            return futilityResult.data;
         }
     }
 
