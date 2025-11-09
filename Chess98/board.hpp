@@ -217,8 +217,8 @@ bool Board::isRepeated() const
         // 判断是否出现重复局面, 没有则直接false
         // 试想如下重复局面：（格式：plyX: x1y1x2y2）
         // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
-        const bool isRepeat =
-            (ply1 == ply5 && ply1.startpos == ply3.endpos && ply1.endpos == ply3.startpos && ply2.startpos == ply4.endpos && ply2.endpos == ply4.startpos);
+        const bool isRepeat = (ply1 == ply5 && ply1.startpos == ply3.endpos && ply1.endpos == ply3.startpos &&
+                               ply2.startpos == ply4.endpos && ply2.endpos == ply4.startpos);
         if (!isRepeat)
         {
             return false;
@@ -235,7 +235,8 @@ bool Board::isRepeated() const
         // 长捉情况比较特殊
         // 只有车、马、炮能作为长捉的发起者
         // 发起者不断捉同一个子, 判负
-        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT || abs(ply1.attacker.pieceid) == R_CANNON)
+        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT ||
+            abs(ply1.attacker.pieceid) == R_CANNON)
         {
             const Piece& attacker = ply1.attacker;
             const Piece& captured = ply2.attacker;
@@ -290,10 +291,14 @@ bool Board::isRepeated() const
             // 马
             else if (abs(attacker.pieceid) == R_KNIGHT)
             {
-                if ((attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) || (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
-                    (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) || (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
-                    (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) || (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
-                    (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) || (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y))
+                if ((attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) ||
+                    (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
+                    (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) ||
+                    (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
+                    (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) ||
+                    (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
+                    (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) ||
+                    (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y))
                 {
                     return true;
                 }
@@ -982,7 +987,8 @@ bool Board::isValidMoveInSituation(Move move)
     if (move.attacker.team != this->team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
         return false;
     PIECEID captured = this->pieceidOn(move.x2, move.y2);
-    if (captured != 0 && this->teamOn(move.x2, move.y2) == this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
+    if (captured != 0 && this->teamOn(move.x2, move.y2) ==
+                             this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
         return false;
 
     // 分类
@@ -1027,11 +1033,13 @@ bool Board::isValidMoveInSituation(Move move)
         // 生成炮的着法范围
         UINT32 bitlineX = this->getBitLineX(move.x1);
         REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, move.y1, 9);
-        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3]) return false;
+        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
+            return false;
         // 横向
         UINT32 bitlineY = this->getBitLineY(move.y1);
         REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, move.x1, 8);
-        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3]) return false;
+        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
+            return false;
     }
 
     this->doMoveSimple(move);

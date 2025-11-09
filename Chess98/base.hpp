@@ -78,7 +78,8 @@ const SEARCH_TYPE PV = 1;
 const SEARCH_TYPE CUT = 2;
 const SEARCH_TYPE QUIESC = 3;
 const std::vector<PIECEID> ALL_PIECEIDS = {
-    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN, B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
+    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
+    B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
 };
 void wait(int ms);
 void command(std::string str);
@@ -126,7 +127,8 @@ class Move
 {
 public:
     Move() = default;
-    Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL) : x1(x1), y1(y1), x2(x2), y2(y2), val(val), moveType(moveType)
+    Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL)
+        : x1(x1), y1(y1), x2(x2), y2(y2), val(val), moveType(moveType)
     {
         this->id = x1 * 1000 + y1 * 100 + x2 * 10 + y2;
         this->startpos = x1 * 10 + y1;
@@ -233,9 +235,10 @@ PIECEID_MAP fenToPieceidmap(std::string fenCode)
     PIECEID_MAP pieceidMap = PIECEID_MAP{};
     int colNum = 9;
     int rowNum = 0;
-    std::map<char, PIECEID> pairs{{'R', R_ROOK},   {'N', R_KNIGHT}, {'H', R_KNIGHT}, {'B', R_BISHOP}, {'E', R_BISHOP}, {'G', R_GUARD},  {'A', R_GUARD},
-                                  {'K', R_KING},   {'C', R_CANNON}, {'P', R_PAWN},   {'r', B_ROOK},   {'n', B_KNIGHT}, {'h', B_KNIGHT}, {'b', B_BISHOP},
-                                  {'e', B_BISHOP}, {'g', B_GUARD},  {'a', B_GUARD},  {'k', B_KING},   {'c', B_CANNON}, {'p', B_PAWN}};
+    std::map<char, PIECEID> pairs{{'R', R_ROOK},  {'N', R_KNIGHT}, {'H', R_KNIGHT}, {'B', R_BISHOP}, {'E', R_BISHOP},
+                                  {'G', R_GUARD}, {'A', R_GUARD},  {'K', R_KING},   {'C', R_CANNON}, {'P', R_PAWN},
+                                  {'r', B_ROOK},  {'n', B_KNIGHT}, {'h', B_KNIGHT}, {'b', B_BISHOP}, {'e', B_BISHOP},
+                                  {'g', B_GUARD}, {'a', B_GUARD},  {'k', B_KING},   {'c', B_CANNON}, {'p', B_PAWN}};
     for (int i = 0; i < fenCode.size(); i++)
     {
         if (fenCode[i] >= '1' && fenCode[i] <= '9')
@@ -267,8 +270,9 @@ std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
 {
     std::string result = "";
     int spaceCount = 0;
-    std::map<PIECEID, char> pairs{{R_KING, 'K'}, {R_GUARD, 'A'}, {R_BISHOP, 'B'}, {R_KNIGHT, 'N'}, {R_ROOK, 'R'}, {R_CANNON, 'C'}, {R_PAWN, 'P'},
-                                  {B_KING, 'k'}, {B_GUARD, 'a'}, {B_BISHOP, 'b'}, {B_KNIGHT, 'n'}, {B_ROOK, 'r'}, {B_CANNON, 'c'}, {B_PAWN, 'p'}};
+    std::map<PIECEID, char> pairs{{R_KING, 'K'},   {R_GUARD, 'A'}, {R_BISHOP, 'B'}, {R_KNIGHT, 'N'}, {R_ROOK, 'R'},
+                                  {R_CANNON, 'C'}, {R_PAWN, 'P'},  {B_KING, 'k'},   {B_GUARD, 'a'},  {B_BISHOP, 'b'},
+                                  {B_KNIGHT, 'n'}, {B_ROOK, 'r'},  {B_CANNON, 'c'}, {B_PAWN, 'p'}};
     for (int x = 9; x >= 0; x--)
     {
         for (int y = 0; y < 9; y++)

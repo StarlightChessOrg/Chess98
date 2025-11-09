@@ -14,7 +14,7 @@ AccessModifierOffset: -4       # 访问修饰符偏移量为 0 个空格
 IndentWidth: 4                 # 缩进宽度为 4 个空格
 TabWidth: 4                    # Tab 宽度为 4 个空格
 UseTab: Never                  # 不使用 Tab，仅用空格缩进
-ColumnLimit: 160               # 每行最大字符数（Visual Studio 常用值）
+ColumnLimit: 120               # 每行最大字符数（Visual Studio 常用值）
 
 # 指针和引用对齐（Visual Studio 风格通常靠左）
 PointerAlignment: Left
