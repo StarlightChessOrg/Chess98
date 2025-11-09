@@ -43,8 +43,3 @@ SpacesBeforeTrailingComments: 1  # 尾随注释前的空格数
 SpaceBeforeParens: ControlStatements  # 仅控制语句（if/for）的括号前加空格
 SpaceInEmptyParentheses: false        # 空括号内不加空格
 SortIncludes: false                   # 不自动排序 #include 语句
-AllowShortFunctionsOnASingleLine: Empty
-AllowShortBlocksOnASingleLine: false
-AllowShortCaseLabelsOnASingleLine: false
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
