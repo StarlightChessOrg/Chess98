@@ -2,6 +2,7 @@
 #include "evaluate.hpp"
 #include "hash.hpp"
 #include "bitboard.hpp"
+#include "nnue.hpp"
 
 class Board
 {

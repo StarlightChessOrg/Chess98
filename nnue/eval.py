@@ -80,7 +80,7 @@ if __name__ == "__main__":
     # 加载和评估原始模型
     print("--- 正在加载和评估原始模型 ---")
     original_model = NNUE(input_size=7 * 9 * 10)
-    original_model.load_state_dict(torch.load("models/epoch_1.pth", map_location='cpu', weights_only=True))
+    original_model.load_state_dict(torch.load("models/epoch_2025_9_20.pth", map_location='cpu', weights_only=True))
     original_model.to('cpu')
     original_model.eval()
     evaluate_model(original_model, fens, 'cpu')
