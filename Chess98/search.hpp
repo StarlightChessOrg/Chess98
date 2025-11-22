@@ -5,11 +5,10 @@
 class Search
 {
 public:
-    Search(PIECEID_MAP pieceidMap, TEAM team) { this->board = Board(pieceidMap, team); }
-
+    Search(PIECEID_MAP pieceidMap, TEAM team) : board(Board(pieceidMap, team)) {}
     void reset()
     {
-        this->rootMoves = MOVES{};
+        this->rootMoves = {};
         board.distance = 0;
         board.initEvaluate();
         this->history->reset();
@@ -37,20 +36,11 @@ protected:
     const int Q_DEPTH_CHECKING = 8;
 
 protected:
-    void validateCheckingMove(bool mChecking);
     Trick nullAndDeltaPruning(int& alpha, int& beta, int& vlBest) const;
     Trick mateDistancePruning(int alpha, int& beta) const;
     Trick futilityPruning(int alpha, int beta, int depth) const;
     Trick multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int depth);
 };
-
-void Search::validateCheckingMove(bool mChecking)
-{
-    if (mChecking && !board.historyMoves.empty())
-    {
-        board.historyMoves.back().isCheckingMove = true;
-    }
-}
 
 Trick Search::nullAndDeltaPruning(int& alpha, int& beta, int& vlBest) const
 {
@@ -445,16 +435,9 @@ int Search::searchPV(int depth, int alpha, int beta)
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
     const bool mChecking = board.inCheck(board.team);
-    this->validateCheckingMove(mChecking);
-
-    if (!mChecking)
+    if (mChecking && !board.historyMoves.empty())
     {
-        // futility pruning
-        Trick futilityResult = this->futilityPruning(alpha, beta, depth);
-        if (futilityResult.success)
-        {
-            return futilityResult.data;
-        }
+        board.historyMoves.back().isCheckingMove = true;
     }
 
     // 置换表着法
@@ -627,7 +610,10 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
     Move bestMove{};
     NODE_TYPE type = ALPHA_TYPE;
     const bool mChecking = board.inCheck(board.team);
-    this->validateCheckingMove(mChecking);
+    if (mChecking && !board.historyMoves.empty())
+    {
+        board.historyMoves.back().isCheckingMove = true;
+    }
 
     if (!mChecking)
     {
@@ -773,9 +759,9 @@ int Search::searchQ(int alpha, int beta, int leftDistance)
     int vlBest = -INF;
     Move bestMove{};
     const bool mChecking = board.inCheck(board.team);
-    this->validateCheckingMove(mChecking);
-    if (mChecking)
+    if (mChecking && !board.historyMoves.empty())
     {
+        board.historyMoves.back().isCheckingMove = true;
         leftDistance = std::min<int>(leftDistance, this->Q_DEPTH_CHECKING);
     }
 

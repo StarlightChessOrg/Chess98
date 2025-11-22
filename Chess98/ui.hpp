@@ -21,21 +21,21 @@ const server = http.createServer((request, response) => {\n\
     response.setHeader('Access-Control-Allow-Methods', 'GET, DELETE, PATCH, OPTIONS')\n\
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type')\n\
 \n\
-    if (method === 'GET' && url === '/boardcode') { // 界面端获取当前棋盘局势图\n\
+    if (method === 'GET' && url === '/boardcode') {\n\
         response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
         response.end(getBoardCode() + '\\n')\n\
     }\n\
-    else if (method === 'PUT' && url.match('boardcode')) { // 人机方面做出决策更改服务器棋盘局势图\n\
+    else if (method === 'PUT' && url.match('boardcode')) {\n\
         response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
         response.end('successful\\n')\n\
         boardCode = request.url.split('=')[1]\n\
     }\n\
-    else if (method === 'PUT' && url.match('move')) { // 获取玩家着法\n\
+    else if (method === 'PUT' && url.match('move')) {\n\
         response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
         response.end('successful\\n')\n\
         computerMove = request.url.split('=')[1]\n\
     }\n\
-    else if (method == 'GET' && url.match('move')) { // 执行玩家着法\n\
+    else if (method == 'GET' && url.match('move')) {\n\
         response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
         response.end('successful\\n')\n\
         let move = request.url.split('=')[1]\n\
@@ -53,11 +53,11 @@ const server = http.createServer((request, response) => {\n\
         }\n\
         fileWrite()\n\
     }\n\
-    else if (method === 'GET' && url.match('computer')) { // 界面端获取电脑着法\n\
+    else if (method === 'GET' && url.match('computer')) {\n\
         response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
         response.end(computerMove + '\\n')\n\
     }\n\
-    else if (method == 'GET' && url.match('undo')) { // 悔棋\n\
+    else if (method == 'GET' && url.match('undo')) {\n\
         response.writeHead(200, { 'Content-Type': 'text/plain' })\n\
         response.end('successful\\n')\n\
         const fileWrite = () => {\n\
