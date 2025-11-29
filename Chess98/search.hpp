@@ -232,8 +232,9 @@ Result Search::searchOpenBook()
     Book bk{};
     BookFile pBookFileStruct{};
 
-    if (!pBookFileStruct.open("BOOK.DAT"))
+    if (!pBookFileStruct.open("./BOOK.DAT"))
     {
+        std::cout << "no open book file!" << std::endl;
         return Result{Move{}, -1};
     }
 
@@ -293,6 +294,7 @@ Result Search::searchOpenBook()
 
     if (nScan == 2)
     {
+        std::cout << "no " << std::endl;
         return Result{Move{}, -1};
     }
 

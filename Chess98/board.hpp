@@ -40,6 +40,123 @@ public:
     UINT32 getBitLineY(int y) const { return this->bitboard->getBitlineY(y); }
 
 public:
+    void changeSide() { this->team = -this->team; }
+    void addDistane() { this->distance++; }
+    void reduceDistance() { this->distance--; }
+    void historyMovePush(const Move& move, const Piece& attacker, const Piece& captured)
+    {
+        this->historyMoves.emplace_back(move);
+        this->historyMoves.back().attacker = attacker;
+        this->historyMoves.back().captured = captured;
+    }
+    void historyMovePop() { this->historyMoves.pop_back(); }
+    void bitboardDoMove(int x1, int y1, int x2, int y2) { this->bitboard->doMove(x1, y1, x2, y2); }
+    void bitboardUndoMove(int x1, int y1, int x2, int y2, const bool& eaten) { this->bitboard->undoMove(x1, y1, x2, y2, eaten); }
+    void piecePositionDoMove(int x1, int y1, int x2, int y2)
+    {
+        const Piece& attacker = this->piecePosition(x1, y1);
+        const Piece& captured = this->piecePosition(x2, y2);
+        this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
+        this->pieceidMap[x1][y1] = 0;
+        this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
+        this->pieceIndexMap[x1][y1] = -1;
+        this->pieces[attacker.pieceIndex].x = x2;
+        this->pieces[attacker.pieceIndex].y = y2;
+        if (captured.pieceIndex != -1)
+        {
+            this->pieces[captured.pieceIndex].isLive = false;
+        }
+    }
+    void piecePositionUndoMove(int x1, int y1, int x2, int y2, const Move& back)
+    {
+        const Piece& attacker = back.attacker;
+        const Piece& captured = back.captured;
+        this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
+        this->pieceidMap[x2][y2] = captured.pieceid;
+        this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
+        this->pieceIndexMap[x2][y2] = captured.pieceIndex;
+        this->pieces[attacker.pieceIndex].x = x1;
+        this->pieces[attacker.pieceIndex].y = y1;
+        if (captured.pieceIndex != -1)
+        {
+            this->pieces[captured.pieceIndex].isLive = true;
+        }
+    }
+    void doEvaluationUpdate(const Piece& attacker, const Piece& captured, int x1, int y1, int x2, int y2)
+    {
+        // 更新评估分
+        if (attacker.team == RED)
+        {
+            int valNewPos = pieceWeights[attacker.pieceid][x2][y2];
+            int valOldPos = pieceWeights[attacker.pieceid][x1][y1];
+            this->vlRed += (valNewPos - valOldPos);
+            if (captured.pieceid != EMPTY_PIECEID)
+            {
+                this->vlBlack -= pieceWeights[captured.pieceid][x2][size_t(9) - y2];
+            }
+        }
+        else
+        {
+            int valNewPos = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
+            int valOldPos = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
+            this->vlBlack += (valNewPos - valOldPos);
+            if (captured.pieceid != EMPTY_PIECEID)
+            {
+                this->vlRed -= pieceWeights[captured.pieceid][x2][y2];
+            }
+        }
+    }
+    void undoEvaluationUpdate(const Piece& attacker, const Piece& captured, int x1, int y1, int x2, int y2)
+    {
+        // 更新评估分
+        if (attacker.team == RED)
+        {
+            int valPos1 = pieceWeights[attacker.pieceid][x1][y1];
+            int valPos2 = pieceWeights[attacker.pieceid][x2][y2];
+            this->vlRed -= (valPos2 - valPos1);
+            if (captured.pieceid != EMPTY_PIECEID)
+            {
+                this->vlBlack += pieceWeights[captured.pieceid][x2][size_t(9) - y2];
+            }
+        }
+        else
+        {
+            int valPos1 = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
+            int valPos2 = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
+            this->vlBlack -= (valPos2 - valPos1);
+            if (captured.pieceid != EMPTY_PIECEID)
+            {
+                this->vlRed += pieceWeights[captured.pieceid][x2][y2];
+            }
+        }
+    }
+    void doHashUpdate(const Piece& attacker, const Piece& captured, int x1, int y1, int x2, int y2)
+    {
+        // 记录旧哈希值
+        this->hashKeyList.emplace_back(this->hashKey);
+        this->hashLockList.emplace_back(this->hashLock);
+        // 更新哈希值
+        this->hashKey ^= HASHKEYS[attacker.pieceid][x1][y1];
+        this->hashKey ^= HASHKEYS[attacker.pieceid][x2][y2];
+        this->hashLock ^= HASHLOCKS[attacker.pieceid][x1][y1];
+        this->hashLock ^= HASHLOCKS[attacker.pieceid][x2][y2];
+        if (captured.pieceid != EMPTY_PIECEID)
+        {
+            this->hashKey ^= HASHKEYS[captured.pieceid][x1][y1];
+            this->hashLock ^= HASHLOCKS[captured.pieceid][x2][y2];
+        }
+        this->hashKey ^= PLAYER_KEY;
+        this->hashLock ^= PLAYER_LOCK;
+    }
+    void undoHashUpdate()
+    {
+        this->hashKey = this->hashKeyList.back();
+        this->hashLock = this->hashLockList.back();
+        this->hashKeyList.pop_back();
+        this->hashLockList.pop_back();
+    }
+
+public:
     PIECEID pieceidOn(int x, int y) const;
     TEAM teamOn(int x, int y) const;
     Piece pieceIndex(int i) const;
@@ -82,7 +199,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
             PIECEID& pieceid = pieceidMap[x][y];
             if (pieceid != 0)
             {
-                const int& size = int(this->pieces.size());
+                int size = int(this->pieces.size());
                 Piece piece{pieceidMap[x][y], x, y, size};
                 PIECE_INDEX index = size;
 
@@ -235,8 +352,7 @@ bool Board::isRepeated() const
         // 长捉情况比较特殊
         // 只有车、马、炮能作为长捉的发起者
         // 发起者不断捉同一个子, 判负
-        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT ||
-            abs(ply1.attacker.pieceid) == R_CANNON)
+        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT || abs(ply1.attacker.pieceid) == R_CANNON)
         {
             const Piece& attacker = ply1.attacker;
             const Piece& captured = ply2.attacker;
@@ -339,8 +455,8 @@ bool Board::isInPalace(int x, int y) const
 bool Board::inCheck(TEAM judgeTeam) const
 {
     const Piece& king = judgeTeam == RED ? this->getPieceReg(R_KING) : this->getPieceReg(B_KING);
-    const int& x = king.x;
-    const int& y = king.y;
+    int x = king.x;
+    int y = king.y;
     const TEAM& team = king.team;
 
     // 兵
@@ -636,119 +752,37 @@ bool Board::hasProtector(int x, int y) const
 
 void Board::doMove(Move move)
 {
-    const int& x1 = move.x1;
-    const int& x2 = move.x2;
-    const int& y1 = move.y1;
-    const int& y2 = move.y2;
+    int x1 = move.x1;
+    int x2 = move.x2;
+    int y1 = move.y1;
+    int y2 = move.y2;
     const Piece& attacker = this->piecePosition(x1, y1);
     const Piece& captured = this->piecePosition(x2, y2);
-
-    // 更新棋盘数据
-    this->team = -this->team;
-    this->distance += 1;
-    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
-    this->historyMoves.back().attacker = attacker;
-    this->historyMoves.back().captured = captured;
-    this->bitboard->doMove(x1, y1, x2, y2);
-    this->pieceidMap[x2][y2] = this->pieceidMap[x1][y1];
-    this->pieceidMap[x1][y1] = 0;
-    this->pieceIndexMap[x2][y2] = this->pieceIndexMap[x1][y1];
-    this->pieceIndexMap[x1][y1] = -1;
-    this->pieces[attacker.pieceIndex].x = x2;
-    this->pieces[attacker.pieceIndex].y = y2;
-    if (captured.pieceIndex != -1)
-    {
-        this->pieces[captured.pieceIndex].isLive = false;
-    }
-    // 更新评估分
-    if (attacker.team == RED)
-    {
-        int valNewPos = pieceWeights[attacker.pieceid][x2][y2];
-        int valOldPos = pieceWeights[attacker.pieceid][x1][y1];
-        this->vlRed += (valNewPos - valOldPos);
-        if (captured.pieceid != EMPTY_PIECEID)
-        {
-            this->vlBlack -= pieceWeights[captured.pieceid][x2][size_t(9) - y2];
-        }
-    }
-    else
-    {
-        int valNewPos = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
-        int valOldPos = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
-        this->vlBlack += (valNewPos - valOldPos);
-        if (captured.pieceid != EMPTY_PIECEID)
-        {
-            this->vlRed -= pieceWeights[captured.pieceid][x2][y2];
-        }
-    }
-    // 记录旧哈希值
-    this->hashKeyList.emplace_back(this->hashKey);
-    this->hashLockList.emplace_back(this->hashLock);
-    // 更新哈希值
-    this->hashKey ^= HASHKEYS[attacker.pieceid][x1][y1];
-    this->hashKey ^= HASHKEYS[attacker.pieceid][x2][y2];
-    this->hashLock ^= HASHLOCKS[attacker.pieceid][x1][y1];
-    this->hashLock ^= HASHLOCKS[attacker.pieceid][x2][y2];
-    if (captured.pieceid != EMPTY_PIECEID)
-    {
-        this->hashKey ^= HASHKEYS[captured.pieceid][x1][y1];
-        this->hashLock ^= HASHLOCKS[captured.pieceid][x2][y2];
-    }
-    this->hashKey ^= PLAYER_KEY;
-    this->hashLock ^= PLAYER_LOCK;
+    changeSide();
+    addDistane();
+    historyMovePush(move, attacker, captured);
+    bitboardDoMove(x1, y1, x2, y2);
+    piecePositionDoMove(x1, y1, x2, y2);
+    doEvaluationUpdate(attacker, captured, x1, y1, x2, y2);
+    doHashUpdate(attacker, captured, x1, y1, x2, y2);
 }
 
 void Board::undoMove()
 {
     const Move& back = this->historyMoves.back();
-    const int& x1 = back.x1;
-    const int& x2 = back.x2;
-    const int& y1 = back.y1;
-    const int& y2 = back.y2;
-    const Piece& attacker = this->historyMoves.back().attacker;
-    const Piece& captured = this->historyMoves.back().captured;
-
-    // 更新棋盘数据
-    this->distance -= 1;
-    this->team = -this->team;
-    this->historyMoves.pop_back();
-    this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
-    this->pieceidMap[x1][y1] = this->pieceidMap[x2][y2];
-    this->pieceidMap[x2][y2] = captured.pieceid;
-    this->pieceIndexMap[x1][y1] = this->pieceIndexMap[x2][y2];
-    this->pieceIndexMap[x2][y2] = captured.pieceIndex;
-    this->pieces[attacker.pieceIndex].x = x1;
-    this->pieces[attacker.pieceIndex].y = y1;
-    if (captured.pieceIndex != -1)
-    {
-        this->pieces[captured.pieceIndex].isLive = true;
-    }
-    // 更新评估分
-    if (attacker.team == RED)
-    {
-        int valPos1 = pieceWeights[attacker.pieceid][x1][y1];
-        int valPos2 = pieceWeights[attacker.pieceid][x2][y2];
-        this->vlRed -= (valPos2 - valPos1);
-        if (captured.pieceid != EMPTY_PIECEID)
-        {
-            this->vlBlack += pieceWeights[captured.pieceid][x2][size_t(9) - y2];
-        }
-    }
-    else
-    {
-        int valPos1 = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
-        int valPos2 = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
-        this->vlBlack -= (valPos2 - valPos1);
-        if (captured.pieceid != EMPTY_PIECEID)
-        {
-            this->vlRed += pieceWeights[captured.pieceid][x2][y2];
-        }
-    }
-    // 回滚哈希值
-    this->hashKey = this->hashKeyList.back();
-    this->hashLock = this->hashLockList.back();
-    this->hashKeyList.pop_back();
-    this->hashLockList.pop_back();
+    int x1 = back.x1;
+    int x2 = back.x2;
+    int y1 = back.y1;
+    int y2 = back.y2;
+    const Piece& attacker = back.attacker;
+    const Piece& captured = back.captured;
+    reduceDistance();
+    changeSide();
+    historyMovePop();
+    bitboardUndoMove(x1, y1, x2, y2, captured.pieceid != 0);
+    piecePositionUndoMove(x1, y1, x2, y2, back);
+    undoEvaluationUpdate(attacker, captured, x1, y1, x2, y2);
+    undoHashUpdate();
 }
 
 void Board::doMoveSimple(Move move)
@@ -987,8 +1021,7 @@ bool Board::isValidMoveInSituation(Move move)
     if (move.attacker.team != this->team) // 若攻击者的队伍和当前队伍不一致, 则一定是不合理着法
         return false;
     PIECEID captured = this->pieceidOn(move.x2, move.y2);
-    if (captured != 0 && this->teamOn(move.x2, move.y2) ==
-                             this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
+    if (captured != 0 && this->teamOn(move.x2, move.y2) == this->teamOn(move.x1, move.y1)) // 吃子着法, 若吃子者和被吃者同队伍, 则一定不合理
         return false;
 
     // 分类
@@ -1033,13 +1066,11 @@ bool Board::isValidMoveInSituation(Move move)
         // 生成炮的着法范围
         UINT32 bitlineX = this->getBitLineX(move.x1);
         REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, move.y1, 9);
-        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
-            return false;
+        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3]) return false;
         // 横向
         UINT32 bitlineY = this->getBitLineY(move.y1);
         REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, move.x1, 8);
-        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
-            return false;
+        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3]) return false;
     }
 
     this->doMoveSimple(move);
