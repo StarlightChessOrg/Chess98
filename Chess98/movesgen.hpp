@@ -906,7 +906,7 @@ MOVES MovesGen::getCaptureMoves(Board& board)
             result.emplace_back(move);
         }
     }
-    return moves;
+    return result;
 }
 
 MOVES MovesGen::facedKings(const Board& board)
