@@ -1,43 +1,29 @@
 # 车九平八
 
-一个借鉴了象眼引擎的中国象棋 AI, 正在持续开发中。
+一个中国象棋项目，借鉴了象眼等引擎，正在持续开发中。
 
 ## 使用
 
-环境要求：
-- 操作系统：Windows, Linux (MacOS 暂未测试)
-- 依赖：Node.js (要求终端能够使用node命令, 以启用UI)
-- 编译器：目前 g++, MSVC 都能过编译
-
-如果想要下棋, 请确保 `Chess98/nnuefile.hpp` 中没有 `#define GENFILES`, 否则会运行跑谱器
-
-确保 localhost:9494 没有被占用, 这是 UI 的服务器端口。
-
-编译 Chess98/main.cpp 后直接运行输出文件, 然后在 `tools/ui/ui.html` 下棋
+通过项目的 GitHub Releases 包含的 exe 文件以及 ui 界面使用发行版。
 
 ## 开发
 
-Chess98 项目的目录是这样的：
+Chess98 项目的目录如下：
 
 - Chess98 项目的源代码文件夹
 - nnue 存放 nnue 相关开发内容
-    - data 存放跑谱器生成的 json
 - tools 存放项目相关的一些工具
-    - auto 自动测试
-    - chess_matrix_convert 象眼格式转换, 做开局库的时候用到
-    - openbook 开局库文件
-    - ui 界面
-- .gitignore Git忽略文件
-- LICENSE 许可证
-- README.md 介绍文件
-- Chess98.sln Visual Studio 项目文件
-- CMakeLists.txt CLion 项目文件
+- .gitignore
+- LICENSE
+- README.md
+- Chess98.sln
+- CMakeLists.txt
 
-### 使用自动测试工具
+### 自动测试工具
 
 环境要求：
-- 操作系统：Windows (Linux, MacOS 暂未测试)
-- 依赖：Node.js, Selenium-Webdriver, Microsoft Edge, Edge Webdriver
+- 操作系统：Windows
+- 依赖：Node.js, Selenium-Webdriver, Edge Webdriver
 
 一个基于 https://play.xiangqi.com/ 使用 selenium 编写的自动测试工具,
 
@@ -89,4 +75,4 @@ json 内容结构如下：
 
 ### NNUE
 
-持续开发中
+神经网络优化评估的技术，正在开发中
