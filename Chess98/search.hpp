@@ -174,74 +174,74 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
 Result Search::searchOpenBook()
 {
-    class Book
+    struct BookStruct
     {
-    public:
-        uint32_t dwZobristLock;
-        int nPtr;
+        union
+        {
+            uint32_t dwZobristLock;
+            int nPtr;
+        };
         uint16_t wmv, wvl;
-
-    public:
-        int bookPosCmp(int32 hashLock) const
-        {
-            const uint32_t bookLock = this->dwZobristLock;
-            const uint32_t boardLock = (uint32_t)hashLock;
-            if (bookLock < boardLock)
-                return -1;
-            else if (bookLock > boardLock)
-                return 1;
-            return 0;
-        }
     };
 
-    class BookFile
+    struct BookFileStruct
     {
-    public:
+        FILE *fp = nullptr;
         int nLen = 0;
-        bool isEdit = false;
-        std::string filename;
 
-        bool open(const char* szFileName, bool bEdit = false)
+        bool open(const char *szFileName, bool bEdit = false)
         {
-            isEdit = bEdit;
-            filename = szFileName;
-            std::ifstream ifs(filename, std::ios::binary | std::ios::ate);
-            if (!ifs.is_open()) return false;
-            nLen = int(ifs.tellg() / sizeof(Book));
-            return true;
+            errno_t result = fopen_s(&fp, szFileName, bEdit ? "r+b" : "rb");
+            if (result == 0)
+            {
+                fseek(fp, 0, SEEK_END);
+                nLen = ftell(fp) / sizeof(BookStruct);
+                return true;
+            }
+            return false;
         }
 
-        void read(Book& bk, int nMid) const
+        void close(void) const
         {
-            std::ifstream ifs(filename, std::ios::binary);
-            if (!ifs.is_open()) return;
-            ifs.seekg(nMid * sizeof(Book), std::ios::beg);
-            ifs.read(reinterpret_cast<char*>(&bk), sizeof(Book));
+            fclose(fp);
         }
 
-        void write(const Book& bk, int nMid) const
+        void read(BookStruct &bk, int nMid) const
         {
-            if (!isEdit) return;
-            std::fstream fstr(filename, std::ios::in | std::ios::out | std::ios::binary);
-            if (!fstr.is_open()) return;
-            fstr.seekp(nMid * sizeof(Book), std::ios::beg);
-            fstr.write(reinterpret_cast<const char*>(&bk), sizeof(Book));
+            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
+            fread(&bk, sizeof(BookStruct), 1, fp);
+        }
+
+        void write(const BookStruct &bk, int nMid) const
+        {
+            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
+            fwrite(&bk, sizeof(BookStruct), 1, fp);
         }
     };
 
-    Book bk{};
-    BookFile pBookFileStruct{};
-
-    if (!pBookFileStruct.open("./BOOK.DAT"))
+    std::function<int(BookStruct&, int32)> bookPosCmp = [](BookStruct &bk, int32 hashLock) -> int
     {
-        std::cout << "no open book file!" << std::endl;
+        uint32_t bookLock = bk.dwZobristLock;
+        uint32_t boardLock = (uint32_t)hashLock;
+        if (bookLock < boardLock)
+            return -1;
+        else if (bookLock > boardLock)
+            return 1;
+        return 0;
+    };
+
+    BookStruct bk{};
+    auto *pBookFileStruct = new BookFileStruct{};
+
+    if (!pBookFileStruct->open("BOOK.DAT"))
+    {
+        delete pBookFileStruct;
         return Result{Move{}, -1};
     }
 
     // 二分法查找开局库
     int nMid = 0;
     int32 hashLock = board.hashLock;
-    // mirrorhash
     int32 mirrorHashLock = 0;
     int32 mirrorHashKey = 0;
     for (int x = 0; x < 9; x++)
@@ -266,18 +266,18 @@ Result Search::searchOpenBook()
     int32 nowHashLock = 0;
     for (nScan = 0; nScan < 2; nScan++)
     {
-        int nHigh = pBookFileStruct.nLen - 1;
+        int nHigh = pBookFileStruct->nLen - 1;
         int nLow = 0;
         nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
         while (nLow <= nHigh)
         {
             nMid = (nHigh + nLow) / 2;
-            pBookFileStruct.read(bk, nMid);
-            if (bk.bookPosCmp(nowHashLock) < 0)
+            pBookFileStruct->read(bk, nMid);
+            if (bookPosCmp(bk, nowHashLock) < 0)
             {
                 nLow = nMid + 1;
             }
-            else if (bk.bookPosCmp(nowHashLock) > 0)
+            else if (bookPosCmp(bk, nowHashLock) > 0)
             {
                 nHigh = nMid - 1;
             }
@@ -294,15 +294,15 @@ Result Search::searchOpenBook()
 
     if (nScan == 2)
     {
-        std::cout << "no " << std::endl;
+        pBookFileStruct->close();
         return Result{Move{}, -1};
     }
 
-    // 如果找到局面, 则向前查找第一个着法
+    // 如果找到局面，则向前查找第一个着法
     for (nMid--; nMid >= 0; nMid--)
     {
-        pBookFileStruct.read(bk, nMid);
-        if (bk.bookPosCmp(nowHashLock) < 0)
+        pBookFileStruct->read(bk, nMid);
+        if (bookPosCmp(bk, nowHashLock) < 0)
         {
             break;
         }
@@ -311,10 +311,10 @@ Result Search::searchOpenBook()
     std::vector<Move> bookMoves;
 
     // 向后依次读入属于该局面的每个着法
-    for (nMid++; nMid < pBookFileStruct.nLen; nMid++)
+    for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
     {
-        pBookFileStruct.read(bk, nMid);
-        if (bk.bookPosCmp(nowHashLock) > 0)
+        pBookFileStruct->read(bk, nMid);
+        if (bookPosCmp(bk, nowHashLock) > 0)
         {
             break;
         }
@@ -339,19 +339,20 @@ Result Search::searchOpenBook()
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move& a, Move& b) { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
+              { return a.val > b.val; });
 
     std::srand(unsigned(std::time(0)));
 
     int vlSum = 0;
-    for (Move& move : bookMoves)
+    for (Move &move : bookMoves)
     {
         vlSum += move.val;
     }
     int vlRandom = std::rand() % vlSum;
 
     Move bookMove;
-    for (Move& move : bookMoves)
+    for (Move &move : bookMoves)
     {
         vlRandom -= move.val;
         if (vlRandom < 0)
@@ -361,10 +362,14 @@ Result Search::searchOpenBook()
         }
     }
 
+    pBookFileStruct->close();
+
+    delete pBookFileStruct;
+
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
-    return board.isValidMoveInSituation(bookMove) ? Result{bookMove, 1} : Result{Move{}, -1};
+    return Result{bookMove, 1};
 }
 
 Result Search::searchRoot(int depth)

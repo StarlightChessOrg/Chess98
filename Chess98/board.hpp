@@ -40,6 +40,32 @@ public:
     UINT32 getBitLineY(int y) const { return this->bitboard->getBitlineY(y); }
 
 public:
+    PIECEID pieceidOn(int x, int y) const;
+    TEAM teamOn(int x, int y) const;
+    Piece pieceIndex(int i) const;
+    Piece piecePosition(int x, int y) const;
+    PIECES getAllLivePieces() const;
+    PIECES getPiecesByTeam(TEAM team) const;
+    Piece getPieceReg(PIECEID pieceid) const;
+    PIECES getPiecesReg(PIECEID pieceid) const;
+    bool isRepeated() const;
+    bool hasCrossedRiver(int x, int y) const;
+    bool isInPalace(int x, int y) const;
+    bool inCheck(TEAM judgeTeam) const;
+    bool hasProtector(int x, int y) const;
+
+public:
+    void doMove(Move move);
+    void undoMove();
+    void doMoveSimple(Move move);
+    void undoMoveSimple();
+    void initEvaluate();
+    void calculateVlOpen(int& vlOpen) const;
+    void vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const;
+    void initHashInfo();
+    bool isValidMoveInSituation(Move move);
+
+protected:
     void changeSide() { this->team = -this->team; }
     void addDistane() { this->distance++; }
     void reduceDistance() { this->distance--; }
@@ -155,32 +181,6 @@ public:
         this->hashKeyList.pop_back();
         this->hashLockList.pop_back();
     }
-
-public:
-    PIECEID pieceidOn(int x, int y) const;
-    TEAM teamOn(int x, int y) const;
-    Piece pieceIndex(int i) const;
-    Piece piecePosition(int x, int y) const;
-    PIECES getAllLivePieces() const;
-    PIECES getPiecesByTeam(TEAM team) const;
-    Piece getPieceReg(PIECEID pieceid) const;
-    PIECES getPiecesReg(PIECEID pieceid) const;
-    bool isRepeated() const;
-    bool hasCrossedRiver(int x, int y) const;
-    bool isInPalace(int x, int y) const;
-    bool inCheck(TEAM judgeTeam) const;
-    bool hasProtector(int x, int y) const;
-
-public:
-    void doMove(Move move);
-    void undoMove();
-    void doMoveSimple(Move move);
-    void undoMoveSimple();
-    void initEvaluate();
-    void calculateVlOpen(int& vlOpen) const;
-    void vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const;
-    void initHashInfo();
-    bool isValidMoveInSituation(Move move);
 };
 
 Board::Board(PIECEID_MAP pieceidMap, TEAM team)
