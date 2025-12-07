@@ -4,20 +4,27 @@
 
 ## 使用
 
-通过项目的 GitHub Releases 包含的 exe 文件以及 ui 界面使用发行版。
+通过项目的 GitHub Releases 包含的 exe 文件以及 ui 界面使用发行版。截至目前（2025/12/7）还没有支持 UCCI 界面
 
 ## 开发
 
-Chess98 项目的目录如下：
+Chess98 已经实现的：
 
-- Chess98 项目的源代码文件夹
-- nnue 存放 nnue 相关开发内容
-- tools 存放项目相关的一些工具
-- .gitignore
-- LICENSE
-- README.md
-- Chess98.sln
-- CMakeLists.txt
+- search:
+    - pvs
+    - searchq
+    - ndp
+    - mdp
+    - fp
+    - multiProbcut
+    - openbook
+    - bitboard
+- heuristic
+    - transportation
+    - killer
+    - history
+- evaluate
+    - classical vl matrix evaluation
 
 ### 自动测试工具
 
