@@ -87,6 +87,7 @@ void readFile(std::string filename, std::string& content);
 void writeFile(std::string filename, std::string content);
 PIECEID_MAP fenToPieceidmap(std::string fenCode);
 std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team);
+TEAM fenToTeam(std::string fenCode);
 
 class Piece
 {
@@ -304,4 +305,9 @@ std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
     result += " - - 0 1";
 
     return result;
+}
+
+TEAM fenToTeam(std::string fen)
+{
+    return fen.find("w") != std::string::npos ? RED : BLACK;
 }

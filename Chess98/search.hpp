@@ -5,6 +5,7 @@
 class Search
 {
 public:
+    Search() = default;
     Search(PIECEID_MAP pieceidMap, TEAM team) : board(Board(pieceidMap, team)) {}
     void reset()
     {
@@ -25,7 +26,7 @@ public:
 
 public:
     Result searchMain(int maxDepth, int maxTime);
-    Result searchOpenBook();
+    Result searchOpenBook() const;
     Result searchRoot(int depth);
     int searchPV(int depth, int alpha, int beta);
     int searchCut(int depth, int beta, bool banNullMove = false);
@@ -172,57 +173,57 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     return bestNode;
 }
 
-Result Search::searchOpenBook()
+Result Search::searchOpenBook() const
 {
     struct BookStruct
     {
-        union
-        {
-            uint32_t dwZobristLock;
-            int nPtr;
-        };
-        uint16_t wmv, wvl;
+        uint32_t dwZobristLock;
+        uint16_t wmv;
+        uint16_t wvl;
     };
 
     struct BookFileStruct
     {
-        FILE *fp = nullptr;
+        std::fstream file;
         int nLen = 0;
 
-        bool open(const char *szFileName, bool bEdit = false)
+        bool open(const char* szFileName, bool bEdit = false)
         {
-            errno_t result = fopen_s(&fp, szFileName, bEdit ? "r+b" : "rb");
-            if (result == 0)
+            auto mode = bEdit ? (std::ios::in | std::ios::out | std::ios::binary) : (std::ios::in | std::ios::binary);
+            file.open(szFileName, mode);
+            if (file.is_open())
             {
-                fseek(fp, 0, SEEK_END);
-                nLen = ftell(fp) / sizeof(BookStruct);
+                file.seekg(0, std::ios::end);
+                nLen = static_cast<int>(file.tellg()) / sizeof(BookStruct);
                 return true;
             }
             return false;
         }
 
-        void close(void) const
+        void close()
         {
-            fclose(fp);
+            if (file.is_open())
+            {
+                file.close();
+            }
         }
 
-        void read(BookStruct &bk, int nMid) const
+        void read(BookStruct& bk, int nMid)
         {
-            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
-            fread(&bk, sizeof(BookStruct), 1, fp);
+            file.seekg(nMid * sizeof(BookStruct), std::ios::beg);
+            file.read(reinterpret_cast<char*>(&bk), sizeof(BookStruct));
         }
 
-        void write(const BookStruct &bk, int nMid) const
+        void write(const BookStruct& bk, int nMid)
         {
-            fseek(fp, nMid * sizeof(BookStruct), SEEK_SET);
-            fwrite(&bk, sizeof(BookStruct), 1, fp);
+            file.seekp(nMid * sizeof(BookStruct), std::ios::beg);
+            file.write(reinterpret_cast<const char*>(&bk), sizeof(BookStruct));
         }
     };
 
-    std::function<int(BookStruct&, int32)> bookPosCmp = [](BookStruct &bk, int32 hashLock) -> int
-    {
+    auto bookPosCmp = [](const BookStruct& bk, int32 hashLock) -> int {
         uint32_t bookLock = bk.dwZobristLock;
-        uint32_t boardLock = (uint32_t)hashLock;
+        uint32_t boardLock = static_cast<uint32_t>(hashLock);
         if (bookLock < boardLock)
             return -1;
         else if (bookLock > boardLock)
@@ -231,11 +232,10 @@ Result Search::searchOpenBook()
     };
 
     BookStruct bk{};
-    auto *pBookFileStruct = new BookFileStruct{};
+    auto pBookFileStruct = std::make_unique<BookFileStruct>();
 
     if (!pBookFileStruct->open("BOOK.DAT"))
     {
-        delete pBookFileStruct;
         return Result{Move{}, -1};
     }
 
@@ -244,6 +244,7 @@ Result Search::searchOpenBook()
     int32 hashLock = board.hashLock;
     int32 mirrorHashLock = 0;
     int32 mirrorHashKey = 0;
+
     for (int x = 0; x < 9; x++)
     {
         for (int y = 0; y < 10; y++)
@@ -251,11 +252,12 @@ Result Search::searchOpenBook()
             const PIECEID& pid = board.pieceidOn(x, y);
             if (pid != EMPTY_PIECEID)
             {
-                mirrorHashKey ^= HASHKEYS[pid][size_t(8) - x][y];
-                mirrorHashLock ^= HASHLOCKS[pid][size_t(8) - x][y];
+                mirrorHashKey ^= HASHKEYS[pid][static_cast<size_t>(8) - x][y];
+                mirrorHashLock ^= HASHLOCKS[pid][static_cast<size_t>(8) - x][y];
             }
         }
     }
+
     if (board.team == BLACK)
     {
         mirrorHashKey ^= PLAYER_KEY;
@@ -264,20 +266,24 @@ Result Search::searchOpenBook()
 
     int nScan = 0;
     int32 nowHashLock = 0;
+
     for (nScan = 0; nScan < 2; nScan++)
     {
         int nHigh = pBookFileStruct->nLen - 1;
         int nLow = 0;
         nowHashLock = (nScan == 0) ? hashLock : mirrorHashLock;
+
         while (nLow <= nHigh)
         {
             nMid = (nHigh + nLow) / 2;
             pBookFileStruct->read(bk, nMid);
-            if (bookPosCmp(bk, nowHashLock) < 0)
+
+            int cmpResult = bookPosCmp(bk, nowHashLock);
+            if (cmpResult < 0)
             {
                 nLow = nMid + 1;
             }
-            else if (bookPosCmp(bk, nowHashLock) > 0)
+            else if (cmpResult > 0)
             {
                 nHigh = nMid - 1;
             }
@@ -286,6 +292,7 @@ Result Search::searchOpenBook()
                 break;
             }
         }
+
         if (nLow <= nHigh)
         {
             break;
@@ -314,11 +321,13 @@ Result Search::searchOpenBook()
     for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
     {
         pBookFileStruct->read(bk, nMid);
-        if (bookPosCmp(bk, nowHashLock) > 0)
+        int cmpResult = bookPosCmp(bk, nowHashLock);
+
+        if (cmpResult > 0)
         {
             break;
         }
-        else
+        else if (cmpResult == 0)
         {
             int mv = bk.wmv;
             int src = mv & 255;
@@ -327,11 +336,13 @@ Result Search::searchOpenBook()
             int ySrc = 12 - (src >> 4);
             int xDst = (dst & 15) - 3;
             int yDst = 12 - (dst >> 4);
+
             if (nScan != 0)
             {
                 xSrc = 8 - xSrc;
                 xDst = 8 - xDst;
             }
+
             int vl = bk.wvl;
             Move tMove = Move(xSrc, ySrc, xDst, yDst, vl);
             bookMoves.emplace_back(tMove);
@@ -339,20 +350,28 @@ Result Search::searchOpenBook()
     }
 
     // 从大到小排序
-    std::sort(bookMoves.begin(), bookMoves.end(), [](Move &a, Move &b)
-              { return a.val > b.val; });
+    std::sort(bookMoves.begin(), bookMoves.end(), [](const Move& a, const Move& b) { return a.val > b.val; });
 
-    std::srand(unsigned(std::time(0)));
+    std::random_device rd;
+    std::mt19937 gen(rd());
 
     int vlSum = 0;
-    for (Move &move : bookMoves)
+    for (const Move& move : bookMoves)
     {
         vlSum += move.val;
     }
-    int vlRandom = std::rand() % vlSum;
+
+    if (bookMoves.empty())
+    {
+        pBookFileStruct->close();
+        return Result{Move{}, -1};
+    }
+
+    std::uniform_int_distribution<> dis(0, vlSum - 1);
+    int vlRandom = dis(gen);
 
     Move bookMove;
-    for (Move &move : bookMoves)
+    for (const Move& move : bookMoves)
     {
         vlRandom -= move.val;
         if (vlRandom < 0)
@@ -363,8 +382,6 @@ Result Search::searchOpenBook()
     }
 
     pBookFileStruct->close();
-
-    delete pBookFileStruct;
 
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);

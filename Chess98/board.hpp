@@ -323,7 +323,7 @@ PIECES Board::getPiecesReg(PIECEID pieceid) const
 bool Board::isRepeated() const
 {
     const MOVES& history = this->historyMoves;
-    const size_t size = history.size();
+    const size_t& size = history.size();
     if (size >= 5)
     {
         const Move& ply1 = history[size_t(size - 1)];
