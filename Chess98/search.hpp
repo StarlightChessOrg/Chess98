@@ -175,14 +175,25 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
 Result Search::searchOpenBook() const
 {
-    struct BookStruct
+    struct Book
     {
         uint32_t dwZobristLock;
         uint16_t wmv;
         uint16_t wvl;
+
+        static int bookPosCmp(const Book& bk, int32 hashLock)
+        {
+            uint32_t bookLock = bk.dwZobristLock;
+            uint32_t boardLock = static_cast<uint32_t>(hashLock);
+            if (bookLock < boardLock)
+                return -1;
+            else if (bookLock > boardLock)
+                return 1;
+            return 0;
+        }
     };
 
-    struct BookFileStruct
+    struct BookFile
     {
         std::fstream file;
         int nLen = 0;
@@ -194,7 +205,7 @@ Result Search::searchOpenBook() const
             if (file.is_open())
             {
                 file.seekg(0, std::ios::end);
-                nLen = static_cast<int>(file.tellg()) / sizeof(BookStruct);
+                nLen = static_cast<int>(file.tellg()) / sizeof(Book);
                 return true;
             }
             return false;
@@ -208,31 +219,21 @@ Result Search::searchOpenBook() const
             }
         }
 
-        void read(BookStruct& bk, int nMid)
+        void read(Book& bk, int nMid)
         {
-            file.seekg(nMid * sizeof(BookStruct), std::ios::beg);
-            file.read(reinterpret_cast<char*>(&bk), sizeof(BookStruct));
+            file.seekg(nMid * sizeof(Book), std::ios::beg);
+            file.read(reinterpret_cast<char*>(&bk), sizeof(Book));
         }
 
-        void write(const BookStruct& bk, int nMid)
+        void write(const Book& bk, int nMid)
         {
-            file.seekp(nMid * sizeof(BookStruct), std::ios::beg);
-            file.write(reinterpret_cast<const char*>(&bk), sizeof(BookStruct));
+            file.seekp(nMid * sizeof(Book), std::ios::beg);
+            file.write(reinterpret_cast<const char*>(&bk), sizeof(Book));
         }
     };
 
-    auto bookPosCmp = [](const BookStruct& bk, int32 hashLock) -> int {
-        uint32_t bookLock = bk.dwZobristLock;
-        uint32_t boardLock = static_cast<uint32_t>(hashLock);
-        if (bookLock < boardLock)
-            return -1;
-        else if (bookLock > boardLock)
-            return 1;
-        return 0;
-    };
-
-    BookStruct bk{};
-    auto pBookFileStruct = std::make_unique<BookFileStruct>();
+    Book bk{};
+    auto pBookFileStruct = std::make_unique<BookFile>();
 
     if (!pBookFileStruct->open("BOOK.DAT"))
     {
@@ -278,7 +279,7 @@ Result Search::searchOpenBook() const
             nMid = (nHigh + nLow) / 2;
             pBookFileStruct->read(bk, nMid);
 
-            int cmpResult = bookPosCmp(bk, nowHashLock);
+            int cmpResult = Book::bookPosCmp(bk, nowHashLock);
             if (cmpResult < 0)
             {
                 nLow = nMid + 1;
@@ -309,7 +310,7 @@ Result Search::searchOpenBook() const
     for (nMid--; nMid >= 0; nMid--)
     {
         pBookFileStruct->read(bk, nMid);
-        if (bookPosCmp(bk, nowHashLock) < 0)
+        if (Book::bookPosCmp(bk, nowHashLock) < 0)
         {
             break;
         }
@@ -321,7 +322,7 @@ Result Search::searchOpenBook() const
     for (nMid++; nMid < pBookFileStruct->nLen; nMid++)
     {
         pBookFileStruct->read(bk, nMid);
-        int cmpResult = bookPosCmp(bk, nowHashLock);
+        int cmpResult = Book::bookPosCmp(bk, nowHashLock);
 
         if (cmpResult > 0)
         {
