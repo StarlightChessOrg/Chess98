@@ -23,7 +23,6 @@ public:
 
 public:
     std::unique_ptr<Search> search = nullptr;
-    MOVES currentBannedMoves{};
 
 public:
     std::string fen() const { return pieceidmapToFen(search->board.pieceidMap, search->board.team); }
@@ -44,8 +43,25 @@ UCCI::MSG UCCI::isready() const
     return READY_MSG;
 }
 
+// setoption my_option_name my_option_value
 UCCI::MSG UCCI::setoption(const std::string& name, const std::string& value)
 {
+    if (name == "usebook")
+    {
+        search->useBook = (value == "true" || value == "1");
+    }
+    else if (name == "newgame")
+    {
+        ucci();
+    }
+    else if (name == "usemillisec")
+    {
+        return SUCCESS_MSG;
+    }
+    else
+    {
+        return "Unknown option name";
+    }
     return SUCCESS_MSG;
 }
 
@@ -65,7 +81,10 @@ UCCI::MSG UCCI::position(const std::string& fenCode, const MOVES& moves)
 // banmove my_banned_moves
 UCCI::MSG UCCI::banmoves(const MOVES& moves)
 {
-    currentBannedMoves = moves;
+    for (const Move& move : moves)
+    {
+        search->bannedMoves[move.id] = 1;
+    }
     return SUCCESS_MSG;
 }
 
@@ -82,5 +101,6 @@ UCCI::MSG UCCI::stop()
 // quit
 UCCI::MSG UCCI::quit()
 {
+    exit(0);
     return SUCCESS_MSG;
 }

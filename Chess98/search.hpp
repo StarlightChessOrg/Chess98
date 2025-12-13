@@ -15,6 +15,7 @@ public:
         this->history->reset();
         this->killer->reset();
         this->tt->reset();
+        this->bannedMoves.clear();
     }
 
 public:
