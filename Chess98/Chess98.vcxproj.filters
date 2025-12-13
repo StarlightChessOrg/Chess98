@@ -56,6 +56,9 @@
     <ClInclude Include="nnue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ucci.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="nnue.pt">

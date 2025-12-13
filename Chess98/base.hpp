@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <memory>
 #include <fstream>
+#include <thread>
 #ifdef _WIN32
 #include <windows.h>
 #elif __unix__

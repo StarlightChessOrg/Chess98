@@ -170,6 +170,7 @@
     <ClInclude Include="nnue.hpp" />
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />
+    <ClInclude Include="ucci.hpp" />
     <ClInclude Include="ui.hpp" />
   </ItemGroup>
   <ItemGroup>
