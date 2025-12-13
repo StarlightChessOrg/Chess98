@@ -252,10 +252,10 @@ public:
         }
         while (printedDepth < depth)
         {
-            std::cout << "  depth: " << (printedDepth + 1);
-            std::cout << "  vl: " << vlSearched[printedDepth];
-            std::cout << "  moveid: " << moveidSearched[printedDepth];
-            std::cout << "  duration(ms): " << durationMs[printedDepth];
+            std::cout << " depth: " << (printedDepth + 1);
+            std::cout << " vl: " << vlSearched[printedDepth];
+            std::cout << " moveid: " << moveidSearched[printedDepth];
+            std::cout << " duration(ms): " << durationMs[printedDepth];
             printedDepth++;
             std::cout << std::endl;
         }

@@ -25,8 +25,8 @@ public:
     std::unique_ptr<Tt> tt = std::make_unique<Tt>();
 
 public:
-    bool useBook = false;
-    MOVES bannedMoves{};
+    bool useBook = true;
+    std::unordered_map<int, bool> bannedMoves{{2324, 1}};
     Information info{};
 
 public:
@@ -131,7 +131,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         return Result{move, INF};
     }
 
-    // 输出局面信息
+    // info situation
     info.setSituation(pieceidmapToFen(board.pieceidMap, board.team));
 
     // 开局库
@@ -139,21 +139,27 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     if (openbookResult.vl != -1)
     {
         info.setBookmove();
+        info.setInfo(1, openbookResult.move.id, 1);
+        info.print();
+        info.clear();
         return openbookResult;
     }
 
     // 搜索
-    this->rootMoves = MovesGen::getMoves(board);
+    rootMoves = MovesGen::getMoves(board);
     Result bestNode = Result(Move(), 0);
+
+    // time start
     auto start = std::chrono::high_resolution_clock::now();
     for (int depth = 1; depth <= maxDepth; depth++)
     {
         bestNode = searchRoot(depth);
 
+        // time check
         auto end = std::chrono::high_resolution_clock::now();
         int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
-        // log
+        // info
         info.setInfo(bestNode.vl, bestNode.move.id, duration);
         info.print();
 
@@ -163,7 +169,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
             break;
         }
     }
-    info.print();
+
+    // info clear
     info.clear();
 
     // 防止没有可行着法
@@ -182,6 +189,7 @@ Result Search::searchOpenBook() const
     {
         return Result{Move{}, -1};
     }
+    
     struct Book
     {
         uint32_t dwZobristLock;
@@ -394,6 +402,11 @@ Result Search::searchOpenBook() const
     bookMove.attacker = board.piecePosition(bookMove.x1, bookMove.y1);
     bookMove.captured = board.piecePosition(bookMove.x2, bookMove.y2);
 
+    if (bannedMoves.find(bookMove.id) != bannedMoves.end())
+    {
+        return Result{Move{}, -1};
+    }
+
     return Result{bookMove, 1};
 }
 
@@ -418,7 +431,7 @@ Result Search::searchRoot(int depth)
                 vl = -searchPV(depth - 1, -INF, -vlBest);
             }
         }
-        if (vl > vlBest)
+        if (vl > vlBest && bannedMoves.find(move.id) == bannedMoves.end())
         {
             vlBest = vl;
             bestMove = move;
