@@ -23,10 +23,24 @@ public:
 
 public:
     std::unique_ptr<Search> search = nullptr;
+    int maxTime = 3;
+    int maxDepth = 20;
+    bool searchCompleted = false;
+    Result searchResult{};
+    std::thread searchThread;
 
 public:
     std::string fen() const { return pieceidmapToFen(search->board.pieceidMap, search->board.team); }
     MOVES history() const { return search->board.historyMoves; }
+    std::string standardMoveConvert(Move move) const
+    {
+        std::string ret = "";
+        ret += char('a' + move.y1);
+        ret += char('0' + (9 - move.x1));
+        ret += char('a' + move.y2);
+        ret += char('0' + (9 - move.x2));
+        return ret;
+    }
 };
 
 // ucci
@@ -88,14 +102,27 @@ UCCI::MSG UCCI::banmoves(const MOVES& moves)
     return SUCCESS_MSG;
 }
 
+// stop
 UCCI::MSG UCCI::go()
 {
-    return SUCCESS_MSG;
+    searchThread = std::thread([&]() {
+        Result result = search->searchMain(maxDepth, maxTime);
+        searchCompleted = true;
+        searchResult = result;
+    });
+    searchThread.detach();
+    while (!searchCompleted)
+    {
+        wait(50);
+    }
+    return standardMoveConvert(searchResult.move);
 }
 
+// stop
 UCCI::MSG UCCI::stop()
 {
-    return SUCCESS_MSG;
+    Result result = search->info.getBestResult();
+    return standardMoveConvert(result.move);
 }
 
 // quit

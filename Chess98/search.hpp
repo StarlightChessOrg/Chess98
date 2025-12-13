@@ -140,7 +140,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     if (openbookResult.vl != -1)
     {
         info.setBookmove();
-        info.setInfo(1, openbookResult.move.id, 1);
+        info.setInfo(1, openbookResult.move, 1);
         info.print();
         info.clear();
         return openbookResult;
@@ -161,7 +161,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         // info
-        info.setInfo(bestNode.vl, bestNode.move.id, duration);
+        info.setInfo(bestNode.vl, bestNode.move, duration);
         info.print();
 
         // timeout break

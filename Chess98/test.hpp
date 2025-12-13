@@ -12,7 +12,7 @@ void testByUI()
     int maxDepth = 20;
     int maxTime = 3;
     std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-
+    
     // test situations
 
     // fenCode = "2bak4/3Ra4/3n5/p8/2b2PP1p/2NR5/P1r1N3P/1r2n4/4A4/2BK1A3 w - - 0 1"; // 漏招 未解决

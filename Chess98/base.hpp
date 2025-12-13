@@ -16,6 +16,7 @@
 #include <memory>
 #include <fstream>
 #include <thread>
+#include <future>
 #ifdef _WIN32
 #include <windows.h>
 #elif __unix__
@@ -209,7 +210,7 @@ public:
         situation = "";
         durationMs.fill(0);
         vlSearched.fill(0);
-        moveidSearched.fill(0);
+        moveSearched.fill(Move{});
     }
 
 public:
@@ -218,7 +219,7 @@ public:
     std::string situation = "";
     std::array<int, ENGINE_MAX_DEPTH> durationMs{};
     std::array<int, ENGINE_MAX_DEPTH> vlSearched{};
-    std::array<int, ENGINE_MAX_DEPTH> moveidSearched{};
+    std::array<Move, ENGINE_MAX_DEPTH> moveSearched{};
 
 protected:
     int printedDepth = 0;
@@ -228,15 +229,25 @@ public:
 
     void setBookmove() { isBookmove = true; }
 
-    void setInfo(int vl, int moveid, int duration)
+    void setInfo(int vl, Move move, int duration)
     {
         if (depth < ENGINE_MAX_DEPTH)
         {
             this->vlSearched[depth] = vl;
-            this->moveidSearched[depth] = moveid;
+            this->moveSearched[depth] = move;
             this->durationMs[depth] = duration;
         }
         depth++;
+    }
+
+    Result getBestResult() const
+    {
+        if (depth == 0)
+        {
+            return Result{};
+        }
+        // 直接返回最深的搜索结果
+        return Result{moveSearched[depth - 1], vlSearched[depth - 1]};
     }
 
     void print()
@@ -254,7 +265,7 @@ public:
         {
             std::cout << " depth: " << (printedDepth + 1);
             std::cout << " vl: " << vlSearched[printedDepth];
-            std::cout << " moveid: " << moveidSearched[printedDepth];
+            std::cout << " moveid: " << moveSearched[printedDepth].id;
             std::cout << " duration(ms): " << durationMs[printedDepth];
             printedDepth++;
             std::cout << std::endl;
@@ -264,11 +275,7 @@ public:
 
 void wait(int ms)
 {
-#ifdef _WIN32
-    Sleep(ms);
-#elif __unix__
-    sleep(ms / 1000);
-#endif
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 }
 
 void command(std::string str)
