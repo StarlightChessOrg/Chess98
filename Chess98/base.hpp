@@ -27,6 +27,7 @@ class Move;
 class Result;
 class Trick;
 class TransItem;
+class Information;
 using uint64 = unsigned long long;
 using uint32 = unsigned int;
 using int32 = int;
@@ -41,6 +42,7 @@ using MOVES = std::vector<Move>;
 const int INF = 1000000;
 const int BAN = INF - 2000;
 const int ILLEGAL_VAL = INF * 2;
+const int ENGINE_MAX_DEPTH = 64;
 const PIECE_INDEX EMPTY_INDEX = -1;
 const PIECEID EMPTY_PIECEID = 0;
 const PIECEID R_KING = 1;
@@ -79,8 +81,7 @@ const SEARCH_TYPE PV = 1;
 const SEARCH_TYPE CUT = 2;
 const SEARCH_TYPE QUIESC = 3;
 const std::vector<PIECEID> ALL_PIECEIDS = {
-    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
-    B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
+    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN, B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
 };
 void wait(int ms);
 void command(std::string str);
@@ -194,6 +195,71 @@ public:
     Move exactMove{};
     Move betaMove{};
     Move alphaMove{};
+};
+
+class Information
+{
+public:
+    Information() = default;
+    void clear()
+    {
+        isBookmove = false;
+        depth = 0;
+        printedDepth = 0;
+        situation = "";
+        durationMs.fill(0);
+        vlSearched.fill(0);
+        moveidSearched.fill(0);
+    }
+
+public:
+    bool isBookmove = false;
+    int depth = 0;
+    std::string situation = "";
+    std::array<int, ENGINE_MAX_DEPTH> durationMs{};
+    std::array<int, ENGINE_MAX_DEPTH> vlSearched{};
+    std::array<int, ENGINE_MAX_DEPTH> moveidSearched{};
+
+protected:
+    int printedDepth = 0;
+
+public:
+    void setSituation(const std::string& fen) { situation = fen; }
+
+    void setBookmove() { isBookmove = true; }
+
+    void setInfo(int vl, int moveid, int duration)
+    {
+        if (depth < ENGINE_MAX_DEPTH)
+        {
+            this->vlSearched[depth] = vl;
+            this->moveidSearched[depth] = moveid;
+            this->durationMs[depth] = duration;
+        }
+        depth++;
+    }
+
+    void print()
+    {
+        if (printedDepth == 0)
+        {
+            std::cout << "situation: " << situation << " ";
+            if (isBookmove)
+            {
+                std::cout << "(openbook move)";
+            }
+            std::cout << std::endl;
+        }
+        while (printedDepth < depth)
+        {
+            std::cout << "  depth: " << (printedDepth + 1);
+            std::cout << "  vl: " << vlSearched[printedDepth];
+            std::cout << "  moveid: " << moveidSearched[printedDepth];
+            std::cout << "  duration(ms): " << durationMs[printedDepth];
+            printedDepth++;
+            std::cout << std::endl;
+        }
+    }
 };
 
 void wait(int ms)

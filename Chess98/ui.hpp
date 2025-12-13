@@ -155,7 +155,6 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     PIECEID_MAP pieceidMap = fenToPieceidmap(fenCode);
 
     // variables
-    int count = 0;
     Search s = Search(pieceidMap, team);
     Board& board = s.board;
 
@@ -169,9 +168,6 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     {
         if (board.team == (aiFirst ? team : -team))
         {
-            count++;
-            std::cout << count << "---------------------" << std::endl;
-
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
             board.doMove(node.move);
@@ -189,7 +185,6 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
             // 悔棋
             if (content == "undo" && board.historyMoves.size() > 1)
             {
-                count--;
                 board.undoMove();
                 board.undoMove();
 

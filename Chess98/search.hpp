@@ -25,6 +25,11 @@ public:
     std::unique_ptr<Tt> tt = std::make_unique<Tt>();
 
 public:
+    bool useBook = false;
+    MOVES bannedMoves{};
+    Information info{};
+
+public:
     Result searchMain(int maxDepth, int maxTime);
     Result searchOpenBook() const;
     Result searchRoot(int depth);
@@ -126,17 +131,16 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         return Result{move, INF};
     }
 
+    // 输出局面信息
+    info.setSituation(pieceidmapToFen(board.pieceidMap, board.team));
+
     // 开局库
     Result openbookResult = Search::searchOpenBook();
     if (openbookResult.vl != -1)
     {
-        std::cout << "Find a great move from OpenBook!" << std::endl;
+        info.setBookmove();
         return openbookResult;
     }
-
-    // 输出局面信息
-    std::cout << "situation: " << pieceidmapToFen(board.pieceidMap, board.team) << std::endl;
-    std::cout << "evaluate: " << board.evaluate() << std::endl;
 
     // 搜索
     this->rootMoves = MovesGen::getMoves(board);
@@ -150,11 +154,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         // log
-        std::cout << " depth: " << depth;
-        std::cout << " vl: " << bestNode.vl;
-        std::cout << " moveid: " << bestNode.move.id;
-        std::cout << " duration(ms): " << duration;
-        std::cout << std::endl;
+        info.setInfo(bestNode.vl, bestNode.move.id, duration);
+        info.print();
 
         // timeout break
         if (duration >= maxTime * 1000 / 3)
@@ -162,6 +163,8 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
             break;
         }
     }
+    info.print();
+    info.clear();
 
     // 防止没有可行着法
     if (bestNode.move.id == -1)
@@ -175,6 +178,10 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
 
 Result Search::searchOpenBook() const
 {
+    if (!useBook)
+    {
+        return Result{Move{}, -1};
+    }
     struct Book
     {
         uint32_t dwZobristLock;
