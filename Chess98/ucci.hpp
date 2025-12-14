@@ -22,6 +22,9 @@ public:
     MSG quit();
 
 public:
+    void cli();
+
+public:
     std::unique_ptr<Search> search = nullptr;
     int maxTime = 3;
     int maxDepth = 20;
@@ -32,14 +35,22 @@ public:
 public:
     std::string fen() const { return pieceidmapToFen(search->board.pieceidMap, search->board.team); }
     MOVES history() const { return search->board.historyMoves; }
-    std::string standardMoveConvert(Move move) const
+    std::string convertToUCCIMove(Move move) const
     {
         std::string ret = "";
-        ret += char('a' + move.y1);
-        ret += char('0' + (9 - move.x1));
-        ret += char('a' + move.y2);
-        ret += char('0' + (9 - move.x2));
+        ret += char('a' + move.x1);
+        ret += char('0' + (9 - move.y1));
+        ret += char('a' + move.x2);
+        ret += char('0' + (9 - move.y2));
         return ret;
+    }
+    Move convertToEngineMove(std::string movestr) const
+    {
+        int x1 = movestr[1] - '0';
+        int y1 = movestr[0] - 'a';
+        int y2 = movestr[3] - '0';
+        int x2 = movestr[2] - 'a';
+        return Move(x1, y1, x2, y2);
     }
 };
 
@@ -48,6 +59,7 @@ UCCI::MSG UCCI::ucci()
 {
     std::string defaultFen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
     this->search = std::make_unique<Search>(fenToPieceidmap(defaultFen), RED);
+    cli();
     return UCCIOK_MSG;
 }
 
@@ -115,14 +127,14 @@ UCCI::MSG UCCI::go()
     {
         wait(50);
     }
-    return standardMoveConvert(searchResult.move);
+    return convertToUCCIMove(searchResult.move);
 }
 
 // stop
 UCCI::MSG UCCI::stop()
 {
     Result result = search->info.getBestResult();
-    return standardMoveConvert(result.move);
+    return convertToUCCIMove(result.move);
 }
 
 // quit
@@ -130,4 +142,51 @@ UCCI::MSG UCCI::quit()
 {
     exit(0);
     return SUCCESS_MSG;
+}
+
+void UCCI::cli()
+{
+    while (true)
+    {
+        MSG command;
+        std::getline(std::cin, command);
+        if (command == "go")
+        {
+            go();
+            search->board.doMove(search->info.getBestResult().move);
+            std::cout << pieceidmapToFen(search->board.pieceidMap, search->board.team) << std::endl;
+        }
+        else if (command.substr(0, 8) == "position")
+        {
+            std::string fen = "";
+            std::string moves = "";
+            size_t moves_pos = command.find("moves");
+            if (moves_pos == std::string::npos)
+            {
+                fen = command.substr(9);
+                position(fen, MOVES{});
+            }
+            else
+            {
+                fen = command.substr(9, moves_pos - 10);
+                moves = command.substr(moves_pos + 6);
+                moves += " ";
+                // 按空格将moves切开
+                MOVES moveList;
+                size_t start = 0;
+                size_t end = moves.find(' ');
+                while (end != std::string::npos)
+                {
+                    std::string moveStr = moves.substr(start, end - start);
+                    if (moveStr.length() == 4)
+                    {
+                        moveList.emplace_back(convertToEngineMove(moveStr));
+                    }
+                    start = end + 1;
+                    end = moves.find(' ', start);
+                }
+                position(fen, moveList);
+            }
+        }
+    }
 }
