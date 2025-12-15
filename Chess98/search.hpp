@@ -16,6 +16,8 @@ public:
         this->killer->reset();
         this->tt->reset();
         this->bannedMoves.clear();
+        this->stop = false;
+        this->info.clear();
     }
 
 public:
@@ -27,6 +29,7 @@ public:
 
 public:
     bool useBook = true;
+    bool stop = false;
     std::unordered_map<int, bool> bannedMoves{{2324, 1}};
     Information info{};
 
@@ -116,7 +119,7 @@ Trick Search::multiProbCut(SEARCH_TYPE searchType, int alpha, int beta, int dept
     return {};
 }
 
-Result Search::searchMain(int maxDepth, int maxTime = 3)
+Result Search::searchMain(int maxDepth, int maxTimeMs = 3)
 {
     // 预制条件检查
     this->reset();
@@ -154,7 +157,15 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
     auto start = std::chrono::high_resolution_clock::now();
     for (int depth = 1; depth <= maxDepth; depth++)
     {
-        bestNode = searchRoot(depth);
+        Result ret = searchRoot(depth);
+        if (!stop)
+        {
+            bestNode = ret;
+        }
+        else
+        {
+            break;
+        }
 
         // time check
         auto end = std::chrono::high_resolution_clock::now();
@@ -165,7 +176,7 @@ Result Search::searchMain(int maxDepth, int maxTime = 3)
         info.print();
 
         // timeout break
-        if (duration >= maxTime * 1000 / 3)
+        if (duration >= maxTimeMs / 3)
         {
             break;
         }
@@ -419,6 +430,10 @@ Result Search::searchRoot(int depth)
 
     for (const Move& move : rootMoves)
     {
+        if (stop)
+        {
+            break;
+        }
         board.doMove(move);
         if (vlBest == -INF)
         {

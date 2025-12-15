@@ -1,36 +1,40 @@
 #include "search.hpp"
 
+void log_to_file(const std::string& message)
+{
+    std::ofstream file("debug_log.txt", std::ios::app); // append模式
+    if (file.is_open())
+    {
+        file << message << std::endl;
+        file.close();
+    }
+}
 class UCCI
 {
 public:
-    UCCI() = default;
-
-public:
-    using MSG = std::string;
-    const MSG SUCCESS_MSG = "";
-    const MSG UCCIOK_MSG = "ucciok";
-    const MSG READY_MSG = "readyok";
-
-public:
-    MSG ucci();
-    MSG isready() const;
-    MSG setoption(const std::string& name, const std::string& value);
-    MSG position(const std::string& fenCode, const MOVES& moves);
-    MSG banmoves(const MOVES& moves);
-    MSG go();
-    MSG stop();
-    MSG quit();
+    UCCI() { cli(); };
 
 public:
     void cli();
 
 public:
+    void ucci();
+    void isready() const;
+    void setoption(const std::string& name, const std::string& value);
+    void position(const std::string& fenCode, const MOVES& moves);
+    void banmoves(const MOVES& moves);
+    void go(int time, int depth);
+    void stop();
+    void quit();
+
+public:
     std::unique_ptr<Search> search = nullptr;
-    int maxTime = 3;
+    int maxTime = 200;
     int maxDepth = 20;
-    bool searchCompleted = false;
+    bool ready = false;
+    bool searchCompleted = true;
     Result searchResult{};
-    std::thread searchThread;
+    std::thread searchThread{};
 
 public:
     std::string fen() const { return pieceidmapToFen(search->board.pieceidMap, search->board.team); }
@@ -39,60 +43,194 @@ public:
     {
         std::string ret = "";
         ret += char('a' + move.x1);
-        ret += char('0' + (9 - move.y1));
+        ret += char('0' + move.y1);
         ret += char('a' + move.x2);
-        ret += char('0' + (9 - move.y2));
+        ret += char('0' + move.y2);
         return ret;
     }
     Move convertToEngineMove(std::string movestr) const
     {
-        int x1 = movestr[1] - '0';
-        int y1 = movestr[0] - 'a';
-        int y2 = movestr[3] - '0';
+        int x1 = movestr[0] - 'a';
+        int y1 = movestr[1] - '0';
         int x2 = movestr[2] - 'a';
+        int y2 = movestr[3] - '0';
         return Move(x1, y1, x2, y2);
+    }
+    MOVES parseMovesInput(std::string moves) const
+    {
+        if (moves[moves.length() - 1] == ' ')
+        {
+            moves += " ";
+        }
+        // 按空格将moves切开
+        MOVES moveList;
+        size_t start = 0;
+        size_t end = moves.find(' ');
+        while (end != std::string::npos)
+        {
+            std::string moveStr = moves.substr(start, end - start);
+            if (moveStr.length() == 4)
+            {
+                moveList.emplace_back(convertToEngineMove(moveStr));
+            }
+            start = end + 1;
+            end = moves.find(' ', start);
+        }
+        return moveList;
     }
 };
 
-// ucci
-UCCI::MSG UCCI::ucci()
+// cli
+void UCCI::cli()
 {
-    std::string defaultFen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-    this->search = std::make_unique<Search>(fenToPieceidmap(defaultFen), RED);
-    cli();
-    return UCCIOK_MSG;
+    log_to_file("cli start");
+    while (true)
+    {
+        // 不断获取输入值
+        std::string cmd;
+        log_to_file("cli read cmd");
+        std::getline(std::cin, cmd);
+        log_to_file(cmd);
+
+        // 任何状态下都可以进行的指令
+        if (cmd == "ucci")
+        {
+            ucci();
+        }
+        else if (cmd == "isready")
+        {
+            isready();
+        }
+        else if (cmd.substr(0, 9) == "setoption")
+        {
+            size_t name_pos = cmd.find("name");
+            size_t value_pos = cmd.find("value");
+            std::string name = cmd.substr(name_pos + 5, value_pos - name_pos - 6);
+            std::string value = cmd.substr(value_pos + 6);
+            setoption(name, value);
+        }
+        else if (cmd == "quit")
+        {
+            quit();
+        }
+        if (!searchCompleted) // 搜索中才可以进行的指令
+        {
+            if (cmd == "stop")
+            {
+                stop();
+            }
+        }
+        else // 没有进入搜索状态才可以进行的指令
+        {
+            if (cmd.substr(0, 2) == "go")
+            {
+                // AI 生成的一个movetime和depth解析的代码
+                int timeArg = maxTime;
+                int depthArg = maxDepth;
+
+                size_t pos = 2;
+                auto nextToken = [&](size_t& p) -> std::string {
+                    p = cmd.find_first_not_of(' ', p);
+                    if (p == std::string::npos) return "";
+                    size_t q = cmd.find(' ', p);
+                    std::string tok = (q == std::string::npos) ? cmd.substr(p) : cmd.substr(p, q - p);
+                    p = (q == std::string::npos) ? std::string::npos : q + 1;
+                    return tok;
+                };
+
+                std::string token = nextToken(pos);
+                while (!token.empty())
+                {
+                    if (token == "depth")
+                    {
+                        std::string val = nextToken(pos);
+                        if (!val.empty())
+                        {
+                            depthArg = std::stoi(val);
+                        }
+                    }
+                    else if (token == "movetime")
+                    {
+                        std::string val = nextToken(pos);
+                        if (!val.empty())
+                        {
+                            timeArg = std::stoi(val);
+                        }
+                    }
+                    token = nextToken(pos);
+                }
+
+                go(timeArg, depthArg);
+            }
+            else if (cmd.substr(0, 8) == "position")
+            {
+                std::string fen = "";
+                std::string moves = "";
+                size_t moves_pos = cmd.find("moves");
+
+                if (moves_pos == std::string::npos) // 没有moves参数的情况
+                {
+                    fen = cmd.substr(9);
+                    position(fen, MOVES{});
+                }
+                else // 有moves参数的情况
+                {
+                    fen = cmd.substr(9, moves_pos - 10);
+                    moves = cmd.substr(moves_pos + 6) + " ";
+                    MOVES moveList = parseMovesInput(moves);
+                    position(fen, moveList);
+                }
+                continue;
+            }
+            else if (cmd.substr(0, 8) == "banmoves")
+            {
+                std::string moves = cmd.substr(9);
+                MOVES moveList = parseMovesInput(moves);
+                banmoves(moveList);
+            }
+        }
+    }
+}
+
+// ucci
+void UCCI::ucci()
+{
+    log_to_file("$ucci");
+    if (!ready)
+    {
+        std::string defaultFen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
+        this->search = std::make_unique<Search>(fenToPieceidmap(defaultFen), RED);
+        ready = true;
+        std::cout << "id name Chess98" << std::endl;
+        std::cout << "id author ForYes&HeliumAreFlying" << std::endl;
+        std::cout << "option usebook type check default true" << std::endl;
+        std::cout << "ucciok" << std::endl;
+        std::cout.flush();
+    }
 }
 
 // isready
-UCCI::MSG UCCI::isready() const
+void UCCI::isready() const
 {
-    return READY_MSG;
+    log_to_file("$isready");
+    std::cout << (ready ? "readyok" : "") << std::endl;
 }
 
 // setoption my_option_name my_option_value
-UCCI::MSG UCCI::setoption(const std::string& name, const std::string& value)
+void UCCI::setoption(const std::string& name, const std::string& value)
 {
     if (name == "usebook")
     {
         search->useBook = (value == "true" || value == "1");
     }
-    else if (name == "newgame")
-    {
-        ucci();
-    }
     else if (name == "usemillisec")
     {
-        return SUCCESS_MSG;
+        return;
     }
-    else
-    {
-        return "Unknown option name";
-    }
-    return SUCCESS_MSG;
 }
 
 // position my_startpos_fen my_moves
-UCCI::MSG UCCI::position(const std::string& fenCode, const MOVES& moves)
+void UCCI::position(const std::string& fenCode, const MOVES& moves)
 {
     PIECEID_MAP pieceidMap = fenToPieceidmap(fenCode);
     TEAM team = (fenCode.find("w") != std::string::npos) ? RED : BLACK;
@@ -101,92 +239,51 @@ UCCI::MSG UCCI::position(const std::string& fenCode, const MOVES& moves)
     {
         search->board.doMove(move);
     }
-    return SUCCESS_MSG;
 }
 
 // banmove my_banned_moves
-UCCI::MSG UCCI::banmoves(const MOVES& moves)
+void UCCI::banmoves(const MOVES& moves)
 {
     for (const Move& move : moves)
     {
         search->bannedMoves[move.id] = 1;
     }
-    return SUCCESS_MSG;
 }
 
 // stop
-UCCI::MSG UCCI::go()
+void UCCI::go(int time, int depth)
 {
+    log_to_file("$go" + time + depth);
+    maxTime = time;
+    maxDepth = depth;
     searchThread = std::thread([&]() {
+        searchCompleted = false;
         Result result = search->searchMain(maxDepth, maxTime);
-        searchCompleted = true;
-        searchResult = result;
+        // 如果search进程没有被强行终止
+        if (!searchCompleted)
+        {
+            std::cout << "bestmove " << convertToUCCIMove(result.move) << std::endl;
+            searchCompleted = true;
+            searchResult = result;
+        }
     });
     searchThread.detach();
-    while (!searchCompleted)
-    {
-        wait(50);
-    }
-    return convertToUCCIMove(searchResult.move);
 }
 
 // stop
-UCCI::MSG UCCI::stop()
+void UCCI::stop()
 {
-    Result result = search->info.getBestResult();
-    return convertToUCCIMove(result.move);
+    // 强行终止search进程
+    searchCompleted = true;
+    search->stop = true;
+    // 获取目前搜索到的最佳结果
+    searchResult = search->info.getBestResult();
+    // 输出结果
+    std::cout << "bestmove " << convertToUCCIMove(searchResult.move) << std::endl;
 }
 
 // quit
-UCCI::MSG UCCI::quit()
+void UCCI::quit()
 {
-    exit(0);
-    return SUCCESS_MSG;
-}
-
-void UCCI::cli()
-{
-    while (true)
-    {
-        MSG command;
-        std::getline(std::cin, command);
-        if (command == "go")
-        {
-            go();
-            search->board.doMove(search->info.getBestResult().move);
-            std::cout << pieceidmapToFen(search->board.pieceidMap, search->board.team) << std::endl;
-        }
-        else if (command.substr(0, 8) == "position")
-        {
-            std::string fen = "";
-            std::string moves = "";
-            size_t moves_pos = command.find("moves");
-            if (moves_pos == std::string::npos)
-            {
-                fen = command.substr(9);
-                position(fen, MOVES{});
-            }
-            else
-            {
-                fen = command.substr(9, moves_pos - 10);
-                moves = command.substr(moves_pos + 6);
-                moves += " ";
-                // 按空格将moves切开
-                MOVES moveList;
-                size_t start = 0;
-                size_t end = moves.find(' ');
-                while (end != std::string::npos)
-                {
-                    std::string moveStr = moves.substr(start, end - start);
-                    if (moveStr.length() == 4)
-                    {
-                        moveList.emplace_back(convertToEngineMove(moveStr));
-                    }
-                    start = end + 1;
-                    end = moves.find(' ', start);
-                }
-                position(fen, moveList);
-            }
-        }
-    }
+    std::exit(0);
 }

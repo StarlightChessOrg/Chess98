@@ -29,3 +29,9 @@ void testByUI()
 
     ui(team, aiFirst, maxDepth, maxTime, fenCode);
 }
+
+void testByUCCI()
+{
+    UCCI ucci;
+    ucci.ucci();
+}

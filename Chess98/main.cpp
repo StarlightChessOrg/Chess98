@@ -10,6 +10,6 @@ static inline void setRealtimePriority()
 int main()
 {
     setRealtimePriority();
-    testByUI();
+    testByUCCI();
     return 0;
 }
