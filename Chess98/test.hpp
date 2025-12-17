@@ -33,5 +33,4 @@ void testByUI()
 void testByUCCI()
 {
     UCCI ucci;
-    ucci.ucci();
 }

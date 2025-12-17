@@ -7,9 +7,45 @@ static inline void setRealtimePriority()
 #endif
 }
 
+std::atomic<bool> ucciValidate{false};
+
+void validateUCCI()
+{
+    std::string tmp = "";
+    std::getline(std::cin, tmp);
+    if (tmp == "ucci")
+    {
+        ucciValidate = true;
+    }
+}
+
 int main()
 {
     setRealtimePriority();
-    UCCI ucci;
+    std::thread v(validateUCCI);
+    v.detach();
+    auto start = std::chrono::high_resolution_clock::now();
+    while (true)
+    {
+        auto end = std::chrono::high_resolution_clock::now();
+        int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+        if (ucciValidate == true)
+        {
+            break;
+        }
+        if (duration > 200)
+        {
+            break;
+        }
+    }
+    if (ucciValidate)
+    {
+        std::cout << "ucciok" << std::endl;
+        testByUCCI();
+    }
+    else
+    {
+        testByUI();
+    }
     return 0;
 }
