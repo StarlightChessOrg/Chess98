@@ -10,8 +10,6 @@ static inline void setRealtimePriority()
 int main()
 {
     setRealtimePriority();
-    std::thread legacyUI(testByUI);
-    legacyUI.detach();
     UCCI ucci;
     return 0;
 }

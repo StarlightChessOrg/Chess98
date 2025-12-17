@@ -1,24 +1,20 @@
 #include "search.hpp"
 
-void log_to_file(const std::string& message)
-{
-    std::ofstream file("debug_log.txt", std::ios::app); // append模式
-    if (file.is_open())
-    {
-        file << message << std::endl;
-        file.close();
-    }
-}
 class UCCI
 {
 public:
-    UCCI() { cli(); };
+    UCCI()
+    {
+        std::string defaultFen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
+        this->search = std::make_unique<Search>(fenToPieceidmap(defaultFen), RED);
+        cli();
+    };
 
 public:
     void cli();
 
 public:
-    void ucci();
+    void ucci() const;
     void isready() const;
     void setoption(const std::string& name, const std::string& value);
     void position(const std::string& fenCode, const MOVES& moves);
@@ -83,14 +79,11 @@ public:
 // cli
 void UCCI::cli()
 {
-    log_to_file("cli start");
     while (true)
     {
         // 不断获取输入值
         std::string cmd;
-        log_to_file("cli read cmd");
         std::getline(std::cin, cmd);
-        log_to_file(cmd);
 
         // 任何状态下都可以进行的指令
         if (cmd == "ucci")
@@ -162,20 +155,21 @@ void UCCI::cli()
 
                 go(timeArg, depthArg);
             }
-            else if (cmd.substr(0, 8) == "position")
+            else if (cmd.substr(0, 12) == "position fen")
             {
                 std::string fen = "";
                 std::string moves = "";
                 size_t moves_pos = cmd.find("moves");
+                std::cout << cmd.substr(0, 12) << std::endl;
 
                 if (moves_pos == std::string::npos) // 没有moves参数的情况
                 {
-                    fen = cmd.substr(9);
+                    fen = cmd.substr(13);
                     position(fen, MOVES{});
                 }
                 else // 有moves参数的情况
                 {
-                    fen = cmd.substr(9, moves_pos - 10);
+                    fen = cmd.substr(13, moves_pos - 10);
                     moves = cmd.substr(moves_pos + 6) + " ";
                     MOVES moveList = parseMovesInput(moves);
                     position(fen, moveList);
@@ -193,27 +187,15 @@ void UCCI::cli()
 }
 
 // ucci
-void UCCI::ucci()
+void UCCI::ucci() const
 {
-    log_to_file("$ucci");
-    if (!ready)
-    {
-        std::string defaultFen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-        this->search = std::make_unique<Search>(fenToPieceidmap(defaultFen), RED);
-        ready = true;
-        std::cout << "id name Chess98" << std::endl;
-        std::cout << "id author ForYes&HeliumAreFlying" << std::endl;
-        std::cout << "option usebook type check default true" << std::endl;
-        std::cout << "ucciok" << std::endl;
-        std::cout.flush();
-    }
+    std::cout << "ucciok" << std::endl;
 }
 
 // isready
 void UCCI::isready() const
 {
-    log_to_file("$isready");
-    std::cout << (ready ? "readyok" : "") << std::endl;
+    std::cout << "readyok" << std::endl;
 }
 
 // setoption my_option_name my_option_value
@@ -253,7 +235,6 @@ void UCCI::banmoves(const MOVES& moves)
 // stop
 void UCCI::go(int time, int depth)
 {
-    log_to_file("$go" + time + depth);
     maxTime = time;
     maxDepth = depth;
     searchThread = std::thread([&]() {
