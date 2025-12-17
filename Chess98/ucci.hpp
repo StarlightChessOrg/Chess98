@@ -25,7 +25,7 @@ public:
 
 public:
     std::unique_ptr<Search> search = nullptr;
-    int maxTime = 200;
+    int maxTime = 3000;
     int maxDepth = 20;
     bool ready = false;
     bool searchCompleted = true;
