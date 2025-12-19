@@ -160,7 +160,9 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
 
     // 界面
     writeFile("./_server_.js", SERVER_CODE);
-    command("powershell.exe -command \"& {Start-Process -WindowStyle hidden node _server_.js}\"");
+    std::thread serverThread([]() { command("node ./_server_.js"); });
+    serverThread.detach();
+    wait(500);
     setBoardCode(board);
     std::string moveFileContent = "____";
 

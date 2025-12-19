@@ -25,6 +25,7 @@ int main()
     std::thread v(validateUCCI);
     v.detach();
     auto start = std::chrono::high_resolution_clock::now();
+    std::cout << "input ucci to enable ucci mode (within 1 second)" << std::endl;
     while (true)
     {
         auto end = std::chrono::high_resolution_clock::now();
@@ -33,7 +34,7 @@ int main()
         {
             break;
         }
-        if (duration > 200)
+        if (duration > 1000)
         {
             break;
         }
