@@ -227,7 +227,11 @@ protected:
 public:
     void setSituation(const std::string& fen) { situation = fen; }
 
-    void setBookmove() { isBookmove = true; }
+    void setBookmove()
+    {
+        isBookmove = true;
+        print();
+    }
 
     void setInfo(int vl, Move move, int duration)
     {
@@ -238,6 +242,7 @@ public:
             this->durationMs[depth] = duration;
         }
         depth++;
+        print();
     }
 
     Result getBestResult() const

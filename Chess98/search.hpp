@@ -144,7 +144,6 @@ Result Search::searchMain(int maxDepth, int maxTimeMs = 3)
     {
         info.setBookmove();
         info.setInfo(1, openbookResult.move, 1);
-        info.print();
         info.clear();
         return openbookResult;
     }
@@ -173,7 +172,6 @@ Result Search::searchMain(int maxDepth, int maxTimeMs = 3)
 
         // info
         info.setInfo(bestNode.vl, bestNode.move, duration);
-        info.print();
 
         // timeout break
         if (duration >= maxTimeMs / 3)
