@@ -432,37 +432,37 @@ MOVES MovesGen::getMoves(Board& board)
 
     MOVES moves{};
 
-    for (const Piece& piece : board.getPiecesReg(board.team * R_ROOK))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_ROOK))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_CANNON))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_CANNON))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_KNIGHT))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_KNIGHT))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_PAWN))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_PAWN))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_BISHOP))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_BISHOP))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_GUARD))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_GUARD))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_KING))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_KING))
     {
         std::vector<Move> ret = MovesGen::generateMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
@@ -857,37 +857,37 @@ MOVES MovesGen::getCaptureMoves(Board& board)
 
     MOVES moves{};
 
-    for (const Piece& piece : board.getPiecesReg(board.team * R_ROOK))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_ROOK))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_PAWN))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_PAWN))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_CANNON))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_CANNON))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_KNIGHT))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_KNIGHT))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_BISHOP))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_BISHOP))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_GUARD))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_GUARD))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
     }
-    for (const Piece& piece : board.getPiecesReg(board.team * R_KING))
+    for (const Piece& piece : board.getPiecesPyType(board.team * R_KING))
     {
         std::vector<Move> ret = MovesGen::generateCaptureMovesOn(board, piece.x, piece.y);
         moves.insert(moves.end(), ret.begin(), ret.end());
@@ -911,8 +911,8 @@ MOVES MovesGen::getCaptureMoves(Board& board)
 
 MOVES MovesGen::facedKings(const Board& board)
 {
-    const Piece& rKing = board.getPieceReg(board.team * R_KING);
-    const Piece& bKing = board.getPieceReg(board.team * B_KING);
+    const Piece& rKing = board.getPieceByType(board.team * R_KING);
+    const Piece& bKing = board.getPieceByType(board.team * B_KING);
     if (rKing.x == bKing.x)
     {
         UINT32 bitlineX = board.getBitLineX(rKing.x);

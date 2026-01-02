@@ -27,10 +27,10 @@ public:
     std::vector<PIECE_INDEX> redPieces{};
     std::vector<PIECE_INDEX> blackPieces{};
     std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
-    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceRegistry{};
+    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceTypes{};
 
 public:
-    bool isKingLive(TEAM team) const { return team == RED ? getPieceReg(R_KING).isLive : getPieceReg(B_KING).isLive; }
+    bool isKingLive(TEAM team) const { return team == RED ? getPieceByType(R_KING).isLive : getPieceByType(B_KING).isLive; }
     int evaluate() const { return team == RED ? vlRed - vlBlack + vlAdvanced : vlBlack - vlRed + vlAdvanced; };
     void doNullMove() { team = -team; }
     void undoNullMove() { team = -team; }
@@ -46,8 +46,8 @@ public:
     Piece piecePosition(int x, int y) const;
     PIECES getAllLivePieces() const;
     PIECES getPiecesByTeam(TEAM team) const;
-    Piece getPieceReg(PIECEID pieceid) const;
-    PIECES getPiecesReg(PIECEID pieceid) const;
+    Piece getPieceByType(PIECEID pieceid) const;
+    PIECES getPiecesPyType(PIECEID pieceid) const;
     bool isRepeated() const;
     bool hasCrossedRiver(int x, int y) const;
     bool isInPalace(int x, int y) const;
@@ -190,7 +190,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
     this->bitboard = std::make_unique<Bitboard>(pieceidMap);
     for (const PIECEID& id : ALL_PIECEIDS)
     {
-        this->pieceRegistry[id] = std::vector<PIECE_INDEX>{};
+        this->pieceTypes[id] = std::vector<PIECE_INDEX>{};
     }
     for (int x = 0; x < 9; x++)
     {
@@ -205,7 +205,7 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
 
                 this->pieces.emplace_back(piece);
                 this->pieceIndexMap[x][y] = index;
-                this->pieceRegistry[pieceid].emplace_back(this->pieces.back().pieceIndex);
+                this->pieceTypes[pieceid].emplace_back(this->pieces.back().pieceIndex);
                 if (pieceid > 0)
                 {
                     this->redPieces.emplace_back(index);
@@ -301,15 +301,15 @@ PIECES Board::getPiecesByTeam(TEAM team) const
     return result;
 }
 
-Piece Board::getPieceReg(PIECEID pieceid) const
+Piece Board::getPieceByType(PIECEID pieceid) const
 {
-    return this->pieceIndex(this->pieceRegistry.at(pieceid)[0]);
+    return this->pieceIndex(this->pieceTypes.at(pieceid)[0]);
 }
 
-PIECES Board::getPiecesReg(PIECEID pieceid) const
+PIECES Board::getPiecesPyType(PIECEID pieceid) const
 {
     PIECES result{};
-    for (PIECE_INDEX pieceindex : this->pieceRegistry.at(pieceid))
+    for (PIECE_INDEX pieceindex : this->pieceTypes.at(pieceid))
     {
         const Piece& piece = this->pieceIndex(pieceindex);
         if (piece.isLive)
@@ -454,7 +454,7 @@ bool Board::isInPalace(int x, int y) const
 
 bool Board::inCheck(TEAM judgeTeam) const
 {
-    const Piece& king = judgeTeam == RED ? this->getPieceReg(R_KING) : this->getPieceReg(B_KING);
+    const Piece& king = judgeTeam == RED ? this->getPieceByType(R_KING) : this->getPieceByType(B_KING);
     int x = king.x;
     int y = king.y;
     const TEAM& team = king.team;
