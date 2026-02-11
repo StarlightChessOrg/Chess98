@@ -5,11 +5,7 @@
 void testByUI()
 {
     TEAM team = RED;
-#ifndef AI_FIRST
     bool aiFirst = true;
-#else
-    bool aiFirst = bool(AI_FIRST);
-#endif
     int maxDepth = 20;
     int maxTime = 3000;
     std::string fenCode = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
