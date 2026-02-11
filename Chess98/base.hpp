@@ -333,10 +333,12 @@ fenToPieceidmap(std::string fenCode)
     PIECEID_MAP pieceidMap = PIECEID_MAP {};
     int colNum = 9;
     int rowNum = 0;
-    std::map<char, PIECEID> pairs { { 'R', R_ROOK }, { 'N', R_KNIGHT }, { 'H', R_KNIGHT }, { 'B', R_BISHOP }, { 'E', R_BISHOP },
+    std::map<char, PIECEID> pairs {
+        { 'R', R_ROOK }, { 'N', R_KNIGHT }, { 'H', R_KNIGHT }, { 'B', R_BISHOP }, { 'E', R_BISHOP },
         { 'G', R_GUARD }, { 'A', R_GUARD }, { 'K', R_KING }, { 'C', R_CANNON }, { 'P', R_PAWN },
         { 'r', B_ROOK }, { 'n', B_KNIGHT }, { 'h', B_KNIGHT }, { 'b', B_BISHOP }, { 'e', B_BISHOP },
-        { 'g', B_GUARD }, { 'a', B_GUARD }, { 'k', B_KING }, { 'c', B_CANNON }, { 'p', B_PAWN } };
+        { 'g', B_GUARD }, { 'a', B_GUARD }, { 'k', B_KING }, { 'c', B_CANNON }, { 'p', B_PAWN }
+    };
     for (int i = 0; i < fenCode.size(); i++) {
         if (fenCode[i] >= '1' && fenCode[i] <= '9') {
             rowNum += fenCode[i] - '0';
