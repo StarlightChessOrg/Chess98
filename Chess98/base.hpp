@@ -23,6 +23,7 @@ class Trick;
 class TransItem;
 class Information;
 using uint32 = unsigned int;
+using POS = char;
 using PIECE_INDEX = size_t;
 using PIECEID = int;
 using TEAM = int;
@@ -39,8 +40,6 @@ using SEARCH_TYPE = int;
 constexpr int INF = 1000000;
 constexpr int BAN = INF - 2000;
 constexpr int ILLEGAL_VAL = INF * 2;
-constexpr int ENGINE_MAX_DEPTH = 64;
-constexpr PIECEID EMPTY_PIECEID = 0;
 constexpr PIECEID R_KING = 1;
 constexpr PIECEID R_GUARD = 2;
 constexpr PIECEID R_BISHOP = 3;
@@ -55,11 +54,8 @@ constexpr PIECEID B_KNIGHT = -4;
 constexpr PIECEID B_ROOK = -5;
 constexpr PIECEID B_CANNON = -6;
 constexpr PIECEID B_PAWN = -7;
-constexpr PIECEID OVERFLOW_PIECEID = 8;
-constexpr TEAM EMPTY_TEAM = 0;
 constexpr TEAM RED = 1;
 constexpr TEAM BLACK = -1;
-constexpr TEAM OVERFLOW_TEAM = 2;
 constexpr MOVE_TYPE NORMAL = 0;
 constexpr MOVE_TYPE HISTORY = 1;
 constexpr MOVE_TYPE CAPTURE = 2;
@@ -78,10 +74,9 @@ constexpr std::array<PIECEID, 14> ALL_PIECEIDS {
     B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN
 };
 
-class Piece {
-public:
+struct Piece {
     Piece() = default;
-    Piece(PIECEID pid, int x, int y, PIECE_INDEX index)
+    Piece(PIECEID pid, POS x, POS y, PIECE_INDEX index)
         : pieceid(pid)
         , x(x)
         , y(y)
@@ -94,59 +89,59 @@ public:
         assert(index < 33);
     }
 
-public:
     PIECEID pieceid { 0 };
-    int x { 0 };
-    int y { 0 };
+    POS x { 0 };
+    POS y { 0 };
     PIECE_INDEX pieceIndex { 0 };
-    TEAM team { EMPTY_TEAM };
+    TEAM team { 0 };
     bool isLive { false };
 };
 
-class Move {
-public:
+struct Move {
     Move() = default;
-    Move(int x1, int y1, int x2, int y2)
+    Move(POS x1, POS y1, POS x2, POS y2)
         : x1(x1)
         , y1(y1)
         , x2(x2)
         , y2(y2)
     {
+        assert(x1 > -1 && x1 < 9 && y1 > -1 && y1 < 10);
+        assert(x2 > -1 && x2 < 9 && y2 > -1 && y2 < 10);
     }
+
+    POS x1 { 0 };
+    POS y1 { 0 };
+    POS x2 { 0 };
+    POS y2 { 0 };
+    MOVE_TYPE type { NORMAL };
+    PIECE_INDEX attacker { 0 };
+    PIECE_INDEX captured { 0 };
 
     bool operator==(const Move& move) const
     {
         return x1 == move.x1 && y1 == move.y1 && x2 == move.x2 && y2 == move.y2;
     }
 
-    bool start_eq(const Move& move) const
+    bool beg_pos_eq(const Move& move) const
     {
         return x1 == move.x1 && y1 == move.y1;
     }
 
-public:
-    int x1 { 0 };
-    int y1 { 0 };
-    int x2 { 0 };
-    int y2 { 0 };
-    MOVE_TYPE moveType { NORMAL };
-    bool isCheckingMove { false };
-    Piece attacker {};
-    Piece captured {};
+    bool end_pos_eq(const Move& move) const
+    {
+        return x2 == move.x2 && y2 == move.y2;
+    }
 };
 
-class TransItem {
-public:
+struct TransItem {
     TransItem() = default;
-
-public:
-    int hash_lock = 0;
-    int vlExact = -INF;
-    int vlBeta = -INF;
-    int vlAlpha = -INF;
-    int exactDepth = 0;
-    int betaDepth = 0;
-    int alphaDepth = 0;
+    int hash_lock { 0 };
+    int vlExact { 0 };
+    int vlBeta { 0 };
+    int vlAlpha { 0 };
+    int exactDepth { 0 };
+    int betaDepth { 0 };
+    int alphaDepth { 0 };
     Move exact_move {};
     Move beta_move {};
     Move alpha_move {};
@@ -154,9 +149,19 @@ public:
 
 namespace utils {
 
-inline bool is_over_board(int x, int y)
+inline bool is_over_board(int& x, int& y)
 {
     return x > -1 && x < 9 && y > -1 && y < 10;
+}
+
+inline std::string to_ucci_move(Move& move)
+{
+    std::string ret { "" };
+    ret += 'a' + move.x1;
+    ret += '0' + move.y1;
+    ret += 'a' + move.x2;
+    ret += '0' + move.y2;
+    return ret;
 }
 
 inline void wait(int ms)
@@ -165,7 +170,7 @@ inline void wait(int ms)
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-void command(std::string str)
+inline void command(std::string str)
 {
     int res = system(str.c_str());
     assert(res == 0);
@@ -204,25 +209,25 @@ static constexpr char pid_letter_table[15] = {
     '?', 'K', 'A', 'B', 'N', 'R', 'C', 'P'
 };
 
-inline PIECEID letter_pid(char ch)
+inline PIECEID letter_pid(char& ch)
 {
     assert(letter_pid_table[ch - 'A'] > -8 && letter_pid_table[ch - 'A'] < 8);
     return letter_pid_table[ch - 'A'];
 }
 
-inline char pid_letter(PIECEID pid)
+inline char pid_letter(PIECEID& pid)
 {
     assert(pid > -8 && pid < 8);
     return pid_letter_table[pid + 7];
 }
 
-inline TEAM team(FEN fen)
+inline TEAM team(FEN& fen)
 {
     assert(fen.find("w") != std::string::npos || fen.find("b") != std::string::npos);
     return fen.find("w") != std::string::npos ? RED : BLACK;
 }
 
-PIECEID_MAP to_pid_matrix(FEN fen)
+PIECEID_MAP to_pid_matrix(FEN& fen)
 {
     PIECEID_MAP ret {};
     size_t col = 0;
@@ -243,14 +248,14 @@ PIECEID_MAP to_pid_matrix(FEN fen)
     return ret;
 }
 
-FEN to_fen(PIECEID_MAP pid_matrix, TEAM team)
+FEN to_fen(PIECEID_MAP& pid_matrix, TEAM& team)
 {
     std::string result = "";
     for (size_t y = 0; y < 10; y++) {
         int spaceCount = 0;
         for (size_t x = 0; x < 9; x++) {
             PIECEID pieceid = pid_matrix[x][9 - y];
-            if (pieceid == EMPTY_PIECEID) {
+            if (pieceid == 0) {
                 spaceCount++;
             } else {
                 if (spaceCount > 0) {
