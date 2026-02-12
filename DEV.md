@@ -17,34 +17,3 @@ Chess98的仓库内附带一些开发组件，便于测试。
 3. 终端运行 `node z`, 开始自动测试
 
 可以在 `tools/auto/z.js` 的文件头部更改对方人机等级
-
-### 跑谱器
-
-生成NNUE训练数据的工具。在 `Chess98/nnuefile.hpp` 内加上 `#define GENFILES` 启用跑谱器, 输出 json 文件到指定目录下。
-
-json 内容结构如下：
-
-```
-[
-    {
-        fen(string),
-        history: [...(int)],
-        data: [
-            {
-                depth(int),
-                data: [
-                    {
-                        moveid(int),
-                        fen_after_move(string),
-                        vl(int)
-                    },
-                    ...
-                ]
-            },
-            ...
-        ]
-    },
-    ...
-]
-```
-
