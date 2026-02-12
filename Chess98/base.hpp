@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -14,11 +15,6 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
-#ifdef _WIN32
-#include <windows.h>
-#elif __unix__
-#include <unistd.h>
-#endif
 
 class Piece;
 class Move;
@@ -26,182 +22,117 @@ class Result;
 class Trick;
 class TransItem;
 class Information;
-using uint64 = unsigned long long;
 using uint32 = unsigned int;
-using PIECE_INDEX = int;
+using PIECE_INDEX = size_t;
 using PIECEID = int;
 using TEAM = int;
+using FEN = std::string;
+using TRICK_RET = std::pair<bool, int>;
+using SEARCH_RET = std::pair<Move, int>;
 using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
 using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
 using PIECES = std::vector<Piece>;
 using MOVES = std::vector<Move>;
-const int INF = 1000000;
-const int BAN = INF - 2000;
-const int ILLEGAL_VAL = INF * 2;
-const int ENGINE_MAX_DEPTH = 64;
-const PIECE_INDEX EMPTY_INDEX = -1;
-const PIECEID EMPTY_PIECEID = 0;
-const PIECEID R_KING = 1;
-const PIECEID R_GUARD = 2;
-const PIECEID R_BISHOP = 3;
-const PIECEID R_KNIGHT = 4;
-const PIECEID R_ROOK = 5;
-const PIECEID R_CANNON = 6;
-const PIECEID R_PAWN = 7;
-const PIECEID B_KING = -1;
-const PIECEID B_GUARD = -2;
-const PIECEID B_BISHOP = -3;
-const PIECEID B_KNIGHT = -4;
-const PIECEID B_ROOK = -5;
-const PIECEID B_CANNON = -6;
-const PIECEID B_PAWN = -7;
-const PIECEID OVERFLOW_PIECEID = 8;
-const TEAM EMPTY_TEAM = 0;
-const TEAM RED = 1;
-const TEAM BLACK = -1;
-const TEAM OVERFLOW_TEAM = 2;
 using MOVE_TYPE = int;
-const MOVE_TYPE NORMAL = 0;
-const MOVE_TYPE HISTORY = 1;
-const MOVE_TYPE CAPTURE = 2;
-const MOVE_TYPE KILLER = 3;
-const MOVE_TYPE HASH = 4;
 using NODE_TYPE = int;
-const NODE_TYPE NONE_TYPE = 0;
-const NODE_TYPE ALPHA_TYPE = 1;
-const NODE_TYPE BETA_TYPE = 2;
-const NODE_TYPE EXACT_TYPE = 3;
 using SEARCH_TYPE = int;
-const SEARCH_TYPE ROOT = 0;
-const SEARCH_TYPE PV = 1;
-const SEARCH_TYPE CUT = 2;
-const SEARCH_TYPE QUIESC = 3;
-const std::vector<PIECEID> ALL_PIECEIDS = {
-    R_KING,
-    R_GUARD,
-    R_BISHOP,
-    R_KNIGHT,
-    R_ROOK,
-    R_CANNON,
-    R_PAWN,
-    B_KING,
-    B_GUARD,
-    B_BISHOP,
-    B_KNIGHT,
-    B_ROOK,
-    B_CANNON,
-    B_PAWN,
+constexpr int INF = 1000000;
+constexpr int BAN = INF - 2000;
+constexpr int ILLEGAL_VAL = INF * 2;
+constexpr int ENGINE_MAX_DEPTH = 64;
+constexpr PIECEID EMPTY_PIECEID = 0;
+constexpr PIECEID R_KING = 1;
+constexpr PIECEID R_GUARD = 2;
+constexpr PIECEID R_BISHOP = 3;
+constexpr PIECEID R_KNIGHT = 4;
+constexpr PIECEID R_ROOK = 5;
+constexpr PIECEID R_CANNON = 6;
+constexpr PIECEID R_PAWN = 7;
+constexpr PIECEID B_KING = -1;
+constexpr PIECEID B_GUARD = -2;
+constexpr PIECEID B_BISHOP = -3;
+constexpr PIECEID B_KNIGHT = -4;
+constexpr PIECEID B_ROOK = -5;
+constexpr PIECEID B_CANNON = -6;
+constexpr PIECEID B_PAWN = -7;
+constexpr PIECEID OVERFLOW_PIECEID = 8;
+constexpr TEAM EMPTY_TEAM = 0;
+constexpr TEAM RED = 1;
+constexpr TEAM BLACK = -1;
+constexpr TEAM OVERFLOW_TEAM = 2;
+constexpr MOVE_TYPE NORMAL = 0;
+constexpr MOVE_TYPE HISTORY = 1;
+constexpr MOVE_TYPE CAPTURE = 2;
+constexpr MOVE_TYPE KILLER = 3;
+constexpr MOVE_TYPE HASH = 4;
+constexpr NODE_TYPE NONE_TYPE = 0;
+constexpr NODE_TYPE ALPHA_TYPE = 1;
+constexpr NODE_TYPE BETA_TYPE = 2;
+constexpr NODE_TYPE EXACT_TYPE = 3;
+constexpr SEARCH_TYPE ROOT = 0;
+constexpr SEARCH_TYPE PV = 1;
+constexpr SEARCH_TYPE CUT = 2;
+constexpr SEARCH_TYPE QUIESC = 3;
+constexpr std::array<PIECEID, 14> ALL_PIECEIDS {
+    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
+    B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN
 };
-void wait(int ms);
-void command(std::string str);
-void readFile(std::string filename, std::string& content);
-void writeFile(std::string filename, std::string content);
-PIECEID_MAP
-fenToPieceidmap(std::string fenCode);
-std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team);
-TEAM fenToTeam(std::string fenCode);
 
 class Piece {
 public:
     Piece() = default;
-    Piece(PIECEID pieceid)
-        : pieceid(pieceid)
-    {
-    }
-    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
-        : pieceid(pieceid)
+    Piece(PIECEID pid, int x, int y, PIECE_INDEX index)
+        : pieceid(pid)
         , x(x)
         , y(y)
-        , pieceIndex(pieceIndex)
+        , pieceIndex(index)
+        , team(pid > 0 ? RED : BLACK)
+        , isLive(true)
     {
-        if (this->pieceid == EMPTY_PIECEID) {
-            this->team = EMPTY_TEAM;
-        } else if (this->pieceid == OVERFLOW_PIECEID) {
-            this->team = OVERFLOW_TEAM;
-        } else if (this->pieceid > 0) {
-            this->team = RED;
-        } else {
-            this->team = BLACK;
-        }
-        this->isLive = true;
+        assert(pid != 0);
+        assert(x < 9 && x > -1 && y < 10 && y > -1);
+        assert(index < 33);
     }
 
 public:
-    PIECEID pieceid = EMPTY_PIECEID;
-    int x = -1;
-    int y = -1;
-    PIECE_INDEX pieceIndex = -1;
-    int team = EMPTY_TEAM;
-    bool isLive = false;
+    PIECEID pieceid { 0 };
+    int x { 0 };
+    int y { 0 };
+    PIECE_INDEX pieceIndex { 0 };
+    TEAM team { EMPTY_TEAM };
+    bool isLive { false };
 };
 
 class Move {
 public:
     Move() = default;
-    Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL)
+    Move(int x1, int y1, int x2, int y2)
         : x1(x1)
         , y1(y1)
         , x2(x2)
         , y2(y2)
-        , val(val)
-        , moveType(moveType)
-        , id(x1 * 1000 + y1 * 100 + x2 * 10 + y2)
-        , startpos(x1 * 10 + y1)
-        , endpos(x2 * 10 + y2)
     {
     }
 
-    constexpr bool operator==(const Move& move) const
+    bool operator==(const Move& move) const
     {
-        return this->id == move.id;
+        return x1 == move.x1 && y1 == move.y1 && x2 == move.x2 && y2 == move.y2;
     }
 
-    constexpr bool operator!=(const Move& move) const
+    bool start_eq(const Move& move) const
     {
-        return this->id != move.id;
+        return x1 == move.x1 && y1 == move.y1;
     }
 
 public:
-    int id = -1;
-    int startpos = -1;
-    int endpos = -1;
-    int x1 = -1;
-    int y1 = -1;
-    int x2 = -1;
-    int y2 = -1;
-    int val = 0;
-    MOVE_TYPE moveType = NORMAL;
-    bool isCheckingMove = false;
+    int x1 { 0 };
+    int y1 { 0 };
+    int x2 { 0 };
+    int y2 { 0 };
+    MOVE_TYPE moveType { NORMAL };
+    bool isCheckingMove { false };
     Piece attacker {};
     Piece captured {};
-};
-
-class Result {
-public:
-    Result() = default;
-    Result(Move move, int vl)
-        : move(move)
-        , vl(vl)
-    {
-    }
-
-public:
-    Move move {};
-    int vl = 0;
-};
-
-class Trick {
-public:
-    Trick() = default;
-    Trick(int result)
-        : success(true)
-        , data(result)
-    {
-    }
-
-public:
-    bool success = false;
-    int data = 0;
 };
 
 class TransItem {
@@ -221,153 +152,104 @@ public:
     Move alpha_move {};
 };
 
-class Information {
-public:
-    Information() = default;
-    void clear()
-    {
-        isBookmove = false;
-        depth = 0;
-        printedDepth = 0;
-        situation = "";
-        durationMs.fill(0);
-        vlSearched.fill(0);
-        moveSearched.fill(Move {});
-    }
+namespace utils {
 
-public:
-    bool isBookmove = false;
-    int depth = 0;
-    std::string situation = "";
-    std::array<int, ENGINE_MAX_DEPTH> durationMs {};
-    std::array<int, ENGINE_MAX_DEPTH> vlSearched {};
-    std::array<Move, ENGINE_MAX_DEPTH> moveSearched {};
-
-protected:
-    int printedDepth = 0;
-
-public:
-    void setSituation(const std::string& fen)
-    {
-        situation = fen;
-    }
-
-    void setBookmove()
-    {
-        isBookmove = true;
-        print();
-    }
-
-    void setInfo(int vl, Move move, int duration)
-    {
-        if (depth < ENGINE_MAX_DEPTH) {
-            this->vlSearched[depth] = vl;
-            this->moveSearched[depth] = move;
-            this->durationMs[depth] = duration;
-        }
-        depth++;
-        print();
-    }
-
-    Result getBestResult() const
-    {
-        if (depth == 0) {
-            return Result {};
-        }
-        // 直接返回最深的搜索结果
-        return Result { moveSearched[depth - 1], vlSearched[depth - 1] };
-    }
-
-    void print()
-    {
-        if (printedDepth == 0) {
-            std::cout << "situation: " << situation << " ";
-            if (isBookmove) {
-                std::cout << "(openbook move)";
-            }
-            std::cout << std::endl;
-        }
-        while (printedDepth < depth) {
-            std::cout << "info depth " << (printedDepth + 1);
-            std::cout << " score cp " << vlSearched[printedDepth];
-            std::cout << " time " << durationMs[printedDepth];
-            printedDepth++;
-            std::cout << std::endl;
-        }
-    }
-};
-
-void wait(int ms)
+inline bool is_over_board(int x, int y)
 {
+    return x > -1 && x < 9 && y > -1 && y < 10;
+}
+
+inline void wait(int ms)
+{
+    assert(ms > 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
 void command(std::string str)
 {
     int res = system(str.c_str());
+    assert(res == 0);
 }
 
-void readFile(std::string filename, std::string& content)
+inline void readFile(std::string filename, std::string& content)
 {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
-    if (!file) {
-        content = "";
-    }
+    assert(file);
     std::string result((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     content = result;
 }
 
-void writeFile(std::string filename, std::string content)
+inline void writeFile(std::string filename, std::string content)
 {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
-    if (!file) {
-        std::cerr << "Failed to open file for writing: " << filename << std::endl;
-        return;
-    }
+    assert(file);
     file.write(content.c_str(), content.size());
 }
 
-PIECEID_MAP
-fenToPieceidmap(std::string fenCode)
-{
-    PIECEID_MAP pieceidMap = PIECEID_MAP {};
-    int colNum = 9;
-    int rowNum = 0;
-    std::map<char, PIECEID> pairs {
-        { 'R', R_ROOK }, { 'N', R_KNIGHT }, { 'H', R_KNIGHT }, { 'B', R_BISHOP }, { 'E', R_BISHOP },
-        { 'G', R_GUARD }, { 'A', R_GUARD }, { 'K', R_KING }, { 'C', R_CANNON }, { 'P', R_PAWN },
-        { 'r', B_ROOK }, { 'n', B_KNIGHT }, { 'h', B_KNIGHT }, { 'b', B_BISHOP }, { 'e', B_BISHOP },
-        { 'g', B_GUARD }, { 'a', B_GUARD }, { 'k', B_KING }, { 'c', B_CANNON }, { 'p', B_PAWN }
-    };
-    for (int i = 0; i < fenCode.size(); i++) {
-        if (fenCode[i] >= '1' && fenCode[i] <= '9') {
-            rowNum += fenCode[i] - '0';
-            continue;
-        } else if (fenCode[i] == '/') {
-            rowNum = 0;
-            colNum--;
-            continue;
-        } else if (fenCode[i] == ' ') {
-            break;
-        } else {
-            pieceidMap[rowNum][colNum] = pairs.at(fenCode[i]);
-        }
-        rowNum++;
-    }
+} // namespace utils
 
-    return pieceidMap;
+namespace fen {
+
+static constexpr PIECEID letter_pid_table[58] = {
+    R_GUARD, R_BISHOP, R_CANNON, 0, R_BISHOP, 0, R_GUARD, R_KNIGHT,
+    0, 0, R_KING, 0, 0, R_KNIGHT, 0, R_PAWN,
+    0, R_ROOK, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    B_GUARD, B_BISHOP, B_CANNON, 0, B_BISHOP, 0, B_GUARD, B_KNIGHT,
+    0, 0, B_KING, 0, 0, B_KNIGHT, 0, B_PAWN,
+    0, B_ROOK, 0, 0, 0, 0, 0, 0, 0, 0
+};
+static constexpr char pid_letter_table[15] = {
+    'p', 'c', 'r', 'n', 'b', 'a', 'k',
+    '?', 'K', 'A', 'B', 'N', 'R', 'C', 'P'
+};
+
+inline PIECEID letter_pid(char ch)
+{
+    assert(letter_pid_table[ch - 'A'] > -8 && letter_pid_table[ch - 'A'] < 8);
+    return letter_pid_table[ch - 'A'];
 }
 
-std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
+inline char pid_letter(PIECEID pid)
+{
+    assert(pid > -8 && pid < 8);
+    return pid_letter_table[pid + 7];
+}
+
+inline TEAM team(FEN fen)
+{
+    assert(fen.find("w") != std::string::npos || fen.find("b") != std::string::npos);
+    return fen.find("w") != std::string::npos ? RED : BLACK;
+}
+
+PIECEID_MAP to_pid_matrix(FEN fen)
+{
+    PIECEID_MAP ret {};
+    size_t col = 0;
+    size_t row = 0;
+    for (size_t i = 0; i < fen.size(); i++) {
+        if (fen[i] >= '1' && fen[i] <= '9') {
+            row += fen[i] - '0';
+        } else if (fen[i] == '/') {
+            row = 0;
+            col += 1;
+        } else if (fen[i] == ' ') {
+            break;
+        } else {
+            ret[row][9 - col] = letter_pid(fen[i]);
+            row += 1;
+        }
+    }
+    return ret;
+}
+
+FEN to_fen(PIECEID_MAP pid_matrix, TEAM team)
 {
     std::string result = "";
-    int spaceCount = 0;
-    std::map<PIECEID, char> pairs { { R_KING, 'K' }, { R_GUARD, 'A' }, { R_BISHOP, 'B' }, { R_KNIGHT, 'N' }, { R_ROOK, 'R' },
-        { R_CANNON, 'C' }, { R_PAWN, 'P' }, { B_KING, 'k' }, { B_GUARD, 'a' }, { B_BISHOP, 'b' },
-        { B_KNIGHT, 'n' }, { B_ROOK, 'r' }, { B_CANNON, 'c' }, { B_PAWN, 'p' } };
-    for (int x = 9; x >= 0; x--) {
-        for (int y = 0; y < 9; y++) {
-            PIECEID pieceid = pieceidMap[y][x];
+    for (size_t y = 0; y < 10; y++) {
+        int spaceCount = 0;
+        for (size_t x = 0; x < 9; x++) {
+            PIECEID pieceid = pid_matrix[x][9 - y];
             if (pieceid == EMPTY_PIECEID) {
                 spaceCount++;
             } else {
@@ -375,23 +257,17 @@ std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
                     result += std::to_string(spaceCount);
                     spaceCount = 0;
                 }
-                result += pairs.at(pieceid);
+                result += pid_letter(pieceid);
             }
         }
         if (spaceCount > 0) {
             result += std::to_string(spaceCount);
-            spaceCount = 0;
         }
         result += "/";
     }
     result.pop_back();
     result += team == RED ? " w" : " b";
-    result += " - - 0 1";
-
     return result;
 }
 
-TEAM fenToTeam(std::string fen)
-{
-    return fen.find("w") != std::string::npos ? RED : BLACK;
-}
+} // namespace fen
