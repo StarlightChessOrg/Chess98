@@ -3,9 +3,8 @@
 
 using HASH_KEY_MAP = std::array<std::array<int, 10>, 9>;
 using HASH_COLLECTION = std::array<HASH_KEY_MAP, 14>;
-const int get_hash_key(PIECEID pid, int x, int y);
-const int get_hash_lock(PIECEID pid, int x, int y);
-
+int get_hash_key(PIECEID pid, int x, int y);
+int get_hash_lock(PIECEID pid, int x, int y);
 constexpr int PLAYER_KEY = 1099503838;
 constexpr int PLAYER_LOCK = 1730021002;
 
@@ -379,12 +378,12 @@ constexpr HASH_COLLECTION HASHLOCKS {
     BLACK_PAWN_LOCK,
 };
 
-const int get_hash_key(PIECEID pid, int x, int y)
+int get_hash_key(PIECEID pid, int x, int y)
 {
     return HASHKEYS[pid > 0 ? pid - 1 : -pid + 7][x][y];
 }
 
-const int get_hash_lock(PIECEID pid, int x, int y)
+int get_hash_lock(PIECEID pid, int x, int y)
 {
     return HASHLOCKS[pid > 0 ? pid - 1 : -pid + 7][x][y];
 }

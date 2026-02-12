@@ -2,9 +2,8 @@
 #include "base.hpp"
 
 class Bitboard;
-using UINT32 = unsigned;
-using BITARRAY_X = std::array<UINT32, 9>;
-using BITARRAY_Y = std::array<UINT32, 10>;
+using BITARRAY_X = std::array<int, 9>;
+using BITARRAY_Y = std::array<int, 10>;
 using REGION_ROOK = std::array<int, 2>;
 using REGION_CANNON = std::array<int, 4>;
 using TYPE_ROOK_CACHE = std::array<std::array<REGION_ROOK, 10>, 1024>;
@@ -21,13 +20,13 @@ protected:
     BITARRAY_Y yBitBoard { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 public:
-    REGION_ROOK getRookRegion(UINT32 bitline, int index, int endpos);
-    REGION_CANNON getCannonRegion(UINT32 bitline, int index, int endpos);
-    UINT32 getBitlineX(int x) const
+    REGION_ROOK getRookRegion(int bitline, int index, int endpos);
+    REGION_CANNON getCannonRegion(int bitline, int index, int endpos);
+    int getBitlineX(int x) const
     {
         return this->xBitBoard[x];
     }
-    UINT32 getBitlineY(int y) const
+    int getBitlineY(int y) const
     {
         return this->yBitBoard[y];
     }
@@ -35,14 +34,14 @@ public:
     void undoMove(int x1, int y1, int x2, int y2, bool eaten);
 
 protected:
-    UINT32 getBit(UINT32 bitline, int index) const
+    int getBit(int bitline, int index) const
     {
         return (bitline >> index) & 1;
     }
     void setBit(int x, int y);
     void deleteBit(int x, int y);
-    REGION_ROOK generateRookRegion(UINT32 bitline, int index) const;
-    REGION_CANNON generateCannonRegion(UINT32 bitline, int index) const;
+    REGION_ROOK generateRookRegion(int bitline, int index) const;
+    REGION_CANNON generateCannonRegion(int bitline, int index) const;
 };
 
 Bitboard::Bitboard(PIECEID_MAP pieceidMap)
@@ -55,7 +54,7 @@ Bitboard::Bitboard(PIECEID_MAP pieceidMap)
         }
     }
     // 初始化车、炮的着法缓存
-    for (UINT32 bitline = 1; bitline <= pow(2, 10); bitline++) {
+    for (int bitline = 1; bitline <= pow(2, 10); bitline++) {
         for (int index = 0; index <= 9; index++) {
             if (this->getBit(bitline, index) == 1) {
                 this->rookCache[bitline][index] = this->generateRookRegion(bitline, index);
@@ -65,7 +64,7 @@ Bitboard::Bitboard(PIECEID_MAP pieceidMap)
     }
 }
 
-REGION_ROOK Bitboard::getRookRegion(UINT32 bitline, int index, int endpos)
+REGION_ROOK Bitboard::getRookRegion(int bitline, int index, int endpos)
 {
     REGION_ROOK result = this->rookCache[bitline][index];
     if (endpos == 8 && result[1] == 9) {
@@ -74,7 +73,7 @@ REGION_ROOK Bitboard::getRookRegion(UINT32 bitline, int index, int endpos)
     return result;
 }
 
-REGION_CANNON Bitboard::getCannonRegion(UINT32 bitline, int index, int endpos)
+REGION_CANNON Bitboard::getCannonRegion(int bitline, int index, int endpos)
 {
     REGION_CANNON result = this->cannonCache[bitline][index];
     if (endpos == 8 && result[3] == 9) {
@@ -110,7 +109,7 @@ void Bitboard::deleteBit(int x, int y)
     this->yBitBoard[y] &= ~(1 << x);
 }
 
-REGION_ROOK Bitboard::generateRookRegion(UINT32 bitline, int index) const
+REGION_ROOK Bitboard::generateRookRegion(int bitline, int index) const
 {
     int beg = 0;
     int end = 9;
@@ -130,7 +129,7 @@ REGION_ROOK Bitboard::generateRookRegion(UINT32 bitline, int index) const
     return REGION_ROOK { beg, end };
 }
 
-REGION_CANNON Bitboard::generateCannonRegion(UINT32 bitline, int index) const
+REGION_CANNON Bitboard::generateCannonRegion(int bitline, int index) const
 {
     int eaten1 = 0;
     int beg = 0;

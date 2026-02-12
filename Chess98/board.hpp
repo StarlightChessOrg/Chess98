@@ -9,11 +9,11 @@ public:
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
 
 public:
-    int distance = 0;
-    int vlRed = 0;
-    int vlBlack = 0;
-    int hashKey = 0;
-    int hash_lock = 0;
+    int distance { 0 };
+    int vlRed { 0 };
+    int vlBlack { 0 };
+    int hashKey { 0 };
+    int hash_lock { 0 };
     std::vector<int> hashKeyList {};
     std::vector<int> hashLockList {};
 
@@ -53,11 +53,11 @@ public:
     {
         return team == RED ? vlRed : vlBlack > 10000 + 1200;
     }
-    UINT32 getBitLineX(int x) const
+    uint32 getBitLineX(int x) const
     {
         return bitboard->getBitlineX(x);
     }
-    UINT32 getBitLineY(int y) const
+    uint32 getBitLineY(int y) const
     {
         return this->bitboard->getBitlineY(y);
     }
@@ -355,13 +355,13 @@ bool Board::isRepeated() const
             // 车
             if (abs(attacker.pieceid) == R_ROOK) {
                 if (ply5.x2 == ply4.x1) {
-                    UINT32 bitlineX = this->getBitLineX(ply5.x2);
+                    uint32 bitlineX = this->getBitLineX(ply5.x2);
                     REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, attacker.y, 9);
                     if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex || this->piecePosition(ply5.x2, regionX[0]).pieceIndex == captured.pieceIndex) {
                         return true;
                     }
                 } else if (ply5.y2 == ply4.y1) {
-                    UINT32 bitlineY = this->getBitLineY(ply5.y2);
+                    uint32 bitlineY = this->getBitLineY(ply5.y2);
                     REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, attacker.x, 8);
                     if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex || this->piecePosition(regionY[1], ply5.y2).pieceIndex == captured.pieceIndex) {
                         return true;
@@ -371,13 +371,13 @@ bool Board::isRepeated() const
             // 炮
             else if (abs(attacker.pieceid) == R_CANNON) {
                 if (ply5.x2 == ply4.x1) {
-                    UINT32 bitlineX = this->getBitLineX(ply5.x2);
+                    uint32 bitlineX = this->getBitLineX(ply5.x2);
                     REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, attacker.y, 9);
                     if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex || this->piecePosition(ply5.x2, regionX[3]).pieceIndex == captured.pieceIndex) {
                         return true;
                     }
                 } else if (ply5.y2 == ply4.y1) {
-                    UINT32 bitlineY = this->getBitLineY(ply5.y2);
+                    uint32 bitlineY = this->getBitLineY(ply5.y2);
                     REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, attacker.x, 8);
                     if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex || this->piecePosition(regionY[3], ply5.y2).pieceIndex == captured.pieceIndex) {
                         return true;
@@ -476,7 +476,7 @@ bool Board::inCheck(TEAM judgeTeam) const
     const PIECEID ENEMY_CANNON = R_CANNON * -team;
     const PIECEID ENEMY_KING = R_KING * -team;
 
-    UINT32 bitlineY = this->getBitLineY(y);
+    uint32 bitlineY = this->getBitLineY(y);
     REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, x, 8);
     if (this->pieceidOn(regionY[1] - 1, y) == ENEMY_ROOK) {
         return true;
@@ -491,7 +491,7 @@ bool Board::inCheck(TEAM judgeTeam) const
         return true;
     }
 
-    UINT32 bitlineX = this->getBitLineX(x);
+    uint32 bitlineX = this->getBitLineX(x);
     REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, y, 9);
     const PIECEID& p1 = this->pieceidOn(x, regionX[1] - 1);
     if (p1 == ENEMY_ROOK || p1 == ENEMY_KING) {
@@ -620,7 +620,7 @@ bool Board::hasProtector(int x, int y) const
     const PIECEID MY_ROOK = R_ROOK * team;
     const PIECEID MY_CANNON = R_CANNON * team;
 
-    UINT32 bitlineY = this->getBitLineY(y);
+    uint32 bitlineY = this->getBitLineY(y);
     REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, x, 8);
     if (this->pieceidOn(regionY[1] - 1, y) == MY_ROOK) {
         return true;
@@ -634,7 +634,7 @@ bool Board::hasProtector(int x, int y) const
     if (this->pieceidOn(regionY[3], y) == MY_CANNON) {
         return true;
     }
-    UINT32 bitlineX = this->getBitLineX(x);
+    uint32 bitlineX = this->getBitLineX(x);
     REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, y, 9);
     if (this->pieceidOn(x, regionX[1] - 1) == MY_ROOK) {
         return true;
@@ -890,12 +890,12 @@ bool Board::is_valid_move(Move move)
         if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法, 若横纵坐标都不相同, 则一定不合理
             return false;
         // 生成车的着法范围, 看是否有障碍物
-        UINT32 bitlineX = this->getBitLineX(move.x1);
+        uint32 bitlineX = this->getBitLineX(move.x1);
         REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, move.y1, 9);
         if (move.y2 < regionX[0] || move.y2 > regionX[1])
             return false;
         // 横向
-        UINT32 bitlineY = this->getBitLineY(move.y1);
+        uint32 bitlineY = this->getBitLineY(move.y1);
         REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, move.x1, 8);
         if (move.x2 < regionY[0] || move.x2 > regionY[1])
             return false;
@@ -921,12 +921,12 @@ bool Board::is_valid_move(Move move)
         if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法, 若横纵坐标都不同, 则一定不合理
             return false;
         // 生成炮的着法范围
-        UINT32 bitlineX = this->getBitLineX(move.x1);
+        uint32 bitlineX = this->getBitLineX(move.x1);
         REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, move.y1, 9);
         if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
             return false;
         // 横向
-        UINT32 bitlineY = this->getBitLineY(move.y1);
+        uint32 bitlineY = this->getBitLineY(move.y1);
         REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, move.x1, 8);
         if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
             return false;

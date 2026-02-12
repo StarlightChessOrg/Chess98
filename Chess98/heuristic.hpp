@@ -104,7 +104,7 @@ protected:
 public:
     void set(Board& board, Move& goodMove, int vl, NODE_TYPE type, int depth)
     {
-        const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hash_mask);
+        const int pos = static_cast<uint32>(board.hashKey) & static_cast<uint32>(this->hash_mask);
         TransItem& item = trans_table[pos];
         if (item.hash_lock == 0) {
             item.hash_lock = board.hash_lock;
@@ -140,7 +140,7 @@ public:
 
     int getVl(Board& board, int vlApha, int vlBeta, int depth) const
     {
-        const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hash_mask);
+        const int pos = static_cast<uint32>(board.hashKey) & static_cast<uint32>(this->hash_mask);
         const TransItem& t = this->trans_table[pos];
         if (t.hash_lock == board.hash_lock) {
             if (t.exactDepth >= depth) {

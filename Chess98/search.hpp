@@ -5,9 +5,9 @@
 class Search {
 public:
     Search() = default;
-    Search(PIECEID_MAP pieceidMap, TEAM team)
+    Search(PIECEID_MAP pid_matrix, TEAM team)
+        : board(pid_matrix, team)
     {
-        board = Board { pieceidMap, team };
     }
     void reset()
     {
@@ -182,14 +182,14 @@ Result Search::searchOpenBook() const
     }
 
     struct Book {
-        uint32_t dwZobristLock;
+        uint32 dwZobristLock;
         uint16_t wmv;
         uint16_t wvl;
 
         static int bookPosCmp(const Book& bk, int hashLock)
         {
-            uint32_t bookLock = bk.dwZobristLock;
-            uint32_t boardLock = static_cast<uint32_t>(hashLock);
+            uint32 bookLock = bk.dwZobristLock;
+            uint32 boardLock = static_cast<uint32>(hashLock);
             if (bookLock < boardLock)
                 return -1;
             else if (bookLock > boardLock)

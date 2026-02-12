@@ -2,17 +2,17 @@
 
 class UCCI {
 public:
-    UCCI()
+    UCCI(FEN fen, TEAM team, int max_time, int max_depth)
+        : search(std::make_unique<Search>(fenToPieceidmap(fen), team))
+        , maxTime(max_time)
+        , maxDepth(max_depth)
     {
-        std::string defaultFen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1";
-        this->search = std::make_unique<Search>(fenToPieceidmap(defaultFen), RED);
-        cli();
-    };
+    }
 
 public:
     void cli();
 
-public:
+private:
     void ucci() const;
     void isready() const;
     void setoption(const std::string& name, const std::string& value);
@@ -22,7 +22,7 @@ public:
     void stop();
     void quit();
 
-public:
+private:
     std::unique_ptr<Search> search = nullptr;
     int maxTime = 3000;
     int maxDepth = 20;
@@ -31,8 +31,8 @@ public:
     Result searchResult {};
     std::thread searchThread {};
 
-public:
-    std::string fen() const
+private:
+    FEN fen() const
     {
         return pieceidmapToFen(search->board.pieceidMap, search->board.team);
     }
@@ -40,7 +40,7 @@ public:
     {
         return search->board.historyMoves;
     }
-    std::string convertToUCCIMove(Move move) const
+    FEN convertToUCCIMove(Move move) const
     {
         std::string ret = "";
         ret += char('a' + move.x1);
@@ -62,7 +62,6 @@ public:
         if (moves[moves.length() - 1] == ' ') {
             moves += " ";
         }
-        // 按空格将moves切开
         MOVES moveList;
         size_t start = 0;
         size_t end = moves.find(' ');
@@ -76,15 +75,32 @@ public:
         }
         return moveList;
     }
+    std::string reduceSpaces(const std::string& input)
+    {
+        std::string result;
+        bool inSpace = false;
+        for (char ch : input) {
+            if (ch == ' ') {
+                if (!inSpace) {
+                    result += ch;
+                    inSpace = true;
+                }
+            } else {
+                result += ch;
+                inSpace = false;
+            }
+        }
+        return result;
+    }
 };
 
-// cli
 void UCCI::cli()
 {
     while (true) {
         // 不断获取输入值
         std::string cmd;
         std::getline(std::cin, cmd);
+        cmd = reduceSpaces(cmd);
 
         // 任何状态下都可以进行的指令
         if (cmd == "ucci") {
@@ -141,21 +157,21 @@ void UCCI::cli()
 
                 go(timeArg, depthArg);
             } else if (cmd.substr(0, 12) == "position fen") {
-                std::string fen = "";
+                std::string position_str = "";
                 std::string moves = "";
                 size_t moves_pos = cmd.find("moves");
                 std::cout << cmd.substr(0, 12) << std::endl;
 
                 if (moves_pos == std::string::npos) // 没有moves参数的情况
                 {
-                    fen = cmd.substr(13);
-                    position(fen, MOVES {});
+                    position_str = cmd.substr(13);
+                    position(position_str, MOVES {});
                 } else // 有moves参数的情况
                 {
-                    fen = cmd.substr(13, moves_pos - 10);
+                    position_str = cmd.substr(13, moves_pos - 10);
                     moves = cmd.substr(moves_pos + 6) + " ";
                     MOVES moveList = parseMovesInput(moves);
-                    position(fen, moveList);
+                    position(position_str, moveList);
                 }
                 continue;
             } else if (cmd.substr(0, 8) == "banmoves") {
@@ -184,12 +200,10 @@ void UCCI::setoption(const std::string& name, const std::string& value)
 {
     if (name == "usebook") {
         search->useBook = (value == "true" || value == "1");
-    } else if (name == "usemillisec") {
-        return;
     }
 }
 
-// position my_startpos_fen my_moves
+// position fen my_startpos_fen moves my_moves
 void UCCI::position(const std::string& fenCode, const MOVES& moves)
 {
     PIECEID_MAP pieceidMap = fenToPieceidmap(fenCode);

@@ -1,46 +1,15 @@
-﻿#include "test.hpp"
-
-static inline void setRealtimePriority()
-{
-#ifdef _WIN32
-    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-#endif
-}
-
-std::atomic<bool> ucciValidate { false };
-
-void validateUCCI()
-{
-    std::string tmp = "";
-    std::getline(std::cin, tmp);
-    if (tmp == "ucci") {
-        ucciValidate = true;
-    }
-}
+﻿// #include "ucci.hpp"
+#include "base.hpp"
 
 int main()
 {
-    setRealtimePriority();
-    std::thread v(validateUCCI);
-    v.detach();
-    auto start = std::chrono::high_resolution_clock::now();
-    std::cout << "input ucci to enable ucci mode (within 1 second)" << std::endl;
-    while (true) {
-        auto end = std::chrono::high_resolution_clock::now();
-        int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-                .count());
-        if (ucciValidate == true) {
-            break;
-        }
-        if (duration > 1000) {
-            break;
-        }
-    }
-    if (ucciValidate) {
-        std::cout << "ucciok" << std::endl;
-        testByUCCI();
-    } else {
-        testByUI();
-    }
+    // FEN fen = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
+    // TEAM team = RED;
+    // int max_time = 3000;
+    // int max_depth = 20;
+
+    // UCCI ucci(fen, team, max_time, max_depth);
+    // ucci.cli();
+
     return 0;
 }
