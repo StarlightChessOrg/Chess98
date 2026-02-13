@@ -4,7 +4,7 @@
 
 using HISTORY_TABLE = std::array<std::array<std::array<int, 90>, 90>, 2>;
 using KILLER_TABLE = std::array<std::array<Move, 2>, 64>;
-using TRANS_TABLE = std::vector<TransItem>;
+using TRANS_TABLE = std::vector<TtItem>;
 
 // 历史启发
 class HistoryTable {
@@ -33,7 +33,7 @@ public:
             const int pos1 = 10 * move.x1 + move.y1;
             const int pos2 = 10 * move.x2 + move.y2;
             const int team = move.attacker.team == RED ? 0 : 1;
-            move.moveType = HISTORY;
+            move.move_type = HISTORY;
             move.val = (*history_table)[team][pos1][pos2];
         }
         std::sort(moves.begin(), moves.end(), [](Move& a, Move& b) { return a.val > b.val; });
@@ -91,8 +91,8 @@ public:
 
     void reset()
     {
-        for (TransItem& item : trans_table) {
-            item = TransItem {};
+        for (TtItem& item : trans_table) {
+            item = TtItem {};
         }
     }
 
@@ -105,7 +105,7 @@ public:
     void set(Board& board, Move& goodMove, int vl, NODE_TYPE type, int depth)
     {
         const int pos = static_cast<uint32>(board.hashKey) & static_cast<uint32>(this->hash_mask);
-        TransItem& item = trans_table[pos];
+        TtItem& item = trans_table[pos];
         if (item.hash_lock == 0) {
             item.hash_lock = board.hash_lock;
             if (type == EXACT_TYPE) {
@@ -141,7 +141,7 @@ public:
     int getVl(Board& board, int vlApha, int vlBeta, int depth) const
     {
         const int pos = static_cast<uint32>(board.hashKey) & static_cast<uint32>(this->hash_mask);
-        const TransItem& t = this->trans_table[pos];
+        const TtItem& t = this->trans_table[pos];
         if (t.hash_lock == board.hash_lock) {
             if (t.exactDepth >= depth) {
                 return vl_adjust(t.vlExact, board.distance);
@@ -157,7 +157,7 @@ public:
     Move getMove(Board& board) const
     {
         const int pos = static_cast<int>(board.hashKey) & static_cast<int>(this->hash_mask);
-        const TransItem& t = this->trans_table[pos];
+        const TtItem& t = this->trans_table[pos];
         if (t.hash_lock == board.hash_lock) {
             if (board.is_valid_move(t.exact_move)) {
                 return t.exact_move;

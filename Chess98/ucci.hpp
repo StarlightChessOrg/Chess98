@@ -34,7 +34,7 @@ private:
 private:
     FEN fen() const
     {
-        return pieceidmapToFen(search->board.pieceidMap, search->board.team);
+        return pieceidmapToFen(search->board.pid_matrix, search->board.team);
     }
     MOVES history() const
     {
@@ -206,7 +206,7 @@ void UCCI::setoption(const std::string& name, const std::string& value)
 // position fen my_startpos_fen moves my_moves
 void UCCI::position(const std::string& fenCode, const MOVES& moves)
 {
-    PIECEID_MAP pieceidMap = fenToPieceidmap(fenCode);
+    PID_MATRIX pieceidMap = fenToPieceidmap(fenCode);
     TEAM team = (fenCode.find("w") != std::string::npos) ? RED : BLACK;
     search = std::make_unique<Search>(pieceidMap, team);
     for (const Move& move : moves) {

@@ -1,14 +1,10 @@
 ﻿#pragma once
 #include "base.hpp"
-#include "nnue.hpp"
 
-using WEIGHT_MAP = std::array<std::array<int, 10>, 9>;
-
-std::map<PIECEID, WEIGHT_MAP> pieceWeights;
 int vlAdvanced = 0;
 int vlPawn = 0;
 
-WEIGHT_MAP OPEN_ATTACK_KING_PAWN_WEIGHT = { {
+PID_MATRIX OPEN_ATTACK_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 21, 21, 67, 97, 97, 97, 7 },
     { 0, 0, 0, 0, 0, 91, 118, 127, 127, 7 },
     { 0, 0, 0, 21, 39, 103, 142, 172, 187, 7 },
@@ -20,7 +16,7 @@ WEIGHT_MAP OPEN_ATTACK_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 21, 21, 67, 97, 97, 97, 7 },
 } };
 
-WEIGHT_MAP OPEN_DEFEND_KING_PAWN_WEIGHT = { {
+PID_MATRIX OPEN_DEFEND_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 21, 21, 87, 117, 117, 117, 27 },
     { 0, 0, 0, 0, 0, 111, 138, 147, 147, 27 },
     { 0, 0, 0, 21, 39, 123, 162, 192, 207, 27 },
@@ -32,7 +28,7 @@ WEIGHT_MAP OPEN_DEFEND_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 21, 21, 87, 117, 117, 117, 27 },
 } };
 
-WEIGHT_MAP END_ATTACK_KING_PAWN_WEIGHT = { {
+PID_MATRIX END_ATTACK_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 120, 135, 190, 205, 175, 130, 10 },
     { 0, 0, 0, 0, 0, 190, 220, 190, 145, 10 },
     { 0, 0, 0, 105, 120, 175, 220, 190, 160, 10 },
@@ -44,7 +40,7 @@ WEIGHT_MAP END_ATTACK_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 120, 135, 190, 205, 175, 130, 10 },
 } };
 
-WEIGHT_MAP END_DEFEND_KING_PAWN_WEIGHT = { {
+PID_MATRIX END_DEFEND_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 60, 75, 75, 105, 75, 30, 30 },
     { 0, 0, 0, 0, 0, 90, 120, 90, 45, 30 },
     { 0, 0, 0, 60, 75, 90, 120, 90, 60, 30 },
@@ -56,7 +52,7 @@ WEIGHT_MAP END_DEFEND_KING_PAWN_WEIGHT = { {
     { 0, 0, 0, 60, 75, 75, 105, 75, 30, 30 },
 } };
 
-WEIGHT_MAP SAFE_GUARD_BISHOP_WEIGHT = { {
+PID_MATRIX SAFE_GUARD_BISHOP_WEIGHT = { {
     { 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 60, 0, 0, 0, 60, 0, 0, 0, 0, 0 },
@@ -68,7 +64,7 @@ WEIGHT_MAP SAFE_GUARD_BISHOP_WEIGHT = { {
     { 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 },
 } };
 
-WEIGHT_MAP DANGER_GUARD_BISHOP_WEIGHT = { {
+PID_MATRIX DANGER_GUARD_BISHOP_WEIGHT = { {
     { 0, 0, 108, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 120, 0, 0, 0, 116, 0, 0, 0, 0, 0 },
@@ -80,7 +76,7 @@ WEIGHT_MAP DANGER_GUARD_BISHOP_WEIGHT = { {
     { 0, 0, 108, 0, 0, 0, 0, 0, 0, 0 },
 } };
 
-WEIGHT_MAP OPEN_KNIGHT_WEIGHT = { {
+PID_MATRIX OPEN_KNIGHT_WEIGHT = { {
     { 264, 255, 270, 276, 270, 270, 279, 276, 270, 270 },
     { 255, 270, 276, 282, 294, 300, 324, 294, 288, 270 },
     { 270, 276, 282, 294, 303, 297, 300, 297, 309, 270 },
@@ -92,7 +88,7 @@ WEIGHT_MAP OPEN_KNIGHT_WEIGHT = { {
     { 264, 255, 270, 276, 270, 270, 279, 276, 270, 270 },
 } };
 
-WEIGHT_MAP END_KNIGHT_WEIGHT = { {
+PID_MATRIX END_KNIGHT_WEIGHT = { {
     { 264, 270, 276, 282, 282, 288, 288, 288, 282, 276 },
     { 270, 276, 282, 288, 288, 294, 294, 294, 288, 282 },
     { 276, 282, 288, 294, 294, 300, 300, 300, 294, 288 },
@@ -104,7 +100,7 @@ WEIGHT_MAP END_KNIGHT_WEIGHT = { {
     { 264, 270, 276, 282, 282, 288, 288, 288, 282, 276 },
 } };
 
-WEIGHT_MAP OPEN_ROOK_WEIGHT = { {
+PID_MATRIX OPEN_ROOK_WEIGHT = { {
     { 582, 600, 594, 612, 624, 624, 618, 618, 618, 618 },
     { 618, 624, 624, 627, 636, 633, 639, 624, 636, 624 },
     { 612, 618, 612, 612, 636, 633, 639, 621, 627, 621 },
@@ -116,7 +112,7 @@ WEIGHT_MAP OPEN_ROOK_WEIGHT = { {
     { 582, 600, 594, 612, 624, 624, 618, 618, 618, 618 },
 } };
 
-WEIGHT_MAP END_ROOK_WEIGHT = { {
+PID_MATRIX END_ROOK_WEIGHT = { {
     { 540, 540, 540, 540, 540, 540, 540, 546, 552, 546 },
     { 540, 540, 540, 540, 540, 540, 540, 546, 552, 546 },
     { 540, 540, 540, 540, 540, 540, 540, 546, 552, 546 },
@@ -128,7 +124,7 @@ WEIGHT_MAP END_ROOK_WEIGHT = { {
     { 540, 540, 540, 540, 540, 540, 540, 546, 552, 546 },
 } };
 
-WEIGHT_MAP OPEN_CANNON_WEIGHT = { {
+PID_MATRIX OPEN_CANNON_WEIGHT = { {
     { 288, 288, 291, 288, 285, 288, 288, 291, 294, 300 },
     { 288, 291, 288, 288, 288, 288, 297, 291, 294, 300 },
     { 291, 294, 300, 288, 297, 288, 297, 288, 288, 288 },
@@ -140,7 +136,7 @@ WEIGHT_MAP OPEN_CANNON_WEIGHT = { {
     { 288, 288, 291, 288, 285, 288, 288, 291, 294, 300 },
 } };
 
-WEIGHT_MAP END_CANNON_WEIGHT = { {
+PID_MATRIX END_CANNON_WEIGHT = { {
     { 300, 300, 300, 300, 300, 300, 300, 300, 300, 300 },
     { 300, 300, 300, 300, 300, 300, 300, 300, 300, 300 },
     { 300, 300, 300, 300, 300, 300, 300, 300, 300, 300 },
@@ -170,12 +166,11 @@ const int OPEN_PAWN_VAL = 30;
 const int END_PAWN_VAL = 120;
 
 // 实时计算红方视角的估值权重
-
-std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack)
+std::map<PIECEID, PID_MATRIX> getBasicEvaluateWeights(int vlOpen, int vlRedAttack, int vlBlackAttack)
 {
     // 兵, 帅
-    WEIGHT_MAP RED_KING_PAWN_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_KING_PAWN_WEIGHT = { 0 };
+    PID_MATRIX RED_KING_PAWN_WEIGHT = { 0 };
+    PID_MATRIX BLACK_KING_PAWN_WEIGHT = { 0 };
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 10; y++) {
             // 进攻状态时的游戏进程权重
@@ -201,8 +196,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 车
-    WEIGHT_MAP RED_ROOK_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_ROOK_WEIGHT = { 0 };
+    PID_MATRIX RED_ROOK_WEIGHT = { 0 };
+    PID_MATRIX BLACK_ROOK_WEIGHT = { 0 };
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 10; y++) {
             int vlSummarise = vlOpen * OPEN_ROOK_WEIGHT[x][y];
@@ -215,8 +210,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 马
-    WEIGHT_MAP RED_KNIGHT_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_KNIGHT_WEIGHT = { 0 };
+    PID_MATRIX RED_KNIGHT_WEIGHT = { 0 };
+    PID_MATRIX BLACK_KNIGHT_WEIGHT = { 0 };
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 10; y++) {
             int vlSummarise = vlOpen * OPEN_KNIGHT_WEIGHT[x][y];
@@ -229,8 +224,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 炮
-    WEIGHT_MAP RED_CANNON_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_CANNON_WEIGHT = { 0 };
+    PID_MATRIX RED_CANNON_WEIGHT = { 0 };
+    PID_MATRIX BLACK_CANNON_WEIGHT = { 0 };
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 10; y++) {
             int vlSummarise = vlOpen * OPEN_CANNON_WEIGHT[x][y];
@@ -243,8 +238,8 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
     }
 
     // 士, 象
-    WEIGHT_MAP RED_GUARD_BISHOP_WEIGHT = { 0 };
-    WEIGHT_MAP BLACK_GUARD_BISHOP_WEIGHT = { 0 };
+    PID_MATRIX RED_GUARD_BISHOP_WEIGHT = { 0 };
+    PID_MATRIX BLACK_GUARD_BISHOP_WEIGHT = { 0 };
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 10; y++) {
             // 红
@@ -266,4 +261,128 @@ std::map<PIECEID, WEIGHT_MAP> getBasicEvaluateWeights(int vlOpen, int vlRedAttac
         { R_PAWN, RED_KING_PAWN_WEIGHT }, { B_KING, BLACK_KING_PAWN_WEIGHT }, { B_GUARD, BLACK_GUARD_BISHOP_WEIGHT },
         { B_BISHOP, BLACK_GUARD_BISHOP_WEIGHT }, { B_KNIGHT, BLACK_KNIGHT_WEIGHT }, { B_ROOK, BLACK_ROOK_WEIGHT },
         { B_CANNON, BLACK_CANNON_WEIGHT }, { B_PAWN, BLACK_KING_PAWN_WEIGHT } };
+}
+
+void Board::initEvaluate()
+{
+    // 更新权重数组
+    int vlOpen = 0;
+    int vlRedAttack = 0;
+    int vlBlackAttack = 0;
+    this->calculateVlOpen(vlOpen);
+    this->vlAttackCalculator(vlRedAttack, vlBlackAttack);
+
+    pieceWeights = getBasicEvaluateWeights(vlOpen, vlRedAttack, vlBlackAttack);
+    vlAdvanced = (TOTAL_ADVANCED_VALUE * vlOpen + TOTAL_ADVANCED_VALUE / 2) / TOTAL_MIDGAME_VALUE;
+    vlPawn = (vlOpen * OPEN_PAWN_VAL + (TOTAL_MIDGAME_VALUE - vlOpen) * END_PAWN_VAL) / TOTAL_MIDGAME_VALUE;
+
+    // 调整不受威胁方少掉的士象分
+    this->vlRed = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlBlackAttack) / TOTAL_ATTACK_VALUE;
+    this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
+
+    // 进一步重新计算分数
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
+            PIECEID pid = this->pid_matrix[x][y];
+            if (pid > 0) {
+                this->vlRed += pieceWeights[pid][x][y];
+            } else if (pid < 0) {
+                this->vlBlack += pieceWeights[pid][x][size_t(9) - y];
+            }
+        }
+    }
+}
+
+void Board::calculateVlOpen(int& vlOpen) const
+{
+    // 首先判断局势处于开中局还是残局阶段, 方法是计算各种棋子的数量, 按照车=6、马炮=3、其它=1相加
+    int rookLiveSum = 0;
+    int knightCannonLiveSum = 0;
+    int otherLiveSum = 0;
+    for (const Piece& piece : this->getAllLivePieces()) {
+        PIECEID pid = std::abs(piece.pieceid);
+        if (pid == R_ROOK) {
+            rookLiveSum++;
+        } else if (pid == R_KNIGHT || pid == R_CANNON) {
+            knightCannonLiveSum++;
+        } else if (pid != R_KING) {
+            otherLiveSum++;
+        }
+    }
+    vlOpen = rookLiveSum * 6 + knightCannonLiveSum * 3 + otherLiveSum;
+    // 使用二次函数, 子力很少时才认为接近残局
+    vlOpen = (2 * TOTAL_MIDGAME_VALUE - vlOpen) * vlOpen;
+    vlOpen /= TOTAL_MIDGAME_VALUE;
+}
+
+void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const
+{
+    // 然后判断各方是否处于进攻状态, 方法是计算各种过河棋子的数量, 按照车马2炮兵1相加
+    int redAttackLiveRookSum = 0;
+    int blackAttackLiveRookSum = 0;
+    int redAttackLiveKnightSum = 0;
+    int blackAttackLiveKnightSum = 0;
+    int redAttackLiveCannonSum = 0;
+    int blackAttackLiveCannonSum = 0;
+    int redAttackLivePawnSum = 0;
+    int blackAttackLivePawnSum = 0;
+    for (const Piece& piece : this->getAllLivePieces()) {
+        PIECEID pid = std::abs(piece.pieceid);
+        if (piece.team == RED) {
+            if (piece.y >= 5) {
+                if (pid == R_ROOK) {
+                    redAttackLiveRookSum++;
+                } else if (pid == R_CANNON) {
+                    redAttackLiveCannonSum++;
+                } else if (pid == R_KNIGHT) {
+                    redAttackLiveKnightSum++;
+                } else if (pid == R_PAWN) {
+                    redAttackLivePawnSum++;
+                }
+            }
+        } else if (piece.team == BLACK) {
+            if (piece.y <= 4) {
+                if (pid == R_ROOK) {
+                    blackAttackLiveRookSum++;
+                } else if (pid == R_CANNON) {
+                    blackAttackLiveCannonSum++;
+                } else if (pid == R_KNIGHT) {
+                    blackAttackLiveKnightSum++;
+                } else if (pid == R_PAWN) {
+                    blackAttackLivePawnSum++;
+                }
+            }
+        }
+    }
+    // 红
+    vlRedAttack = redAttackLiveRookSum * 2;
+    vlRedAttack += redAttackLiveKnightSum * 2;
+    vlRedAttack += redAttackLiveCannonSum;
+    vlRedAttack += redAttackLivePawnSum;
+    // 黑
+    vlBlackAttack = blackAttackLiveRookSum * 2;
+    vlBlackAttack += blackAttackLiveKnightSum * 2;
+    vlBlackAttack += blackAttackLiveCannonSum;
+    vlBlackAttack += blackAttackLivePawnSum;
+    // 如果本方轻子数比对方多, 那么每多一个轻子(车算2个轻子)威胁值加2。威胁值最多不超过8
+    int redSimpleValues = 0;
+    int blackSimpleValues = 0;
+    // 红
+    redSimpleValues += redAttackLiveRookSum * 2;
+    redSimpleValues += redAttackLiveKnightSum;
+    redSimpleValues += redAttackLiveCannonSum;
+    redSimpleValues += redAttackLivePawnSum;
+    // 黑
+    blackSimpleValues += blackAttackLiveRookSum * 2;
+    blackSimpleValues += blackAttackLiveKnightSum;
+    blackSimpleValues += blackAttackLiveCannonSum;
+    blackSimpleValues += blackAttackLivePawnSum;
+    // 设置
+    if (redSimpleValues > blackSimpleValues) {
+        vlRedAttack += (redSimpleValues - blackSimpleValues) * 2;
+    } else if (redSimpleValues < blackSimpleValues) {
+        vlBlackAttack += (blackSimpleValues - redSimpleValues) * 2;
+    }
+    vlRedAttack = std::min<int>(vlRedAttack, TOTAL_ATTACK_VALUE);
+    vlBlackAttack = std::min<int>(vlBlackAttack, TOTAL_ATTACK_VALUE);
 }

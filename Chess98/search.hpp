@@ -5,7 +5,7 @@
 class Search {
 public:
     Search() = default;
-    Search(PIECEID_MAP pid_matrix, TEAM team)
+    Search(PID_MATRIX pid_matrix, TEAM team)
         : board(pid_matrix, team)
     {
     }
@@ -125,7 +125,7 @@ Result Search::searchMain(int maxDepth, int maxTimeMs = 3)
     }
 
     // info situation
-    info.setSituation(pieceidmapToFen(board.pieceidMap, board.team));
+    info.setSituation(pieceidmapToFen(board.pid_matrix, board.team));
 
     // 开局库
     Result openbookResult = Search::searchOpenBook();
@@ -249,7 +249,7 @@ Result Search::searchOpenBook() const
 
     for (int x = 0; x < 9; x++) {
         for (int y = 0; y < 10; y++) {
-            const PIECEID& pid = board.pieceidOn(x, y);
+            const PIECEID& pid = board.pid_on(x, y);
             if (pid != EMPTY_PIECEID) {
                 mirrorHashKey ^= HASHKEYS[pid][static_cast<size_t>(8) - x][y];
                 mirrorHashLock ^= HASHLOCKS[pid][static_cast<size_t>(8) - x][y];

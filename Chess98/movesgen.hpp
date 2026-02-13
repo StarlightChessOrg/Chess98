@@ -37,24 +37,24 @@ MOVES MovesGen::king(TEAM team, Board& board, int x, int y)
     const int up = y + 1;
     const int down = y - 1;
 
-    if (left >= 3 && board.teamOn(left, y) != team) {
+    if (left >= 3 && board.team_on(left, y) != team) {
         result.emplace_back(Move { x, y, left, y });
     }
-    if (right <= 5 && board.teamOn(right, y) != team) {
+    if (right <= 5 && board.team_on(right, y) != team) {
         result.emplace_back(Move { x, y, right, y });
     }
     if (team == RED) {
-        if (up <= 2 && board.teamOn(x, up) != team) {
+        if (up <= 2 && board.team_on(x, up) != team) {
             result.emplace_back(Move { x, y, x, up });
         }
-        if (down >= 0 && board.teamOn(x, down) != team) {
+        if (down >= 0 && board.team_on(x, down) != team) {
             result.emplace_back(Move { x, y, x, down });
         }
     } else {
-        if (up <= 9 && board.teamOn(x, up) != team) {
+        if (up <= 9 && board.team_on(x, up) != team) {
             result.emplace_back(Move { x, y, x, up });
         }
-        if (down >= 7 && board.teamOn(x, down) != team) {
+        if (down >= 7 && board.team_on(x, down) != team) {
             result.emplace_back(Move { x, y, x, down });
         }
     }
@@ -73,34 +73,34 @@ MOVES MovesGen::guard(TEAM team, Board& board, int x, int y)
     const int down = y - 1;
     if (left >= 3) {
         if (team == RED) {
-            if (board.teamOn(left, up) != team && up <= 2) {
+            if (board.team_on(left, up) != team && up <= 2) {
                 result.emplace_back(Move { x, y, left, up });
             }
-            if (board.teamOn(left, down) != team && down >= 0) {
+            if (board.team_on(left, down) != team && down >= 0) {
                 result.emplace_back(Move { x, y, left, down });
             }
         } else {
-            if (board.teamOn(left, up) != team && up <= 9) {
+            if (board.team_on(left, up) != team && up <= 9) {
                 result.emplace_back(Move { x, y, left, up });
             }
-            if (board.teamOn(left, down) != team && down >= 7) {
+            if (board.team_on(left, down) != team && down >= 7) {
                 result.emplace_back(Move { x, y, left, down });
             }
         }
     }
     if (right <= 5) {
         if (team == RED) {
-            if (board.teamOn(right, up) != team && up <= 2) {
+            if (board.team_on(right, up) != team && up <= 2) {
                 result.emplace_back(Move { x, y, right, up });
             }
-            if (board.teamOn(right, down) != team && down >= 0) {
+            if (board.team_on(right, down) != team && down >= 0) {
                 result.emplace_back(Move { x, y, right, down });
             }
         } else {
-            if (board.teamOn(right, up) != team && up <= 9) {
+            if (board.team_on(right, up) != team && up <= 9) {
                 result.emplace_back(Move { x, y, right, up });
             }
-            if (board.teamOn(right, down) != team && down >= 7) {
+            if (board.team_on(right, down) != team && down >= 7) {
                 result.emplace_back(Move { x, y, right, down });
             }
         }
@@ -115,29 +115,29 @@ MOVES MovesGen::bishop(TEAM team, Board& board, int x, int y)
 
     // 横坐标应在0, 9之间, 纵坐标的话, 红方在0, 4之间, 黑方在5, 9之间
     if (team == RED) {
-        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) != team) {
+        if (board.team_on(x - 1, y - 1) == EMPTY_TEAM && board.team_on(x - 2, y - 2) != team) {
             result.emplace_back(Move { x, y, x - 2, y - 2 });
         }
-        if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && board.teamOn(x + 2, y - 2) != team) {
+        if (board.team_on(x + 1, y - 1) == EMPTY_TEAM && board.team_on(x + 2, y - 2) != team) {
             result.emplace_back(Move { x, y, x + 2, y - 2 });
         }
-        if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && board.teamOn(x - 2, y + 2) != team && y + 1 <= 4) {
+        if (board.team_on(x - 1, y + 1) == EMPTY_TEAM && board.team_on(x - 2, y + 2) != team && y + 1 <= 4) {
             result.emplace_back(Move { x, y, x - 2, y + 2 });
         }
-        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && board.teamOn(x + 2, y + 2) != team && y + 1 <= 4) {
+        if (board.team_on(x + 1, y + 1) == EMPTY_TEAM && board.team_on(x + 2, y + 2) != team && y + 1 <= 4) {
             result.emplace_back(Move { x, y, x + 2, y + 2 });
         }
     } else {
-        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && board.teamOn(x + 2, y + 2) != team) {
+        if (board.team_on(x + 1, y + 1) == EMPTY_TEAM && board.team_on(x + 2, y + 2) != team) {
             result.emplace_back(Move { x, y, x + 2, y + 2 });
         }
-        if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && board.teamOn(x + 2, y - 2) != team && y - 1 >= 5) {
+        if (board.team_on(x + 1, y - 1) == EMPTY_TEAM && board.team_on(x + 2, y - 2) != team && y - 1 >= 5) {
             result.emplace_back(Move { x, y, x + 2, y - 2 });
         }
-        if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && board.teamOn(x - 2, y + 2) != team) {
+        if (board.team_on(x - 1, y + 1) == EMPTY_TEAM && board.team_on(x - 2, y + 2) != team) {
             result.emplace_back(Move { x, y, x - 2, y + 2 });
         }
-        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) != team && y - 1 >= 5) {
+        if (board.team_on(x - 1, y - 1) == EMPTY_TEAM && board.team_on(x - 2, y - 2) != team && y - 1 >= 5) {
             result.emplace_back(Move { x, y, x - 2, y - 2 });
         }
     }
@@ -149,9 +149,9 @@ MOVES MovesGen::knight(TEAM team, Board& board, int x, int y)
 {
     MOVES result {};
 
-    if (board.pieceidOn(x, y - 1) == EMPTY_PIECEID) {
-        TEAM t1 = board.teamOn(x - 1, y - 2);
-        TEAM t2 = board.teamOn(x + 1, y - 2);
+    if (board.pid_on(x, y - 1) == EMPTY_PIECEID) {
+        TEAM t1 = board.team_on(x - 1, y - 2);
+        TEAM t2 = board.team_on(x + 1, y - 2);
         if (t1 != team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x - 1, y - 2 });
         }
@@ -159,9 +159,9 @@ MOVES MovesGen::knight(TEAM team, Board& board, int x, int y)
             result.emplace_back(Move { x, y, x + 1, y - 2 });
         }
     }
-    if (board.pieceidOn(x, y + 1) == EMPTY_PIECEID) {
-        TEAM t1 = board.teamOn(x - 1, y + 2);
-        TEAM t2 = board.teamOn(x + 1, y + 2);
+    if (board.pid_on(x, y + 1) == EMPTY_PIECEID) {
+        TEAM t1 = board.team_on(x - 1, y + 2);
+        TEAM t2 = board.team_on(x + 1, y + 2);
         if (t1 != team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x - 1, y + 2 });
         }
@@ -169,9 +169,9 @@ MOVES MovesGen::knight(TEAM team, Board& board, int x, int y)
             result.emplace_back(Move { x, y, x + 1, y + 2 });
         }
     }
-    if (board.pieceidOn(x - 1, y) == EMPTY_PIECEID) {
-        TEAM t1 = board.teamOn(x - 2, y + 1);
-        TEAM t2 = board.teamOn(x - 2, y - 1);
+    if (board.pid_on(x - 1, y) == EMPTY_PIECEID) {
+        TEAM t1 = board.team_on(x - 2, y + 1);
+        TEAM t2 = board.team_on(x - 2, y - 1);
         if (t1 != team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x - 2, y + 1 });
         }
@@ -179,9 +179,9 @@ MOVES MovesGen::knight(TEAM team, Board& board, int x, int y)
             result.emplace_back(Move { x, y, x - 2, y - 1 });
         }
     }
-    if (board.pieceidOn(x + 1, y) == EMPTY_PIECEID) {
-        TEAM t1 = board.teamOn(x + 2, y + 1);
-        TEAM t2 = board.teamOn(x + 2, y - 1);
+    if (board.pid_on(x + 1, y) == EMPTY_PIECEID) {
+        TEAM t1 = board.team_on(x + 2, y + 1);
+        TEAM t2 = board.team_on(x + 2, y - 1);
         if (t1 != team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x + 2, y + 1 });
         }
@@ -203,13 +203,13 @@ MOVES MovesGen::rook(TEAM team, Board& board, int x, int y)
     for (int y2 = y + 1; y2 < regionX[1]; y2++) {
         result.emplace_back(Move { x, y, x, y2 });
     }
-    if (board.teamOn(x, regionX[1]) != team) {
+    if (board.team_on(x, regionX[1]) != team) {
         result.emplace_back(Move { x, y, x, regionX[1] });
     }
     for (int y2 = y - 1; y2 > regionX[0]; y2--) {
         result.emplace_back(Move { x, y, x, y2 });
     }
-    if (board.teamOn(x, regionX[0]) != team) {
+    if (board.team_on(x, regionX[0]) != team) {
         result.emplace_back(Move { x, y, x, regionX[0] });
     }
 
@@ -219,13 +219,13 @@ MOVES MovesGen::rook(TEAM team, Board& board, int x, int y)
     for (int x2 = x + 1; x2 < regionY[1]; x2++) {
         result.emplace_back(Move { x, y, x2, y });
     }
-    if (board.teamOn(regionY[1], y) != team) {
+    if (board.team_on(regionY[1], y) != team) {
         result.emplace_back(Move { x, y, regionY[1], y });
     }
     for (int x2 = x - 1; x2 > regionY[0]; x2--) {
         result.emplace_back(Move { x, y, x2, y });
     }
-    if (board.teamOn(regionY[0], y) != team) {
+    if (board.team_on(regionY[0], y) != team) {
         result.emplace_back(Move { x, y, regionY[0], y });
     }
 
@@ -242,13 +242,13 @@ MOVES MovesGen::cannon(TEAM team, Board& board, int x, int y)
     for (int x2 = x + 1; x2 <= regionY[2]; x2++) {
         result.emplace_back(Move { x, y, x2, y });
     }
-    if (board.teamOn(regionY[3], y) == -team && regionY[3] != regionY[2]) {
+    if (board.team_on(regionY[3], y) == -team && regionY[3] != regionY[2]) {
         result.emplace_back(Move { x, y, regionY[3], y });
     }
     for (int x2 = x - 1; x2 >= regionY[1]; x2--) {
         result.emplace_back(Move { x, y, x2, y });
     }
-    if (board.teamOn(regionY[0], y) == -team && regionY[0] != regionY[1]) {
+    if (board.team_on(regionY[0], y) == -team && regionY[0] != regionY[1]) {
         result.emplace_back(Move { x, y, regionY[0], y });
     }
 
@@ -258,13 +258,13 @@ MOVES MovesGen::cannon(TEAM team, Board& board, int x, int y)
     for (int y2 = y + 1; y2 <= regionX[2]; y2++) {
         result.emplace_back(Move { x, y, x, y2 });
     }
-    if (board.teamOn(x, regionX[3]) == -team && regionX[3] != regionX[2]) {
+    if (board.team_on(x, regionX[3]) == -team && regionX[3] != regionX[2]) {
         result.emplace_back(Move { x, y, x, regionX[3] });
     }
     for (int y2 = y - 1; y2 >= regionX[1]; y2--) {
         result.emplace_back(Move { x, y, x, y2 });
     }
-    if (board.teamOn(x, regionX[0]) == -team && regionX[0] != regionX[1]) {
+    if (board.team_on(x, regionX[0]) == -team && regionX[0] != regionX[1]) {
         result.emplace_back(Move { x, y, x, regionX[0] });
     }
 
@@ -276,28 +276,28 @@ MOVES MovesGen::pawn(TEAM team, Board& board, int x, int y)
     MOVES result {};
 
     if (team == RED) {
-        if (board.teamOn(x, y + 1) != team && board.teamOn(x, y + 1) != OVERFLOW_TEAM) {
+        if (board.team_on(x, y + 1) != team && board.team_on(x, y + 1) != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x, y + 1 });
         }
         // 如果过河了
         if (y > 4) {
-            if (board.teamOn(x - 1, y) != team && x - 1 >= 0) {
+            if (board.team_on(x - 1, y) != team && x - 1 >= 0) {
                 result.emplace_back(Move { x, y, x - 1, y });
             }
-            if (board.teamOn(x + 1, y) != team && x + 1 <= 8) {
+            if (board.team_on(x + 1, y) != team && x + 1 <= 8) {
                 result.emplace_back(Move { x, y, x + 1, y });
             }
         }
     } else {
-        if (board.teamOn(x, y - 1) != team && board.teamOn(x, y - 1) != OVERFLOW_TEAM) {
+        if (board.team_on(x, y - 1) != team && board.team_on(x, y - 1) != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x, y - 1 });
         }
         // 如果过河了
         if (y < 5) {
-            if (board.teamOn(x - 1, y) != team && x - 1 >= 0) {
+            if (board.team_on(x - 1, y) != team && x - 1 >= 0) {
                 result.emplace_back(Move { x, y, x - 1, y });
             }
-            if (board.teamOn(x + 1, y) != team && x + 1 <= 8) {
+            if (board.team_on(x + 1, y) != team && x + 1 <= 8) {
                 result.emplace_back(Move { x, y, x + 1, y });
             }
         }
@@ -308,8 +308,8 @@ MOVES MovesGen::pawn(TEAM team, Board& board, int x, int y)
 
 MOVES MovesGen::generateMovesOn(Board& board, int x, int y)
 {
-    const PIECEID pieceid = abs(board.pieceidOn(x, y));
-    const TEAM team = board.teamOn(x, y);
+    const PIECEID pieceid = abs(board.pid_on(x, y));
+    const TEAM team = board.team_on(x, y);
 
     if (pieceid == R_KING) {
         return MovesGen::king(team, board, x, y);
@@ -394,24 +394,24 @@ MOVES MovesGen::kingCapture(TEAM team, Board& board, int x, int y)
     const int up = y + 1;
     const int down = y - 1;
 
-    if (left >= 3 && board.teamOn(left, y) == -team) {
+    if (left >= 3 && board.team_on(left, y) == -team) {
         result.emplace_back(Move { x, y, left, y });
     }
-    if (right <= 5 && board.teamOn(right, y) == -team) {
+    if (right <= 5 && board.team_on(right, y) == -team) {
         result.emplace_back(Move { x, y, right, y });
     }
     if (team == RED) {
-        if (up <= 2 && board.teamOn(x, up) == -team) {
+        if (up <= 2 && board.team_on(x, up) == -team) {
             result.emplace_back(Move { x, y, x, up });
         }
-        if (down >= 0 && board.teamOn(x, down) == -team) {
+        if (down >= 0 && board.team_on(x, down) == -team) {
             result.emplace_back(Move { x, y, x, down });
         }
     } else {
-        if (up <= 9 && board.teamOn(x, up) == -team) {
+        if (up <= 9 && board.team_on(x, up) == -team) {
             result.emplace_back(Move { x, y, x, up });
         }
-        if (down >= 7 && board.teamOn(x, down) == -team) {
+        if (down >= 7 && board.team_on(x, down) == -team) {
             result.emplace_back(Move { x, y, x, down });
         }
     }
@@ -430,34 +430,34 @@ MOVES MovesGen::guardCapture(TEAM team, Board& board, int x, int y)
     const int down = y - 1;
     if (left >= 3) {
         if (team == RED) {
-            if (board.teamOn(left, up) == -team && up <= 2) {
+            if (board.team_on(left, up) == -team && up <= 2) {
                 result.emplace_back(Move { x, y, left, up });
             }
-            if (board.teamOn(left, down) == -team && down >= 0) {
+            if (board.team_on(left, down) == -team && down >= 0) {
                 result.emplace_back(Move { x, y, left, down });
             }
         } else {
-            if (board.teamOn(left, up) == -team && up <= 9) {
+            if (board.team_on(left, up) == -team && up <= 9) {
                 result.emplace_back(Move { x, y, left, up });
             }
-            if (board.teamOn(left, down) == -team && down >= 7) {
+            if (board.team_on(left, down) == -team && down >= 7) {
                 result.emplace_back(Move { x, y, left, down });
             }
         }
     }
     if (right <= 5) {
         if (team == RED) {
-            if (board.teamOn(right, up) == -team && up <= 2) {
+            if (board.team_on(right, up) == -team && up <= 2) {
                 result.emplace_back(Move { x, y, right, up });
             }
-            if (board.teamOn(right, down) == -team && down >= 0) {
+            if (board.team_on(right, down) == -team && down >= 0) {
                 result.emplace_back(Move { x, y, right, down });
             }
         } else {
-            if (board.teamOn(right, up) == -team && up <= 9) {
+            if (board.team_on(right, up) == -team && up <= 9) {
                 result.emplace_back(Move { x, y, right, up });
             }
-            if (board.teamOn(right, down) == -team && down >= 7) {
+            if (board.team_on(right, down) == -team && down >= 7) {
                 result.emplace_back(Move { x, y, right, down });
             }
         }
@@ -472,29 +472,29 @@ MOVES MovesGen::bishopCapture(TEAM team, Board& board, int x, int y)
 
     // 横坐标应在0, 9之间, 纵坐标的话, 红方在0, 4之间, 黑方在5, 9之间
     if (team == RED) {
-        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) == -team) {
+        if (board.team_on(x - 1, y - 1) == EMPTY_TEAM && board.team_on(x - 2, y - 2) == -team) {
             result.emplace_back(Move { x, y, x - 2, y - 2 });
         }
-        if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && board.teamOn(x + 2, y - 2) == -team) {
+        if (board.team_on(x + 1, y - 1) == EMPTY_TEAM && board.team_on(x + 2, y - 2) == -team) {
             result.emplace_back(Move { x, y, x + 2, y - 2 });
         }
-        if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && board.teamOn(x - 2, y + 2) == -team && y + 1 <= 4) {
+        if (board.team_on(x - 1, y + 1) == EMPTY_TEAM && board.team_on(x - 2, y + 2) == -team && y + 1 <= 4) {
             result.emplace_back(Move { x, y, x - 2, y + 2 });
         }
-        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && board.teamOn(x + 2, y + 2) == -team && y + 1 <= 4) {
+        if (board.team_on(x + 1, y + 1) == EMPTY_TEAM && board.team_on(x + 2, y + 2) == -team && y + 1 <= 4) {
             result.emplace_back(Move { x, y, x + 2, y + 2 });
         }
     } else {
-        if (board.teamOn(x + 1, y + 1) == EMPTY_TEAM && board.teamOn(x + 2, y + 2) == -team) {
+        if (board.team_on(x + 1, y + 1) == EMPTY_TEAM && board.team_on(x + 2, y + 2) == -team) {
             result.emplace_back(Move { x, y, x + 2, y + 2 });
         }
-        if (board.teamOn(x + 1, y - 1) == EMPTY_TEAM && board.teamOn(x + 2, y - 2) == -team && y - 1 >= 5) {
+        if (board.team_on(x + 1, y - 1) == EMPTY_TEAM && board.team_on(x + 2, y - 2) == -team && y - 1 >= 5) {
             result.emplace_back(Move { x, y, x + 2, y - 2 });
         }
-        if (board.teamOn(x - 1, y + 1) == EMPTY_TEAM && board.teamOn(x - 2, y + 2) == -team) {
+        if (board.team_on(x - 1, y + 1) == EMPTY_TEAM && board.team_on(x - 2, y + 2) == -team) {
             result.emplace_back(Move { x, y, x - 2, y + 2 });
         }
-        if (board.teamOn(x - 1, y - 1) == EMPTY_TEAM && board.teamOn(x - 2, y - 2) == -team && y - 1 >= 5) {
+        if (board.team_on(x - 1, y - 1) == EMPTY_TEAM && board.team_on(x - 2, y - 2) == -team && y - 1 >= 5) {
             result.emplace_back(Move { x, y, x - 2, y - 2 });
         }
     }
@@ -506,9 +506,9 @@ MOVES MovesGen::knightCapture(TEAM team, Board& board, int x, int y)
 {
     MOVES result {};
 
-    if (board.teamOn(x, y - 1) == EMPTY_TEAM) {
-        TEAM t1 = board.teamOn(x - 1, y - 2);
-        TEAM t2 = board.teamOn(x + 1, y - 2);
+    if (board.team_on(x, y - 1) == EMPTY_TEAM) {
+        TEAM t1 = board.team_on(x - 1, y - 2);
+        TEAM t2 = board.team_on(x + 1, y - 2);
         if (t1 == -team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x - 1, y - 2 });
         }
@@ -516,9 +516,9 @@ MOVES MovesGen::knightCapture(TEAM team, Board& board, int x, int y)
             result.emplace_back(Move { x, y, x + 1, y - 2 });
         }
     }
-    if (board.teamOn(x, y + 1) == EMPTY_TEAM) {
-        TEAM t1 = board.teamOn(x - 1, y + 2);
-        TEAM t2 = board.teamOn(x + 1, y + 2);
+    if (board.team_on(x, y + 1) == EMPTY_TEAM) {
+        TEAM t1 = board.team_on(x - 1, y + 2);
+        TEAM t2 = board.team_on(x + 1, y + 2);
         if (t1 == -team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x - 1, y + 2 });
         }
@@ -526,9 +526,9 @@ MOVES MovesGen::knightCapture(TEAM team, Board& board, int x, int y)
             result.emplace_back(Move { x, y, x + 1, y + 2 });
         }
     }
-    if (board.teamOn(x - 1, y) == EMPTY_TEAM) {
-        TEAM t1 = board.teamOn(x - 2, y + 1);
-        TEAM t2 = board.teamOn(x - 2, y - 1);
+    if (board.team_on(x - 1, y) == EMPTY_TEAM) {
+        TEAM t1 = board.team_on(x - 2, y + 1);
+        TEAM t2 = board.team_on(x - 2, y - 1);
         if (t1 == -team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x - 2, y + 1 });
         }
@@ -536,9 +536,9 @@ MOVES MovesGen::knightCapture(TEAM team, Board& board, int x, int y)
             result.emplace_back(Move { x, y, x - 2, y - 1 });
         }
     }
-    if (board.teamOn(x + 1, y) == EMPTY_TEAM) {
-        TEAM t1 = board.teamOn(x + 2, y + 1);
-        TEAM t2 = board.teamOn(x + 2, y - 1);
+    if (board.team_on(x + 1, y) == EMPTY_TEAM) {
+        TEAM t1 = board.team_on(x + 2, y + 1);
+        TEAM t2 = board.team_on(x + 2, y - 1);
         if (t1 == -team && t1 != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x + 2, y + 1 });
         }
@@ -557,20 +557,20 @@ MOVES MovesGen::rookCapture(TEAM team, Board& board, int x, int y)
     // 纵向着法
     uint32 bitlineX = board.getBitLineX(x);
     REGION_ROOK regionX = board.bitboard->getRookRegion(bitlineX, y, 9);
-    if (board.teamOn(x, regionX[1]) == -team) {
+    if (board.team_on(x, regionX[1]) == -team) {
         result.emplace_back(Move { x, y, x, regionX[1] });
     }
-    if (board.teamOn(x, regionX[0]) == -team) {
+    if (board.team_on(x, regionX[0]) == -team) {
         result.emplace_back(Move { x, y, x, regionX[0] });
     }
 
     // 横向着法
     uint32 bitlineY = board.getBitLineY(y);
     REGION_ROOK regionY = board.bitboard->getRookRegion(bitlineY, x, 8);
-    if (board.teamOn(regionY[1], y) == -team) {
+    if (board.team_on(regionY[1], y) == -team) {
         result.emplace_back(Move { x, y, regionY[1], y });
     }
-    if (board.teamOn(regionY[0], y) == -team) {
+    if (board.team_on(regionY[0], y) == -team) {
         result.emplace_back(Move { x, y, regionY[0], y });
     }
 
@@ -584,20 +584,20 @@ MOVES MovesGen::cannonCapture(TEAM team, Board& board, int x, int y)
     // 横向着法
     uint32 bitlineY = board.getBitLineY(y);
     REGION_CANNON regionY = board.bitboard->getCannonRegion(bitlineY, x, 8);
-    if (board.teamOn(regionY[3], y) == -team && regionY[3] != regionY[2]) {
+    if (board.team_on(regionY[3], y) == -team && regionY[3] != regionY[2]) {
         result.emplace_back(Move { x, y, regionY[3], y });
     }
-    if (board.teamOn(regionY[0], y) == -team && regionY[0] != regionY[1]) {
+    if (board.team_on(regionY[0], y) == -team && regionY[0] != regionY[1]) {
         result.emplace_back(Move { x, y, regionY[0], y });
     }
 
     // 纵向着法
     uint32 bitlineX = board.getBitLineX(x);
     REGION_CANNON regionX = board.bitboard->getCannonRegion(bitlineX, y, 9);
-    if (board.teamOn(x, regionX[3]) == -team && regionX[3] != regionX[2]) {
+    if (board.team_on(x, regionX[3]) == -team && regionX[3] != regionX[2]) {
         result.emplace_back(Move { x, y, x, regionX[3] });
     }
-    if (board.teamOn(x, regionX[0]) == -team && regionX[0] != regionX[1]) {
+    if (board.team_on(x, regionX[0]) == -team && regionX[0] != regionX[1]) {
         result.emplace_back(Move { x, y, x, regionX[0] });
     }
 
@@ -609,28 +609,28 @@ MOVES MovesGen::pawnCapture(TEAM team, Board& board, int x, int y)
     MOVES result {};
 
     if (team == RED) {
-        if (board.teamOn(x, y + 1) == -team && board.teamOn(x, y + 1) != OVERFLOW_TEAM) {
+        if (board.team_on(x, y + 1) == -team && board.team_on(x, y + 1) != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x, y + 1 });
         }
         // 如果过河了
         if (y > 4) {
-            if (board.teamOn(x - 1, y) == -team && x - 1 >= 0) {
+            if (board.team_on(x - 1, y) == -team && x - 1 >= 0) {
                 result.emplace_back(Move { x, y, x - 1, y });
             }
-            if (board.teamOn(x + 1, y) == -team && x + 1 <= 8) {
+            if (board.team_on(x + 1, y) == -team && x + 1 <= 8) {
                 result.emplace_back(Move { x, y, x + 1, y });
             }
         }
     } else {
-        if (board.teamOn(x, y - 1) == -team && board.teamOn(x, y - 1) != OVERFLOW_TEAM) {
+        if (board.team_on(x, y - 1) == -team && board.team_on(x, y - 1) != OVERFLOW_TEAM) {
             result.emplace_back(Move { x, y, x, y - 1 });
         }
         // 如果过河了
         if (y < 5) {
-            if (board.teamOn(x - 1, y) == -team && x - 1 >= 0) {
+            if (board.team_on(x - 1, y) == -team && x - 1 >= 0) {
                 result.emplace_back(Move { x, y, x - 1, y });
             }
-            if (board.teamOn(x + 1, y) == -team && x + 1 <= 8) {
+            if (board.team_on(x + 1, y) == -team && x + 1 <= 8) {
                 result.emplace_back(Move { x, y, x + 1, y });
             }
         }
@@ -641,8 +641,8 @@ MOVES MovesGen::pawnCapture(TEAM team, Board& board, int x, int y)
 
 MOVES MovesGen::generateCaptureMovesOn(Board& board, int x, int y)
 {
-    const PIECEID pieceid = board.pieceidOn(x, y);
-    const TEAM team = board.teamOn(x, y);
+    const PIECEID pieceid = board.pid_on(x, y);
+    const TEAM team = board.team_on(x, y);
 
     if (pieceid == R_KING || pieceid == B_KING) {
         return MovesGen::kingCapture(team, board, x, y);
