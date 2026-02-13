@@ -9,19 +9,14 @@
 #include <fstream>
 #include <future>
 #include <iostream>
-#include <map>
 #include <random>
 #include <string>
 #include <thread>
-#include <unordered_map>
 #include <vector>
 
 class Piece;
 class Move;
-class Result;
-class Trick;
-class TransItem;
-class Information;
+class TtItem;
 using uint32 = unsigned int;
 using POS = char;
 using PIECE_INDEX = size_t;
@@ -30,7 +25,7 @@ using TEAM = int;
 using FEN = std::string;
 using TRICK_RET = std::pair<bool, int>;
 using SEARCH_RET = std::pair<Move, int>;
-using PIECEID_MAP = std::array<std::array<PIECEID, 10>, 9>;
+using PID_MATRIX = std::array<std::array<PIECEID, 10>, 9>;
 using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
 using PIECES = std::vector<Piece>;
 using MOVES = std::vector<Move>;
@@ -133,8 +128,8 @@ struct Move {
     }
 };
 
-struct TransItem {
-    TransItem() = default;
+struct TtItem {
+    TtItem() = default;
     int hash_lock { 0 };
     int vlExact { 0 };
     int vlBeta { 0 };
@@ -149,7 +144,7 @@ struct TransItem {
 
 namespace utils {
 
-inline bool is_over_board(int& x, int& y)
+inline bool not_over_board(int& x, int& y)
 {
     return x > -1 && x < 9 && y > -1 && y < 10;
 }
@@ -227,9 +222,9 @@ inline TEAM team(FEN& fen)
     return fen.find("w") != std::string::npos ? RED : BLACK;
 }
 
-PIECEID_MAP to_pid_matrix(FEN& fen)
+PID_MATRIX to_pid_matrix(FEN& fen)
 {
-    PIECEID_MAP ret {};
+    PID_MATRIX ret {};
     size_t col = 0;
     size_t row = 0;
     for (size_t i = 0; i < fen.size(); i++) {
@@ -248,7 +243,7 @@ PIECEID_MAP to_pid_matrix(FEN& fen)
     return ret;
 }
 
-FEN to_fen(PIECEID_MAP& pid_matrix, TEAM& team)
+FEN to_fen(PID_MATRIX& pid_matrix, TEAM& team)
 {
     std::string result = "";
     for (size_t y = 0; y < 10; y++) {
