@@ -29,8 +29,8 @@ using PIECES = std::vector<Piece>;
 using MOVES = std::vector<Move>;
 constexpr int INF = 1000000;
 constexpr int BAN = INF - 2000;
-constexpr int POS_BEG = 51;
-constexpr int POS_END = 203;
+constexpr int POS_BEG = 0x33;
+constexpr int POS_END = 0xcb;
 constexpr PIECEID R_KING = 1;
 constexpr PIECEID R_GUARD = 2;
 constexpr PIECEID R_BISHOP = 3;
@@ -74,7 +74,6 @@ struct Piece {
         assert(POS_BEG <= pos && pos <= POS_END);
         assert(index < 33);
     }
-
     const PIECEID pieceid { 0 };
     const POS pos { 0 };
     const INDEX index { 0 };
@@ -91,14 +90,8 @@ struct Move {
         assert(POS_BEG <= beg && beg <= POS_END);
         assert(POS_BEG <= end && end <= POS_END);
     }
-    bool operator==(const Move& move) const
-    {
-        return beg == move.beg && end == move.end;
-    }
-
     const POS beg { 0 };
     const POS end { 0 };
-    MOVE_TYPE type { NORMAL };
 };
 
 namespace utils {

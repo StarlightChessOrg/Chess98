@@ -3,8 +3,6 @@
 namespace {
 
 struct TtItem {
-    TtItem() = default;
-
     int hash_lock { 0 };
     int vlExact { 0 };
     int vlBeta { 0 };
@@ -17,4 +15,8 @@ struct TtItem {
     Move alpha_move {};
 };
 
+}
+
+namespace tt {
+    
 }
