@@ -32,14 +32,14 @@ constexpr int BAN = INF - 2000;
 constexpr int POS_BEG = 0x33;
 constexpr int POS_END = 0xcb;
 constexpr PIECEID R_KING = 1;
-constexpr PIECEID R_GUARD = 2;
+constexpr PIECEID R_ADVISOR = 2;
 constexpr PIECEID R_BISHOP = 3;
 constexpr PIECEID R_KNIGHT = 4;
 constexpr PIECEID R_ROOK = 5;
 constexpr PIECEID R_CANNON = 6;
 constexpr PIECEID R_PAWN = 7;
 constexpr PIECEID B_KING = -1;
-constexpr PIECEID B_GUARD = -2;
+constexpr PIECEID B_ADVISOR = -2;
 constexpr PIECEID B_BISHOP = -3;
 constexpr PIECEID B_KNIGHT = -4;
 constexpr PIECEID B_ROOK = -5;
@@ -60,6 +60,43 @@ constexpr SEARCH_TYPE ROOT = 0;
 constexpr SEARCH_TYPE PV = 1;
 constexpr SEARCH_TYPE CUT = 2;
 constexpr SEARCH_TYPE QUIESC = 3;
+
+bool valid_pos(const POS& pos)
+{
+    assert(POS_BEG <= pos && pos <= POS_END);
+    constexpr PID_MATRIX AVAIABLE {
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0,
+        1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+    };
+    return AVAIABLE[pos] == 1;
+}
+
+bool valid_pid(const PIECEID& pid) {
+    return -7 <= pid && pid <= 7 && pid != 0;
+}
 
 struct Piece {
     Piece() = default;
@@ -87,8 +124,7 @@ struct Move {
         : beg(beg)
         , end(end)
     {
-        assert(POS_BEG <= beg && beg <= POS_END);
-        assert(POS_BEG <= end && end <= POS_END);
+        assert(valid_pos(beg) && valid_pos(end));
     }
     const POS beg { 0 };
     const POS end { 0 };
@@ -136,11 +172,11 @@ void writeFile(std::string filename, std::string content)
 namespace fen {
 
 static constexpr PIECEID letter_pid_table[58] = {
-    R_GUARD, R_BISHOP, R_CANNON, 0, R_BISHOP, 0, R_GUARD, R_KNIGHT,
+    R_ADVISOR, R_BISHOP, R_CANNON, 0, R_BISHOP, 0, R_ADVISOR, R_KNIGHT,
     0, 0, R_KING, 0, 0, R_KNIGHT, 0, R_PAWN,
     0, R_ROOK, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
-    B_GUARD, B_BISHOP, B_CANNON, 0, B_BISHOP, 0, B_GUARD, B_KNIGHT,
+    B_ADVISOR, B_BISHOP, B_CANNON, 0, B_BISHOP, 0, B_ADVISOR, B_KNIGHT,
     0, 0, B_KING, 0, 0, B_KNIGHT, 0, B_PAWN,
     0, B_ROOK, 0, 0, 0, 0, 0, 0, 0, 0
 };
@@ -151,13 +187,13 @@ static constexpr char pid_letter_table[15] = {
 
 PIECEID letter_pid(char& ch)
 {
-    assert(letter_pid_table[ch - 'A'] > -8 && letter_pid_table[ch - 'A'] < 8);
+    assert(valid_pid(letter_pid_table[ch - 'A']));
     return letter_pid_table[ch - 'A'];
 }
 
 char pid_letter(PIECEID& pid)
 {
-    assert(pid > -8 && pid < 8);
+    assert(valid_pid(pid));
     return pid_letter_table[pid + 7];
 }
 
