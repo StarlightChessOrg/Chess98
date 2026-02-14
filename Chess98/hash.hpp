@@ -814,7 +814,7 @@ inline int lock_on(const PIECEID& pid, const POS& pos)
     return LOCKS[pid + 7][pos];
 }
 
-} // namespace hash_data
+} // namespace
 
 namespace hash {
 
@@ -831,7 +831,6 @@ void clear()
 
 void init(const PID_MATRIX& pid_matrix)
 {
-    clear();
     key_history.reserve(256);
     lock_history.reserve(256);
     for (int i = POS_BEG; i <= POS_END; i++) {

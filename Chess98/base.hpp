@@ -12,8 +12,6 @@
 #include <thread>
 #include <vector>
 
-struct Piece;
-struct Move;
 using TRICK_RET = std::pair<bool, int>;
 using SEARCH_RET = std::pair<Move, int>;
 using POS = int;
