@@ -7,17 +7,17 @@ namespace {
     std::array<std::array<int, 256>, 256> table_r {};
     std::array<std::array<int, 256>, 256> table_b {};
 
-    int strategy(const int& depth)
+    int strategy(int depth)
     {
         return depth * depth;
     }
 
-    int score_of_r(const Move& move)
+    int score_of_r(Move move)
     {
         return table_r[move.beg][move.end];
     }
 
-    int score_of_b(const Move& move)
+    int score_of_b(Move move)
     {
         return table_b[move.beg][move.end];
     }
@@ -30,7 +30,7 @@ void init()
     table_b = {};
 }
 
-void update(const Move& move, const TEAM& team, const int& depth)
+void update(Move move, TEAM team, int depth)
 {
     assert(team == R || team == B);
     assert(valid_pos(move.beg) && valid_pos(move.end));
@@ -41,7 +41,7 @@ void update(const Move& move, const TEAM& team, const int& depth)
     }
 }
 
-void sort(const PID_MATRIX& pid_matrix, MOVES& moves)
+void sort(PID_MATRIX pid_matrix, MOVES& moves)
 {
     const size_t n = moves.size();
     if (n <= 1)
@@ -70,7 +70,7 @@ void init()
     table = {};
 }
 
-void update(const int& distance, const Move& move)
+void update(int distance, Move move)
 {
     table[distance][1] = table[distance][0];
     table[distance][0] = move;
@@ -107,18 +107,18 @@ void init(int hash_size = 12)
     table.resize(size);
 }
 
-void update(const int& key, const int& lock, const Move& good_move, NODE_TYPE type, const int& depth)
+void update(int key, int lock, Move& good_move, NODE_TYPE type, int depth)
 {
     // TODO
 }
 
-int get_vl(const int& lock, const int& alpha, const int& beta, const int& depth)
+int get_vl(int lock, int alpha, int beta, int depth)
 {
     // TODO
     return 0;
 }
 
-Move get_move(const int& key, const int& lock)
+Move get_move(int key, int lock)
 {
     // TODO
     return Move{};

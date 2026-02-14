@@ -60,7 +60,7 @@ constexpr SEARCH_TYPE PV = 1;
 constexpr SEARCH_TYPE CUT = 2;
 constexpr SEARCH_TYPE QUIESC = 3;
 
-bool valid_pos(const POS& pos)
+bool valid_pos(POS pos)
 {
     assert(POS_BEG <= pos && pos <= POS_END);
     constexpr PID_MATRIX AVAIABLE {
@@ -93,7 +93,7 @@ bool valid_pos(const POS& pos)
     return AVAIABLE[pos] == 1;
 }
 
-bool valid_pid(const PIECEID& pid) {
+bool valid_pid(PIECEID pid) {
     return -7 <= pid && pid <= 7 && pid != 0;
 }
 
@@ -184,13 +184,13 @@ static constexpr char pid_letter_table[15] = {
     '?', 'K', 'A', 'B', 'N', 'R', 'C', 'P'
 };
 
-PIECEID letter_pid(char& ch)
+PIECEID letter_pid(char ch)
 {
     assert(valid_pid(letter_pid_table[ch - 'A']));
     return letter_pid_table[ch - 'A'];
 }
 
-char pid_letter(PIECEID& pid)
+char pid_letter(PIECEID pid)
 {
     assert(valid_pid(pid));
     return pid_letter_table[pid + 7];

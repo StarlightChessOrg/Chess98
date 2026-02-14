@@ -839,7 +839,7 @@ void init(const PID_MATRIX& pid_matrix)
     }
 }
 
-void update(const PID_MATRIX pid_matrix, const Move& move, PIECEID captured = 0)
+void update(const PID_MATRIX& pid_matrix, Move move, PIECEID captured = 0)
 {
     assert(valid_pos(move.beg) && valid_pos(move.end));
     const PIECEID& pid_beg = pid_matrix[move.beg];
