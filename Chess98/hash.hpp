@@ -66,7 +66,7 @@ constexpr PID_MATRIX R_KING_LOCK {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-constexpr PID_MATRIX R_GUARD_KEY {
+constexpr PID_MATRIX R_ADVISOR_KEY {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -92,7 +92,7 @@ constexpr PID_MATRIX R_GUARD_KEY {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-constexpr PID_MATRIX R_GUARD_LOCK {
+constexpr PID_MATRIX R_ADVISOR_LOCK {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -456,7 +456,7 @@ constexpr PID_MATRIX B_KING_LOCK {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-constexpr PID_MATRIX B_GUARD_KEY {
+constexpr PID_MATRIX B_ADVISOR_KEY {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -484,7 +484,7 @@ constexpr PID_MATRIX B_GUARD_KEY {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-constexpr PID_MATRIX B_GUARD_LOCK {
+constexpr PID_MATRIX B_ADVISOR_LOCK {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -792,11 +792,71 @@ constexpr PID_MATRIX B_PAWN_LOCK {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+constexpr std::array<PID_MATRIX, 15> KEYS {
+    B_PAWN_KEY, B_CANNON_KEY, B_ROOK_KEY, B_KNIGHT_KEY, B_BISHOP_KEY, B_ADVISOR_KEY, B_KING_KEY, {},
+    R_KING_KEY, R_ADVISOR_KEY, R_BISHOP_KEY, R_KNIGHT_KEY, R_ROOK_KEY, R_CANNON_KEY, R_PAWN_KEY
+};
+
+constexpr std::array<PID_MATRIX, 15> LOCKS {
+    B_PAWN_LOCK, B_CANNON_LOCK, B_ROOK_LOCK, B_KNIGHT_LOCK, B_BISHOP_LOCK, B_ADVISOR_LOCK, B_KING_LOCK, {},
+    R_KING_LOCK, R_ADVISOR_LOCK, R_BISHOP_LOCK, R_KNIGHT_LOCK, R_ROOK_LOCK, R_CANNON_LOCK, R_PAWN_LOCK
+};
+
+inline int key_on(const PIECEID& pid, const POS& pos)
+{
+    assert(valid_pid(pid) && valid_pos(pos));
+    return KEYS[pid + 7][pos];
+}
+
+inline int lock_on(const PIECEID& pid, const POS& pos)
+{
+    assert(valid_pid(pid) && valid_pos(pos));
+    return LOCKS[pid + 7][pos];
+}
+
 } // namespace hash_data
 
-namespace hash
+namespace hash {
+
+int key { 0 };
+int lock { 0 };
+
+void clear()
 {
+    key = 0;
+    lock = 0;
+    key_history.clear();
+    lock_history.clear();
+}
 
+void init(const PID_MATRIX& pid_matrix)
+{
+    clear();
+    key_history.reserve(256);
+    lock_history.reserve(256);
+    for (int i = POS_BEG; i <= POS_END; i++) {
+        const PIECEID& pid = pid_matrix[i];
+        if (pid != 0) {
+            assert(valid_pid(pid));
+            key ^= key_on(pid, i);
+            lock ^= lock_on(pid, i);
+        }
+    }
+}
 
-    
+void update(const PID_MATRIX pid_matrix, const Move& move, PIECEID captured = 0)
+{
+    assert(valid_pos(move.beg) && valid_pos(move.end));
+    const PIECEID& pid_beg = pid_matrix[move.beg];
+    const PIECEID& pid_end = pid_matrix[move.end];
+    key_history.emplace_back(key);
+    lock_history.emplace_back(lock);
+    key ^= key_on(pid_beg, move.beg);
+    lock ^= lock_on(pid_end, move.end);
+    if (captured != 0) {
+        key ^= key_on(captured, move.end);
+        lock ^= lock_on(captured, move.end);
+    }
+}
+
 } // namespace hash
