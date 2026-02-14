@@ -821,16 +821,12 @@ namespace hash {
 int key { 0 };
 int lock { 0 };
 
-void clear()
+void init(const PID_MATRIX& pid_matrix)
 {
     key = 0;
     lock = 0;
     key_history.clear();
     lock_history.clear();
-}
-
-void init(const PID_MATRIX& pid_matrix)
-{
     key_history.reserve(256);
     lock_history.reserve(256);
     for (int i = POS_BEG; i <= POS_END; i++) {
