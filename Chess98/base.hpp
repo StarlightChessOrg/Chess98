@@ -5,36 +5,33 @@
 #include <chrono>
 #include <cmath>
 #include <cstring>
-#include <ctime>
 #include <fstream>
-#include <future>
 #include <iostream>
 #include <random>
 #include <string>
 #include <thread>
 #include <vector>
 
-class Piece;
-class Move;
-class TtItem;
-using uint32 = unsigned int;
-using POS = char;
-using PIECE_INDEX = size_t;
-using PIECEID = int;
-using TEAM = int;
-using FEN = std::string;
+struct Piece;
+struct Move;
+struct TtItem;
 using TRICK_RET = std::pair<bool, int>;
 using SEARCH_RET = std::pair<Move, int>;
-using PID_MATRIX = std::array<std::array<PIECEID, 10>, 9>;
-using PIECE_TARGET_MAP = std::array<std::array<bool, 10>, 9>;
-using PIECES = std::vector<Piece>;
-using MOVES = std::vector<Move>;
+using POS = int;
+using INDEX = int;
+using PIECEID = int;
+using TEAM = int;
 using MOVE_TYPE = int;
 using NODE_TYPE = int;
 using SEARCH_TYPE = int;
+using FEN = std::string;
+using PID_MATRIX = std::array<int, 256>;
+using PIECES = std::vector<Piece>;
+using MOVES = std::vector<Move>;
 constexpr int INF = 1000000;
 constexpr int BAN = INF - 2000;
-constexpr int ILLEGAL_VAL = INF * 2;
+constexpr int POS_BEG = 51;
+constexpr int POS_END = 203;
 constexpr PIECEID R_KING = 1;
 constexpr PIECEID R_GUARD = 2;
 constexpr PIECEID R_BISHOP = 3;
@@ -49,8 +46,8 @@ constexpr PIECEID B_KNIGHT = -4;
 constexpr PIECEID B_ROOK = -5;
 constexpr PIECEID B_CANNON = -6;
 constexpr PIECEID B_PAWN = -7;
-constexpr TEAM RED = 1;
-constexpr TEAM BLACK = -1;
+constexpr TEAM R = 1;
+constexpr TEAM B = -1;
 constexpr MOVE_TYPE NORMAL = 0;
 constexpr MOVE_TYPE HISTORY = 1;
 constexpr MOVE_TYPE CAPTURE = 2;
@@ -64,72 +61,50 @@ constexpr SEARCH_TYPE ROOT = 0;
 constexpr SEARCH_TYPE PV = 1;
 constexpr SEARCH_TYPE CUT = 2;
 constexpr SEARCH_TYPE QUIESC = 3;
-constexpr std::array<PIECEID, 14> ALL_PIECEIDS {
-    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN,
-    B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN
-};
 
 struct Piece {
     Piece() = default;
-    Piece(PIECEID pid, POS x, POS y, PIECE_INDEX index)
+    Piece(PIECEID pid, POS pos, INDEX index)
         : pieceid(pid)
-        , x(x)
-        , y(y)
-        , pieceIndex(index)
-        , team(pid > 0 ? RED : BLACK)
-        , isLive(true)
+        , pos(pos)
+        , index(index)
+        , team(pid > 0 ? R : B)
+        , live(true)
     {
         assert(pid != 0);
-        assert(x < 9 && x > -1 && y < 10 && y > -1);
+        assert(POS_BEG <= pos && pos <= POS_END);
         assert(index < 33);
     }
 
-    PIECEID pieceid { 0 };
-    POS x { 0 };
-    POS y { 0 };
-    PIECE_INDEX pieceIndex { 0 };
-    TEAM team { 0 };
-    bool isLive { false };
+    const PIECEID pieceid { 0 };
+    const POS pos { 0 };
+    const INDEX index { 0 };
+    const TEAM team { 0 };
+    bool live { false };
 };
 
 struct Move {
     Move() = default;
-    Move(POS x1, POS y1, POS x2, POS y2)
-        : x1(x1)
-        , y1(y1)
-        , x2(x2)
-        , y2(y2)
+    Move(POS beg, POS end)
+        : beg(beg)
+        , end(end)
     {
-        assert(x1 > -1 && x1 < 9 && y1 > -1 && y1 < 10);
-        assert(x2 > -1 && x2 < 9 && y2 > -1 && y2 < 10);
+        assert(POS_BEG <= beg && beg <= POS_END);
+        assert(POS_BEG <= end && end <= POS_END);
     }
-
-    POS x1 { 0 };
-    POS y1 { 0 };
-    POS x2 { 0 };
-    POS y2 { 0 };
-    MOVE_TYPE type { NORMAL };
-    PIECE_INDEX attacker { 0 };
-    PIECE_INDEX captured { 0 };
-
     bool operator==(const Move& move) const
     {
-        return x1 == move.x1 && y1 == move.y1 && x2 == move.x2 && y2 == move.y2;
+        return beg == move.beg && end == move.end;
     }
 
-    bool beg_pos_eq(const Move& move) const
-    {
-        return x1 == move.x1 && y1 == move.y1;
-    }
-
-    bool end_pos_eq(const Move& move) const
-    {
-        return x2 == move.x2 && y2 == move.y2;
-    }
+    const POS beg { 0 };
+    const POS end { 0 };
+    MOVE_TYPE type { NORMAL };
 };
 
 struct TtItem {
     TtItem() = default;
+
     int hash_lock { 0 };
     int vlExact { 0 };
     int vlBeta { 0 };
@@ -144,34 +119,27 @@ struct TtItem {
 
 namespace utils {
 
-inline bool not_over_board(int& x, int& y)
+std::string to_ucci_move(const Move& m)
 {
-    return x > -1 && x < 9 && y > -1 && y < 10;
+    return {
+        char('a' + (m.beg & 15)), char('0' + (m.beg >> 4)),
+        char('a' + (m.end & 15)), char('0' + (m.end >> 4))
+    };
 }
 
-inline std::string to_ucci_move(Move& move)
-{
-    std::string ret { "" };
-    ret += 'a' + move.x1;
-    ret += '0' + move.y1;
-    ret += 'a' + move.x2;
-    ret += '0' + move.y2;
-    return ret;
-}
-
-inline void wait(int ms)
+void wait(int ms)
 {
     assert(ms > 0);
     std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 }
 
-inline void command(std::string str)
+void command(std::string str)
 {
     int res = system(str.c_str());
     assert(res == 0);
 }
 
-inline void readFile(std::string filename, std::string& content)
+void readFile(std::string filename, std::string& content)
 {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
     assert(file);
@@ -179,7 +147,7 @@ inline void readFile(std::string filename, std::string& content)
     content = result;
 }
 
-inline void writeFile(std::string filename, std::string content)
+void writeFile(std::string filename, std::string content)
 {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
     assert(file);
@@ -204,70 +172,77 @@ static constexpr char pid_letter_table[15] = {
     '?', 'K', 'A', 'B', 'N', 'R', 'C', 'P'
 };
 
-inline PIECEID letter_pid(char& ch)
+PIECEID letter_pid(char& ch)
 {
     assert(letter_pid_table[ch - 'A'] > -8 && letter_pid_table[ch - 'A'] < 8);
     return letter_pid_table[ch - 'A'];
 }
 
-inline char pid_letter(PIECEID& pid)
+char pid_letter(PIECEID& pid)
 {
     assert(pid > -8 && pid < 8);
     return pid_letter_table[pid + 7];
 }
 
-inline TEAM team(FEN& fen)
+TEAM team(FEN& fen)
 {
     assert(fen.find("w") != std::string::npos || fen.find("b") != std::string::npos);
-    return fen.find("w") != std::string::npos ? RED : BLACK;
+    return fen.find("w") != std::string::npos ? R : B;
 }
 
-PID_MATRIX to_pid_matrix(FEN& fen)
+using FEN = std::string;
+using PID_MATRIX = std::array<int, 256>;
+
+PID_MATRIX to_matrix(FEN fen)
 {
-    PID_MATRIX ret {};
-    size_t col = 0;
-    size_t row = 0;
-    for (size_t i = 0; i < fen.size(); i++) {
-        if (fen[i] >= '1' && fen[i] <= '9') {
-            row += fen[i] - '0';
-        } else if (fen[i] == '/') {
-            row = 0;
-            col += 1;
-        } else if (fen[i] == ' ') {
+    PID_MATRIX pid_matrix {};
+    int r = 0, c = 0;
+    for (const char& ch : fen) {
+        if (ch == ' ') {
             break;
+        } else if (ch == '/') {
+            r++;
+            c = 0;
+        } else if (ch >= '1' && ch <= '9') {
+            c += ch - '0';
         } else {
-            ret[row][9 - col] = letter_pid(fen[i]);
-            row += 1;
-        }
-    }
-    return ret;
-}
-
-FEN to_fen(PID_MATRIX& pid_matrix, TEAM& team)
-{
-    std::string result = "";
-    for (size_t y = 0; y < 10; y++) {
-        int spaceCount = 0;
-        for (size_t x = 0; x < 9; x++) {
-            PIECEID pieceid = pid_matrix[x][9 - y];
-            if (pieceid == 0) {
-                spaceCount++;
-            } else {
-                if (spaceCount > 0) {
-                    result += std::to_string(spaceCount);
-                    spaceCount = 0;
-                }
-                result += pid_letter(pieceid);
+            const int idx = ch - 'A';
+            const int pid = letter_pid_table[idx];
+            if (pid != 0) {
+                int sq = ((r + 3) << 4) | (c + 3);
+                pid_matrix[sq] = pid;
+                c++;
             }
         }
-        if (spaceCount > 0) {
-            result += std::to_string(spaceCount);
-        }
-        result += "/";
     }
-    result.pop_back();
-    result += team == RED ? " w" : " b";
-    return result;
+    return pid_matrix;
+}
+
+FEN to_fen(PID_MATRIX pid_matrix, TEAM team = R)
+{
+    std::string fen { "" };
+    for (int r = 0; r < 10; r++) {
+        int empty = 0;
+        for (int c = 0; c < 9; c++) {
+            const int sq = ((r + 3) << 4) | (c + 3);
+            const int pid = pid_matrix[sq];
+            if (!pid) {
+                empty++;
+            } else {
+                if (empty)
+                    fen += char('0' + empty), empty = 0;
+                fen += pid_letter_table[pid + 7];
+            }
+        }
+        if (empty) {
+            fen += char('0' + empty);
+        }
+        if (r != 9) {
+            fen += '/';
+        }
+    }
+    fen += team == R ? " w" : " b";
+    return fen;
 }
 
 } // namespace fen
