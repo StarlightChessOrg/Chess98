@@ -11,10 +11,11 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <numeric>
 
 using TRICK_RET = std::pair<bool, int>;
 using SEARCH_RET = std::pair<Move, int>;
-using POS = int;
+using POS = unsigned char;
 using INDEX = int;
 using PIECEID = int;
 using TEAM = int;
@@ -109,10 +110,10 @@ struct Piece {
         assert(POS_BEG <= pos && pos <= POS_END);
         assert(index < 33);
     }
-    const PIECEID pieceid { 0 };
-    const POS pos { 0 };
-    const INDEX index { 0 };
-    const TEAM team { 0 };
+    PIECEID pieceid { 0 };
+    POS pos { 0 };
+    INDEX index { 0 };
+    TEAM team { 0 };
     bool live { false };
 };
 
@@ -124,8 +125,8 @@ struct Move {
     {
         assert(valid_pos(beg) && valid_pos(end));
     }
-    const POS beg { 0 };
-    const POS end { 0 };
+    POS beg { 0 };
+    POS end { 0 };
 };
 
 namespace utils {
