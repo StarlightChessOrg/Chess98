@@ -1,7 +1,0 @@
-{
-    "files.exclude": {
-        "**/out": true,
-        "*/*CMake*": true
-    },
-    "terminal.integrated.cwd": "./utils"
-}
