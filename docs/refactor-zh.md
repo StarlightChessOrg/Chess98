@@ -78,7 +78,6 @@ movepicker.hpp    evaluate.hpp
 - 定义TEAM队伍id类型为char，范围-1~1。
 - 定义具体TEAM，命名为R和B。
 - 定义MATRIX棋盘矩阵类型为`std::array<char, 90>`，0~8为黑方的最底列，即有车的一列。
-- 定义FEN类型为std::string。
 - 定义DEPTH类型为unsigned char，定义VL类型为short。
 - 定义INF, BAN分别为30000和20000，INF到short边界去没有什么必要性。
 - 定义MOVES, PIECES为各自类型的std::vector。
@@ -88,6 +87,7 @@ movepicker.hpp    evaluate.hpp
 - Piece结构包含pid，pindex，pos，live，占4字节。
 - 定义SEARCH_RET为`std::pair<Move, short>`，存储搜索结果。
 - 定义TRICK_RET为`std::pair<bool, short>`，存储mdp和probCut等技巧的结果，便于封装。
+- 定义基于chrono的计时函数封装。
 
 在`hash.hpp`内加入祖传的哈希矩阵，封装相关功能。
 
