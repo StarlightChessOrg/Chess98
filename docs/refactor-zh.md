@@ -24,7 +24,7 @@ date: 2026/2/16
 文件依赖树将采用新的架构，尽量避免陷入循环依赖问题，大致如下：
 
 ```plaintext
-核心层
+核心
 base.hpp
   存储公用的全局常量
 hash.hpp 依赖 base.hpp
@@ -40,7 +40,7 @@ evaluate.hpp 依赖 position.hpp
 search.hpp 依赖 movepicker.hpp evaluate.hpp
   实现搜索算法
 
-边缘层
+前端
 utils.hpp 依赖 base.hpp
   实现各种非核心的方法
 ucci.hpp 依赖 search.hpp
@@ -89,14 +89,6 @@ movepicker.hpp    evaluate.hpp
 - 定义SEARCH_RET为`std::pair<Move, short>`，存储搜索结果。
 - 定义TRICK_RET为`std::pair<bool, short>`，存储mdp和probCut等技巧的结果，便于封装。
 
-在`utils.hpp`内加入各种杂项功能，放在命名空间`utils`中。
-
-- `fen_to_matrix(FEN fen)->MATRIX` 棋盘fen码转矩阵。
-- `matrix_to_fen(const MATRIX& matrix)->FEN` 矩阵转棋盘fen码。
-- `read_file(std::string name)->std::string` 流操作读取整个文件。
-- `write_file(std::string name, std::string` content)->void 流操作w模式写文件。
-- `gen_random_fen(int num)->std::vector<FEN>` 快速生成伪随机不重复的合法fen局面。
-
 在`hash.hpp`内加入祖传的哈希矩阵，封装相关功能。
 
 - 在匿名namespace中放入R_KING_KEY，R_KING_LOCK等祖传代码。
@@ -113,18 +105,58 @@ movepicker.hpp    evaluate.hpp
   - `update(const MATRIX& matrix, Move move, PID captured)->void` 更新步进
   - `undo_update()->void` 撤销更新
 
-在`movepicker.hpp`内加入各类着法生成函数，且采用新的设计。
+在`position.hpp`内加入全局的棋盘状态管理以及相关方法。
 
-- 在匿名namespace里放入棋子的预生成着法，编译时直接计算，具体策略如下：
-  - TODO: 这个算法较为复杂，我还在考虑。
-- 不应当一次性生成所有着法，
+- 定义board作为当前局面。
+- 定义init方法。
+- 定义do_move和undo_move方法。
+- 定义valid_move方法。
+- TODO: 还有很多内容，我想想。
 
 在`heuristic.hpp`内加入启发函数，各自有各自的匿名namespace和封装的接口。
 
 - 历史启发
 - 杀手启发
 - 置换表启发
-- MVV/LVA
-- SEE
+- MVV/LVA排序
+- SEE_GE评价
 
+在`movepicker.hpp`内加入各类着法生成函数，且采用新的设计。
 
+- 在匿名namespace里放入棋子的预生成着法，编译时直接计算，具体策略如下：
+  - TODO: 这个算法较为复杂，我还在考虑。
+- 不应当一次性生成所有着法，具体方案如下：
+  - TODO: 着法生成策略较为复杂，还在想。
+
+在`evaluate.hpp`内加入评估功能，负责评估一个局面。
+
+- TODO: 评估的具体实现还没有想好。
+
+### 前端
+
+在`utils.hpp`内加入各种杂项功能，放在命名空间`utils`中。
+
+- `fen_to_matrix(FEN fen)->MATRIX` 棋盘fen码转矩阵。
+- `matrix_to_fen(const MATRIX& matrix)->FEN` 矩阵转棋盘fen码。
+- `read_file(std::string name)->std::string` 流操作读取整个文件。
+- `write_file(std::string name, std::string` content)->void 流操作w模式写文件。
+- `gen_random_fen(int num)->std::vector<FEN>` 快速生成伪随机不重复的合法fen局面。
+
+在`ucci.hpp`内实现ucci协议。
+
+- TODO: 具体如何实现、支持什么功能等，还没有想好
+
+在`test.hpp`内实现测试功能。
+
+- TODO: 具体的测试内容之后再写。
+
+在`main.cpp`内写主进程
+
+- 如果有权限则添加此进程到最高优先级。
+- 运行ucci，如果ucci退出了就运行test。
+
+## 结语
+
+象棋引擎这种项目，不架构纯凭感觉写是真的不行，除非水平足够高，不然很容易各种东西窝一坨，积重难返。
+
+希望这次重构圆满成功。
