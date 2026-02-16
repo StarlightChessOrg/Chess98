@@ -1,6 +1,8 @@
 ---
-title: 中象引擎开发文档
+title: 中象引擎项目重构文档
 author: 夜水
+lang: zh
+date: 2026/2/16
 ---
 
 最近准备把我的象棋引擎重构一遍，重新设计并加入一些新的算法，提升搜索性能和评估准确度，为此翻阅了一些论文，参考了AI给出的设计，写下本文。
@@ -38,16 +40,20 @@ evaluate.hpp 依赖 position.hpp
 search.hpp 依赖 movepicker.hpp evaluate.hpp
   实现搜索算法
 
-用户层
+边缘层
+utils.hpp 依赖 base.hpp
+  实现各种非核心的方法
 ucci.hpp 依赖 search.hpp
   实现ucci协议
 test.hpp 依赖 search.hpp
   实现test测试，若0.3s内没有接收ucci输入则启用
 main.cpp 依赖 ucci.hpp test.hpp
   实现主进程
+```
 
-总体依赖树如下：
+核心依赖树如下：
 
+```plaintext
         base.hpp
        /        \
     hash.hpp heuristic.hpp
@@ -57,10 +63,6 @@ main.cpp 依赖 ucci.hpp test.hpp
 movepicker.hpp    evaluate.hpp
          \          /
           search.hpp
-         /          \
-      test.hpp    ucci.hpp
-          \        /
-           main.cpp
 ```
 
 ## 具体方案
@@ -89,27 +91,27 @@ movepicker.hpp    evaluate.hpp
 
 在`utils.hpp`内加入各种杂项功能，放在命名空间`utils`中。
 
-- utils::fen_to_matrix(FEN fen)->MATRIX 棋盘fen码转矩阵。
-- utils::matrix_to_fen(const MATRIX& matrix)->FEN 矩阵转棋盘fen码。
-- utils::read_file(std::string name)->std::string 流操作读取整个文件。
-- utils::write_file(std::string name, std::string content)->void 流操作w模式写文件。
-- utils::gen_random_fen(int num)->std::vector<FEN> 快速生成伪随机不重复的合法fen局面。
+- `fen_to_matrix(FEN fen)->MATRIX` 棋盘fen码转矩阵。
+- `matrix_to_fen(const MATRIX& matrix)->FEN` 矩阵转棋盘fen码。
+- `read_file(std::string name)->std::string` 流操作读取整个文件。
+- `write_file(std::string name, std::string` content)->void 流操作w模式写文件。
+- `gen_random_fen(int num)->std::vector<FEN>` 快速生成伪随机不重复的合法fen局面。
 
 在`hash.hpp`内加入祖传的哈希矩阵，封装相关功能。
 
 - 在匿名namespace中放入R_KING_KEY，R_KING_LOCK等祖传代码。
 - 整理为KEYS和LOCKS数组，能使用`xx[pid + 7][pos]`访问。
 - 在匿名namespace中放入变量：
-  - int key 当前局面的key值，由当前组件管理。
-  - int lock 当前局面的lock值。
-  - std::vector<int> key_history(256)
-  - std::vector<int> lock_history(256)
+  - `int key` 当前局面的key值，由当前组件管理。
+  - `int lock` 当前局面的lock值。
+  - `std::vector<int> key_history`
+  - `std::vector<int> lock_history`
 - 在namespace hash内加入以下内容：
-  - init(const MATRIX& matrix)->void 初始化，算法如下：
+  - `init(const MATRIX& matrix)->void` 初始化，算法如下：
     - 设key和lock为0。
     - 遍历matrix，若v不为0则每次都`key ^= KEYS[v + 7]`，lock同理。
-  - update(const MATRIX& matrix, Move move, PID captured)->void 更新步进
-  - undo_update()->void 撤销更新
+  - `update(const MATRIX& matrix, Move move, PID captured)->void` 更新步进
+  - `undo_update()->void` 撤销更新
 
 在`movepicker.hpp`内加入各类着法生成函数，且采用新的设计。
 
@@ -119,7 +121,10 @@ movepicker.hpp    evaluate.hpp
 
 在`heuristic.hpp`内加入启发函数，各自有各自的匿名namespace和封装的接口。
 
-- 历史启发，杀手启发，置换表启发
-- MVV/LVA和SEE
+- 历史启发
+- 杀手启发
+- 置换表启发
+- MVV/LVA
+- SEE
 
-未完待续...
+
