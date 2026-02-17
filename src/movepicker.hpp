@@ -8,9 +8,7 @@ namespace {
 
 }
 
-namespace {
-
-MOVES king(POS pos)
+[[ maybe_unused ]] MOVES king(POS pos)
 {
     MOVES ret {};
     ret.reserve(4);
@@ -31,9 +29,9 @@ MOVES king(POS pos)
             ret.emplace_back(Move { pos, pos - 1 });
         }
     }
-    if (pos / 9 != 0 && pos / 9 != 9 && !same_team(team, pos + 9)) {
+    if (pos / 9 != 2 && pos / 9 != 9 && !same_team(team, pos + 9)) {
         ret.emplace_back(Move { pos, pos + 9 });
-    } else if (pos / 9 != 2 && pos / 9 != 7 && !same_team(team, pos - 9)) {
+    } else if (pos / 9 != 0 && pos / 9 != 7 && !same_team(team, pos - 9)) {
         ret.emplace_back(Move { pos, pos - 9 });
     }
     return ret;
@@ -146,9 +144,3 @@ MOVES king(POS pos)
 //     }
 //     return ret;
 // }
-
-}
-
-namespace movepicker {
-
-}
