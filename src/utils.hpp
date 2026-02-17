@@ -94,9 +94,15 @@ constexpr std::array<char, 15> pid_char = []() {
 
 [[maybe_unused]] std::string to_ucci_move(Move move)
 {
-    // TODO:
-    move;
-    return "";
+    int beg = static_cast<int>(move.beg);
+    int end = static_cast<int>(move.end);
+    std::string s;
+    s.reserve(4);
+    s.push_back(static_cast<char>('a' + beg / 9));
+    s.push_back(static_cast<char>('0' + beg % 9));
+    s.push_back(static_cast<char>('a' + end / 9));
+    s.push_back(static_cast<char>('0' + end % 9));
+    return s;
 }
 
 }
