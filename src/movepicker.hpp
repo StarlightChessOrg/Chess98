@@ -8,8 +8,9 @@ namespace {
 
 }
 
-[[ maybe_unused ]] MOVES king(POS pos)
+MOVES king(POS pos)
 {
+    assert(pid_on(pos) == R_KING || pid_on(pos) == B_KING);
     MOVES ret {};
     ret.reserve(4);
     const PID pid = pid_on(pos);
@@ -25,45 +26,48 @@ namespace {
     } else {
         if (!same_team(team, pos + 1) && pos % 9 == 4) {
             ret.emplace_back(Move { pos, pos + 1 });
-        } else if (!same_team(team, pos - 1)) {
+        }
+        if (!same_team(team, pos - 1)) {
             ret.emplace_back(Move { pos, pos - 1 });
         }
     }
     if (pos / 9 != 2 && pos / 9 != 9 && !same_team(team, pos + 9)) {
         ret.emplace_back(Move { pos, pos + 9 });
-    } else if (pos / 9 != 0 && pos / 9 != 7 && !same_team(team, pos - 9)) {
+    }
+    if (pos / 9 != 0 && pos / 9 != 7 && !same_team(team, pos - 9)) {
         ret.emplace_back(Move { pos, pos - 9 });
     }
     return ret;
 }
 
-// MOVES advisor(POS pos)
-// {
-//     MOVES ret {};
-//     ret.reserve(4);
-//     const PID pid = pid_on(pos);
-//     const TEAM team = pid > 0 ? R : B;
+MOVES advisor(POS pos)
+{
+    assert(pid_on(pos) == R_ADVISOR || pid_on(pos) == B_ADVISOR);
+    MOVES ret {};
+    ret.reserve(4);
+    const PID pid = pid_on(pos);
+    const TEAM team = pid > 0 ? R : B;
 
-//     if (pos == 76 || pos == 13) {
-//         if (!same_team(team, pos - 10)) {
-//             ret.emplace_back(Move { pos, pos - 10 });
-//         }
-//         if (!same_team(team, pos - 8)) {
-//             ret.emplace_back(Move { pos, pos - 8 });
-//         }
-//         if (!same_team(team, pos + 10)) {
-//             ret.emplace_back(Move { pos, pos + 10 });
-//         }
-//         if (!same_team(team, pos + 8)) {
-//             ret.emplace_back(Move { pos, pos + 8 });
-//         }
-//     } else if (team == R && same_team(team, 76)) {
-//         ret.emplace_back(Move { pos, 76 });
-//     } else if (team == B && same_team(team, 13)) {
-//         ret.emplace_back(Move { pos, 13 });
-//     }
-//     return ret;
-// }
+    if (pos == 76 || pos == 13) {
+        if (!same_team(team, pos - 10)) {
+            ret.emplace_back(Move { pos, pos - 10 });
+        }
+        if (!same_team(team, pos - 8)) {
+            ret.emplace_back(Move { pos, pos - 8 });
+        }
+        if (!same_team(team, pos + 10)) {
+            ret.emplace_back(Move { pos, pos + 10 });
+        }
+        if (!same_team(team, pos + 8)) {
+            ret.emplace_back(Move { pos, pos + 8 });
+        }
+    } else if (team == R && !same_team(team, 76)) {
+        ret.emplace_back(Move { pos, 76 });
+    } else if (team == B && !same_team(team, 13)) {
+        ret.emplace_back(Move { pos, 13 });
+    }
+    return ret;
+}
 
 // MOVES bishop(POS pos)
 // {

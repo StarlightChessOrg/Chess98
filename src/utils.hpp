@@ -1,5 +1,6 @@
 #include "base.hpp"
 #include <random>
+#include <iostream>
 
 namespace utils {
 
@@ -89,6 +90,13 @@ constexpr std::array<char, 15> pid_char = []() {
             fen += '/';
     }
     return fen;
+}
+
+[[maybe_unused]] std::string to_ucci_move(Move move)
+{
+    // TODO:
+    move;
+    return "";
 }
 
 }
