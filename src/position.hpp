@@ -25,7 +25,7 @@ namespace position {
 
 void init(const MATRIX& matrix, TEAM t)
 {
-    assert(board_team == R || board_team == B);
+    assert(t == R || t == B);
     // board and team
     board = matrix;
     board_team = t;
