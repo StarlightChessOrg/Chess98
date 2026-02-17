@@ -24,6 +24,7 @@ namespace position {
 
 void init(const MATRIX& matrix, TEAM team)
 {
+    assert(team == R || team == B);
     // board and team
     board = matrix;
     team = team;
@@ -33,6 +34,7 @@ void init(const MATRIX& matrix, TEAM team)
     history_captured_pindeces.clear();
     history_captured_pindeces.reserve(256);
     for (POS i = 0; i < 90; i++) {
+        assert(-7 <= matrix[i] && matrix[i] <= 7);
         if (matrix[i] != 0) {
             // pindex and ptypes
             const PINDEX& size = pieces.size();
@@ -69,6 +71,7 @@ void do_move(Move move)
 
 void undo_move()
 {
+    assert(!history_moves.empty());
     const Move& move = history_moves.back();
     const PINDEX& captured_pindex = history_captured_pindeces.back();
     // pindex update
@@ -88,6 +91,18 @@ void undo_move()
     history_captured_pindeces.pop_back();
     history_hashkey.pop_back();
     history_hashlock.pop_back();
+}
+
+PID pid_on(POS pos)
+{
+    assert(0 <= pos && pos < 90);
+    return board[pos];
+}
+
+PID pid_on(PINDEX pindex)
+{
+    assert(0 <= pindex && pindex < pieces.size());
+    return pieces[pindex].pid;
 }
 
 }
