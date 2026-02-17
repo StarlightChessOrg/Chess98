@@ -25,7 +25,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/.build/gcc-debug",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_BUILD_TYPE": "Debug"
       }
@@ -36,7 +35,6 @@
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/.build/gcc-release",
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "gcc",
         "CMAKE_CXX_COMPILER": "g++",
         "CMAKE_BUILD_TYPE": "Release"
       }
