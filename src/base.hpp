@@ -52,6 +52,10 @@ struct Move {
         assert(0 <= beg && beg <= 89);
         assert(0 <= end && end <= 89);
     }
+    bool operator==(Move m) const
+    {
+        return beg == m.beg && end == m.end;
+    }
 };
 
 struct Piece {
@@ -84,8 +88,7 @@ struct Timer {
     {
         assert(limit > 0);
     }
-
-    bool is_time_up() const
+    bool time_up() const
     {
         return std::chrono::steady_clock::now() - beg >= limit;
     }
