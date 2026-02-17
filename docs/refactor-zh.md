@@ -71,23 +71,21 @@ movepicker.hpp    evaluate.hpp
 
 - 定义POS位置类型为char，范围0~89。
 - 定义PID棋子id类型为char，范围-7~7，直接-pid就可以表示对方队伍的棋子。
-- 定义具体PID，命名如下：
-  - R_KING, R_ADVISOR, R_BISHOP, ..., R_PAWN
-  - B_KING, B_ADVISOR, B_BISHOP, ..., B_PAWN
 - 定义PINDEX棋子唯一编号类型为char，范围0~31，用于精确地指示棋子。
 - 定义TEAM队伍id类型为char，范围-1~1。
-- 定义具体TEAM，命名为R和B。
-- 定义MATRIX棋盘矩阵类型为`std::array<char, 90>`，0~8为黑方的最底列，即有车的一列。
 - 定义DEPTH类型为unsigned char，定义VL类型为short。
-- 定义INF, BAN分别为30000和20000，INF到short边界去没有什么必要性。
-- 定义MOVES, PIECES为各自类型的std::vector。
-- 棋子id按照将、士、象、马、车、炮、兵从一到七，红方为正数，黑方为负数，空位为0，溢出棋盘也为0。
-- 队伍id按照红1黑-1设计，空位为0，溢出棋盘也为0。
-- Move结构包含beg，end，等号运算符重载，占2字节。
-- Piece结构包含pid，pindex，pos，live，占4字节。
 - 定义SEARCH_RET为`std::pair<Move, short>`，存储搜索结果。
 - 定义TRICK_RET为`std::pair<bool, short>`，存储mdp和probCut等技巧的结果，便于封装。
-- 定义基于chrono的计时函数封装。
+- 定义MATRIX棋盘矩阵类型为`std::array<char, 90>`，0~8为黑方的最底列，即有车的一列。
+- 定义MOVES, PIECES, PINDEXES为各自类型的std::vector。
+- 定义INF, BAN分别为30000和20000，INF到short边界去没有什么必要性。
+- 定义具体PID，棋子id按照将、士、象、马、车、炮、兵从一到七，红方为正数，黑方为负数，空位为0，溢出棋盘也为0，命名如下
+  - R_KING, R_ADVISOR, R_BISHOP, ..., R_PAWN
+  - B_KING, B_ADVISOR, B_BISHOP, ..., B_PAWN
+- 定义具体TEAM，队伍id按照红1黑-1设计，空位为0，溢出棋盘也为0。命名为R和B。
+- Move结构包含beg，end，等号运算符重载，占2字节。
+- Piece结构包含pid，pindex，pos，live，占4字节。
+- Timer结构用于计时。
 
 在`hash.hpp`内加入祖传的哈希矩阵，封装相关功能。
 
