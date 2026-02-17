@@ -4,6 +4,7 @@
 
 namespace {
 
-    
+SEARCH_RETS rets {};
+std::vector<int> durations {};
 
 }

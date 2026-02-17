@@ -4,7 +4,7 @@
 namespace {
 
 MATRIX board {};
-TEAM team { 0 };
+TEAM board_team { 0 };
 // pindex
 PIECES pieces {};
 MATRIX pos_pindex {};
@@ -25,10 +25,10 @@ namespace position {
 
 void init(const MATRIX& matrix, TEAM t)
 {
-    assert(team == R || team == B);
+    assert(board_team == R || board_team == B);
     // board and team
     board = matrix;
-    team = t;
+    board_team = t;
     // history_moves and history_captured_pindeces
     history_moves.clear();
     history_moves.reserve(256);
@@ -65,7 +65,7 @@ void do_move(Move move)
     // board update
     board[move.end] = board[move.beg];
     board[move.beg] = 0;
-    team = -team;
+    board_team = -board_team;
     // hash update
     hashkey ^= hash::key_on(board[move.beg], move.beg);
     hashlock ^= hash::lock_on(board[move.beg], move.beg);
@@ -84,7 +84,7 @@ void undo_move()
     // board update
     board[move.beg] = board[move.end];
     board[move.end] = pieces[captured_pindex].pid;
-    team = -team;
+    board_team = -board_team;
     // hash update
     hashkey = history_hashkey.back();
     hashlock = history_hashlock.back();
@@ -95,16 +95,22 @@ void undo_move()
     history_hashlock.pop_back();
 }
 
+}
+
 PID pid_on(POS pos)
 {
     assert(0 <= pos && pos < 90);
     return board[pos];
 }
 
+TEAM same_team(TEAM t, POS pos)
+{
+    assert(0 <= pos && pos < 90);
+    return board[pos] * t > 0;
+}
+
 PID pindex_pid(PINDEX pindex)
 {
     assert(0 <= pindex && pindex < pieces.size());
     return pieces[pindex].pid;
-}
-
 }
