@@ -10,12 +10,12 @@
 struct Move;
 struct Piece;
 struct Timer;
-using POS = char;
-using PID = char;
-using PINDEX = char;
-using TEAM = char;
-using DEPTH = unsigned char;
-using VL = short;
+using POS = std::uint8_t;
+using PID = std::int8_t;
+using PINDEX = std::uint8_t;
+using TEAM = std::int8_t;
+using DEPTH = std::uint8_t;
+using VL = std::int16_t;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PID, 90>;
@@ -47,9 +47,9 @@ struct Move {
     POS end { 0 };
 
     Move() = default;
-    Move(POS beg, POS end)
-        : beg(beg)
-        , end(end)
+    Move(int beg, int end)
+        : beg(static_cast<POS>(beg))
+        , end(static_cast<POS>(end))
     {
         assert(beg != end);
         assert(0 <= beg && beg <= 89);
@@ -68,10 +68,10 @@ struct Piece {
     bool live { false };
 
     Piece() = default;
-    Piece(PID p, PINDEX i, POS s)
-        : pid(p)
-        , pindex(i)
-        , pos(s)
+    Piece(int p, int i, int s)
+        : pid(static_cast<PID>(p))
+        , pindex(static_cast<PINDEX>(i))
+        , pos(static_cast<POS>(s))
         , live(true)
     {
         assert(-7 <= pid && pid <= 7 && pid != 0);
