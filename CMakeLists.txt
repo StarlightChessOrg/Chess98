@@ -15,3 +15,7 @@ endif()
 file(GLOB SOURCE_CPP_FILES "src/*.cpp")
 file(GLOB SOURCE_HPP_FILES "src/*.hpp")
 add_executable(Chess98 ${SOURCE_CPP_FILES} ${SOURCE_HPP_FILES})
+
+# 测试
+enable_testing()
+add_test(NAME Chess98 COMMAND Chess98)
