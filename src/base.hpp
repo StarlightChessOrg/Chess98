@@ -22,6 +22,7 @@ using MATRIX = std::array<PID, 90>;
 using MOVES = std::vector<Move>;
 using PIECES = std::vector<Piece>;
 using PINDECES = std::vector<PINDEX>;
+using SEARCH_RETS = std::vector<SEARCH_RET>;
 constexpr PID R_KING = 1;
 constexpr PID R_ADVISOR = 2;
 constexpr PID R_BISHOP = 3;
