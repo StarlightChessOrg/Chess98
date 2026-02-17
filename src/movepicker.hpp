@@ -69,82 +69,82 @@ MOVES advisor(POS pos)
     return ret;
 }
 
-// MOVES bishop(POS pos)
-// {
-//     MOVES ret {};
-//     ret.reserve(4);
-//     const PID pid = pid_on(pos);
-//     const TEAM team = pid > 0 ? R : B;
+MOVES bishop(POS pos)
+{
+    MOVES ret {};
+    ret.reserve(4);
+    const PID pid = pid_on(pos);
+    const TEAM team = pid > 0 ? R : B;
 
-//     if (pos / 9 == 9 || pos / 9 == 4) {
-//         if (!pid_on(pos - 10) && !same_team(team, pos - 20)) {
-//             ret.emplace_back(Move { pos, pos - 20 });
-//         }
-//         if (!pid_on(pos - 8) && !same_team(team, pos - 16)) {
-//             ret.emplace_back(Move { pos, pos - 16 });
-//         }
-//     } else if (pos / 9 == 7 || pos / 9 == 2) {
-//         if (!pid_on(pos + 10) && !same_team(team, pos + 20)) {
-//             ret.emplace_back(Move { pos, pos + 20 });
-//         }
-//         if (!pid_on(pos + 8) && !same_team(team, pos + 16)) {
-//             ret.emplace_back(Move { pos, pos + 16 });
-//         }
-//         if (!pid_on(pos - 10) && !same_team(team, pos - 20)) {
-//             ret.emplace_back(Move { pos, pos - 20 });
-//         }
-//         if (!pid_on(pos - 8) && !same_team(team, pos - 16)) {
-//             ret.emplace_back(Move { pos, pos - 16 });
-//         }
-//     } else {
-//         if (!pid_on(pos + 10) && !same_team(team, pos + 20)) {
-//             ret.emplace_back(Move { pos, pos + 20 });
-//         }
-//         if (!pid_on(pos + 8) && !same_team(team, pos + 16)) {
-//             ret.emplace_back(Move { pos, pos + 16 });
-//         }
-//     }
-//     return ret;
-// }
+    if (pos / 9 == 9 || pos / 9 == 4) {
+        if (!pid_on(pos - 10) && !same_team(team, pos - 20)) {
+            ret.emplace_back(Move { pos, pos - 20 });
+        }
+        if (!pid_on(pos - 8) && !same_team(team, pos - 16)) {
+            ret.emplace_back(Move { pos, pos - 16 });
+        }
+    } else if (pos / 9 == 7 || pos / 9 == 2) {
+        if (!pid_on(pos + 10) && !same_team(team, pos + 20)) {
+            ret.emplace_back(Move { pos, pos + 20 });
+        }
+        if (!pid_on(pos + 8) && !same_team(team, pos + 16)) {
+            ret.emplace_back(Move { pos, pos + 16 });
+        }
+        if (!pid_on(pos - 10) && !same_team(team, pos - 20)) {
+            ret.emplace_back(Move { pos, pos - 20 });
+        }
+        if (!pid_on(pos - 8) && !same_team(team, pos - 16)) {
+            ret.emplace_back(Move { pos, pos - 16 });
+        }
+    } else {
+        if (!pid_on(pos + 10) && !same_team(team, pos + 20)) {
+            ret.emplace_back(Move { pos, pos + 20 });
+        }
+        if (!pid_on(pos + 8) && !same_team(team, pos + 16)) {
+            ret.emplace_back(Move { pos, pos + 16 });
+        }
+    }
+    return ret;
+}
 
-// MOVES knight(POS pos)
-// {
-//     MOVES ret {};
-//     ret.reserve(8);
-//     const PID pid = pid_on(pos);
-//     const TEAM team = pid > 0 ? R : B;
+MOVES knight(POS pos)
+{
+    MOVES ret {};
+    ret.reserve(8);
+    const PID pid = pid_on(pos);
+    const TEAM team = pid > 0 ? R : B;
 
-//     if (!pid_on(pos + 1)) {
-//         if (!same_team(team, pos + 11)) {
-//             ret.emplace_back(Move { pos, pos + 11 });
-//         }
-//         if (!same_team(team, pos - 7)) {
-//             ret.emplace_back(Move { pos, pos - 7 });
-//         }
-//     }
-//     if (!pid_on(pos - 1)) {
-//         if (!same_team(team, pos - 11)) {
-//             ret.emplace_back(Move { pos, pos - 11 });
-//         }
-//         if (!same_team(team, pos + 7)) {
-//             ret.emplace_back(Move { pos, pos + 7 });
-//         }
-//     }
-//     if (!pid_on(pos + 9)) {
-//         if (!same_team(team, pos + 19)) {
-//             ret.emplace_back(Move { pos, pos + 19 });
-//         }
-//         if (!same_team(team, pos - 1)) {
-//             ret.emplace_back(Move { pos, pos - 1 });
-//         }
-//     }
-//     if (!pid_on(pos - 9)) {
-//         if (!same_team(team, pos - 19)) {
-//             ret.emplace_back(Move { pos, pos - 19 });
-//         }
-//         if (!same_team(team, pos + 1)) {
-//             ret.emplace_back(Move { pos, pos + 1 });
-//         }
-//     }
-//     return ret;
-// }
+    if (pos + 1 < 90 && !pid_on(pos + 1)) {
+        if (pos + 11 < 90 && !same_team(team, pos + 11)) {
+            ret.emplace_back(Move { pos, pos + 11 });
+        }
+        if (pos - 7 >= 0 && !same_team(team, pos - 7)) {
+            ret.emplace_back(Move { pos, pos - 7 });
+        }
+    }
+    if (pos - 1 >= 0 && !pid_on(pos - 1)) {
+        if (pos - 11 >= 0 && !same_team(team, pos - 11)) {
+            ret.emplace_back(Move { pos, pos - 11 });
+        }
+        if (pos + 7 < 90 && !same_team(team, pos + 7)) {
+            ret.emplace_back(Move { pos, pos + 7 });
+        }
+    }
+    if (pos + 9 < 90 && !pid_on(pos + 9)) {
+        if (pos + 19 < 90 && !same_team(team, pos + 19)) {
+            ret.emplace_back(Move { pos, pos + 19 });
+        }
+        if (pos + 17 >= 0 && !same_team(team, pos + 17)) {
+            ret.emplace_back(Move { pos, pos + 17 });
+        }
+    }
+    if (pos - 9 >= 0 && !pid_on(pos - 9)) {
+        if (pos - 19 >= 0 && !same_team(team, pos - 19)) {
+            ret.emplace_back(Move { pos, pos - 19 });
+        }
+        if (pos - 17 < 90 && !same_team(team, pos - 17)) {
+            ret.emplace_back(Move { pos, pos - 17 });
+        }
+    }
+    return ret;
+}
