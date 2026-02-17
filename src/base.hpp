@@ -20,6 +20,7 @@ using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PID, 90>;
 using MOVES = std::vector<Move>;
 using PIECES = std::vector<Piece>;
+using PINDECES = std::vector<PINDEX>;
 constexpr PID R_KING = 1;
 constexpr PID R_ADVISOR = 2;
 constexpr PID R_BISHOP = 3;
