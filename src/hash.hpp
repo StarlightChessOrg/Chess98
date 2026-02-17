@@ -201,7 +201,7 @@ constexpr std::array<int, 90> B_KING_KEY {
     -1945599482, -532665330, -211694158, 1219133040, -7753935, 2058365437, -214361310, 1766343201, -867242518
 };
 
-constexpr std::array<int, 90> B_KING_KEY {
+constexpr std::array<int, 90> B_KING_LOCK {
     -274287040, -2084958308, -1456867466, 1144248026, -1523199131, 926644380, -1476893754, -1501138984, -171857819,
     -2056844925, 876322273, -1945575793, -1119967090, -536600295, -1334116299, 826858053, -2004139242, -356170513,
     -1801402761, 360107790, -1881899228, -1057777993, -1520451486, 1553362205, -26132657, -1193725499, -812160683,
@@ -390,14 +390,16 @@ constexpr int key_on(PID pid, POS pos)
 {
     assert(-7 <= pid && pid <= 7);
     assert(0 <= pos && pos < 90);
-    return KEYS[pid + 7][pos];
+    const size_t k = static_cast<size_t>(pid + 7);
+    return KEYS[k][pos];
 }
 
 constexpr int lock_on(PID pid, POS pos)
 {
     assert(-7 <= pid && pid <= 7);
     assert(0 <= pos && pos < 90);
-    return LOCKS[pid + 7][pos];
+    const size_t k = static_cast<size_t>(pid + 7);
+    return LOCKS[k][pos];
 }
 
 }

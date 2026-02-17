@@ -23,12 +23,12 @@ int hashlock { 0 };
 
 namespace position {
 
-void init(const MATRIX& matrix, TEAM team)
+void init(const MATRIX& matrix, TEAM t)
 {
     assert(team == R || team == B);
     // board and team
     board = matrix;
-    team = team;
+    team = t;
     // history_moves and history_captured_pindeces
     history_moves.clear();
     history_moves.reserve(256);
@@ -38,8 +38,9 @@ void init(const MATRIX& matrix, TEAM team)
         assert(-7 <= matrix[i] && matrix[i] <= 7);
         if (matrix[i] != 0) {
             // pindex and ptypes
-            const PINDEX& size = pieces.size();
-            pid_pindeces[matrix[i] + 7].emplace_back(size);
+            const PINDEX size = static_cast<PINDEX>(pieces.size());
+            const size_t k = static_cast<size_t>(matrix[i] + 7);
+            pid_pindeces[k].emplace_back(size);
             pos_pindex[i] = size;
             pieces.emplace_back(Piece { matrix[i], size, i });
             // hash
@@ -100,7 +101,7 @@ PID pid_on(POS pos)
     return board[pos];
 }
 
-PID pid_on(PINDEX pindex)
+PID pindex_pid(PINDEX pindex)
 {
     assert(0 <= pindex && pindex < pieces.size());
     return pieces[pindex].pid;

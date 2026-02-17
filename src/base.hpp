@@ -95,4 +95,10 @@ struct Timer {
     {
         return std::chrono::steady_clock::now() - beg >= limit;
     }
+    int duration() const
+    {
+        const std::chrono::duration duration = std::chrono::steady_clock::now() - beg;
+        const long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        return static_cast<int>(ms);
+    }
 };
