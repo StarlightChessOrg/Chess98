@@ -387,14 +387,14 @@ namespace hash {
 
 constexpr int key_on(PID pid, POS pos)
 {
-    assert(-7 <= pid && pid <= 7 && pid != 0);
+    assert(-7 <= pid && pid <= 7);
     assert(0 <= pos && pos < 90);
     return KEYS[pid + 7][pos];
 }
 
 constexpr int lock_on(PID pid, POS pos)
 {
-    assert(-7 <= pid && pid <= 7 && pid != 0);
+    assert(-7 <= pid && pid <= 7);
     assert(0 <= pos && pos < 90);
     return LOCKS[pid + 7][pos];
 }
