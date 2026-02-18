@@ -142,6 +142,45 @@ constexpr auto KNIGHT_MOVES = []() {
     return ret;
 }();
 
+constexpr auto PAWN_MOVES = []() {
+    std::array<std::array<std::array<POS, 3>, 90>, 2> ret {};
+    for (int side = 0; side < 2; ++side) {
+        for (POS pos = 0; pos < 90; ++pos) {
+            auto& arr = ret[side][pos];
+            arr = { _, _, _ };
+            const int x = pos % 9;
+            const int y = pos / 9;
+            int k = 0;
+            if (side == 0) {
+                if (y < 9){
+                    arr[k++] = static_cast<POS>(pos + 9);
+                }
+                if (y >= 5) {
+                    if (x > 0) {
+                        arr[k++] = static_cast<POS>(pos - 1);
+                    }
+                    if (x < 8) {
+                        arr[k++] = static_cast<POS>(pos + 1);
+                    }
+                }
+            } else {
+                if (y > 0) {
+                    arr[k++] = static_cast<POS>(pos - 9);
+                }
+                if (y <= 4) {
+                    if (x > 0) {
+                        arr[k++] = static_cast<POS>(pos - 1);
+                    }
+                    if (x < 8) {
+                        arr[k++] = static_cast<POS>(pos + 1);
+                    }
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
 }
 
 MOVES king(POS pos)
@@ -212,6 +251,22 @@ MOVES knight(POS pos)
                     ret.emplace_back(pos, to);
                 }
             }
+        }
+    }
+    return ret;
+}
+
+MOVES pawn(POS pos)
+{
+    assert(pid_on(pos) == R_PAWN || pid_on(pos) == B_PAWN);
+    const TEAM team = pid_on(pos) > 0 ? R : B;
+    MOVES ret {};
+    ret.reserve(3);
+    for (const POS i : PAWN_MOVES[team == R ? 0 : 1][pos]) {
+        if (i == _) {
+            break;
+        } else if (!same_team(team, i)) {
+            ret.emplace_back(pos, i);
         }
     }
     return ret;
