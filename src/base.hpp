@@ -47,13 +47,13 @@ struct Move {
     POS end { 0 };
 
     Move() = default;
-    Move(int beg, int end)
-        : beg(static_cast<POS>(beg))
-        , end(static_cast<POS>(end))
+    Move(int _beg, int _end)
+        : beg(static_cast<POS>(_beg))
+        , end(static_cast<POS>(_end))
     {
-        assert(beg != end);
-        assert(0 <= beg && beg <= 89);
-        assert(0 <= end && end <= 89);
+        assert(_beg != _end);
+        assert(0 <= _beg && _beg <= 89);
+        assert(0 <= _end && _end <= 89);
     }
     bool operator==(Move m) const
     {
@@ -68,15 +68,15 @@ struct Piece {
     bool live { false };
 
     Piece() = default;
-    Piece(int p, int i, int s)
-        : pid(static_cast<PID>(p))
-        , pindex(static_cast<PINDEX>(i))
-        , pos(static_cast<POS>(s))
+    Piece(int _pid, int _pindex, int _pos)
+        : pid(static_cast<PID>(_pid))
+        , pindex(static_cast<PINDEX>(_pindex))
+        , pos(static_cast<POS>(_pos))
         , live(true)
     {
-        assert(-7 <= pid && pid <= 7 && pid != 0);
-        assert(0 <= pindex && pindex <= 33);
-        assert(0 <= pos && pos <= 89);
+        assert(-7 <= _pid && _pid <= 7 && _pid != 0);
+        assert(0 <= _pindex && _pindex <= 33);
+        assert(0 <= _pos && _pos <= 89);
     }
 };
 
@@ -85,11 +85,11 @@ struct Timer {
     std::chrono::milliseconds limit;
 
     Timer() = default;
-    Timer(int limit)
+    Timer(int _limit)
         : beg(std::chrono::steady_clock::now())
-        , limit(std::chrono::milliseconds(limit))
+        , limit(std::chrono::milliseconds(_limit))
     {
-        assert(limit > 0);
+        assert(_limit > 0);
     }
     bool time_up() const
     {

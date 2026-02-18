@@ -97,20 +97,21 @@ void undo_move()
 
 }
 
-PID pid_on(POS pos)
+PID pid_on(int pos)
 {
     assert(0 <= pos && pos < 90);
-    return board[pos];
+    return board[static_cast<POS>(pos)];
 }
 
-TEAM same_team(TEAM t, POS pos)
+TEAM same_team(int t, int pos)
 {
     assert(0 <= pos && pos < 90);
-    return board[pos] * t > 0;
+    assert(t == R || t == B || t == 0);
+    return board[static_cast<POS>(pos)] * t > 0;
 }
 
 PID pindex_pid(PINDEX pindex)
 {
     assert(0 <= pindex && pindex < pieces.size());
-    return pieces[pindex].pid;
+    return pieces[static_cast<size_t>(pindex)].pid;
 }

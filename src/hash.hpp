@@ -389,16 +389,16 @@ namespace hash {
 constexpr int key_on(PID pid, POS pos)
 {
     assert(-7 <= pid && pid <= 7);
-    assert(0 <= pos && pos < 90);
-    const size_t k = static_cast<size_t>(pid + 7);
+    assert(pos < 90);
+    const auto k = static_cast<size_t>(pid + 7);
     return KEYS[k][pos];
 }
 
 constexpr int lock_on(PID pid, POS pos)
 {
     assert(-7 <= pid && pid <= 7);
-    assert(0 <= pos && pos < 90);
-    const size_t k = static_cast<size_t>(pid + 7);
+    assert(pos < 90);
+    const auto k = static_cast<size_t>(pid + 7);
     return LOCKS[k][pos];
 }
 
