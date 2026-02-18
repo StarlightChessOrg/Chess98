@@ -31,17 +31,14 @@ constexpr auto KING_MOVES = []() {
     return ret;
 }();
 
-constexpr POS ADVISOR_CENTER_R = 13;
-constexpr POS ADVISOR_CENTER_B = 76;
-constexpr POS ADVISOR_OFFSET = 10;
 constexpr auto ADVISOR_MOVES = []() {
     std::array<std::array<POS, 4>, 90> ret {};
     // black
-    ret[3] = ret[5] = ret[21] = ret[23] = { ADVISOR_CENTER_B, _, _, _ };
-    ret[ADVISOR_CENTER_B] = { 3, 5, 21, 23 };
+    ret[3] = ret[5] = ret[21] = ret[23] = { 13, _, _, _ };
+    ret[13] = { 3, 5, 21, 23 };
     // red
-    ret[84] = ret[86] = ret[66] = ret[68] = { ADVISOR_CENTER_R, _, _, _ };
-    ret[ADVISOR_CENTER_R] = { 84, 86, 66, 68 };
+    ret[84] = ret[86] = ret[66] = ret[68] = { 76, _, _, _ };
+    ret[76] = { 84, 86, 66, 68 };
     return ret;
 }();
 
@@ -192,7 +189,7 @@ MOVES advisor(POS pos)
 {
     assert(pid_on(pos) == R_ADVISOR || pid_on(pos) == B_ADVISOR);
     const TEAM team = pid_on(pos) > 0 ? R : B;
-    if (pos == ADVISOR_CENTER_R || pos == ADVISOR_CENTER_B) {
+    if (pos == 13 || pos == 76) {
         MOVES ret {};
         ret.reserve(4);
         for (const POS i : ADVISOR_MOVES[pos]) {
