@@ -14,36 +14,26 @@ namespace {
 
 void init()
 {
-    r_table = {};
-    b_table = {};
+    r_table = b_table = {};
 }
 
 void update(Move move, TEAM team, DEPTH depth)
 {
-    if (team == R) {
-        r_table[move.beg][move.end] += strategy(depth);
-    } else {
-        b_table[move.beg][move.end] += strategy(depth);
-    }
+    (team == R ? r_table : b_table)[move.beg][move.end] += strategy(depth);
 }
 
 void sort(MOVES& moves, TEAM team)
 {
-    if (team == R) {
-        std::sort(moves.begin(), moves.end(), [](Move a, Move b) {
-            return r_table[a.beg][a.end] > r_table[b.beg][b.end];
-        });
-    } else {
-        std::sort(moves.begin(), moves.end(), [](Move a, Move b) {
-            return b_table[a.beg][a.end] > b_table[b.beg][b.end];
-        });
-    }
+    const auto& table = team == R ? r_table : b_table;
+    std::sort(moves.begin(), moves.end(), [&](const Move& a, const Move& b) {
+        return table[a.beg][a.end] > table[b.beg][b.end];
+    });
 }
 
 }
 
 namespace killer {
-    
+
 namespace {
     std::array<std::array<Move, 2>, 128> table {};
 }
@@ -67,7 +57,7 @@ std::array<Move, 2> get(DEPTH distance)
 }
 
 namespace tt {
-    
+
 // TODO: implement tt
 
 }
