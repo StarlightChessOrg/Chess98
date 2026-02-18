@@ -6,6 +6,19 @@ namespace {
 
 constexpr POS _ = 100;
 
+constexpr auto KING_FACES = []() {
+    std::array<bool, 1024> ret {};
+    ret[0b100000001] = true;
+    ret[0b100000010] = true;
+    ret[0b100000100] = true;
+    ret[0b010000001] = true;
+    ret[0b010000010] = true;
+    ret[0b010000100] = true;
+    ret[0b001000001] = true;
+    ret[0b001000010] = true;
+    ret[0b001000100] = true;
+    return ret;
+}();
 constexpr auto KING_MOVES = []() {
     std::array<std::array<POS, 4>, 90> ret {};
     // black
@@ -85,6 +98,7 @@ constexpr auto BISHOP_MOVES = []() {
 }();
 
 constexpr auto KNIGHT_LEGS = []() {
+    // AI generated
     std::array<std::array<POS, 4>, 90> ret {};
     constexpr int lx[4] = { 0, -1, 0, 1 };
     constexpr int ly[4] = { -1, 0, 1, 0 };
@@ -105,6 +119,7 @@ constexpr auto KNIGHT_LEGS = []() {
     return ret;
 }();
 constexpr auto KNIGHT_MOVES = []() {
+    // AI generated
     std::array<std::array<std::array<POS, 2>, 4>, 90> ret {};
     constexpr int mx[4][2] = { { -1, 1 }, { -2, -2 }, { -1, 1 }, { 2, 2 } };
     constexpr int my[4][2] = { { -2, -2 }, { -1, 1 }, { 2, 2 }, { -1, 1 } };
@@ -128,7 +143,26 @@ constexpr auto KNIGHT_MOVES = []() {
     return ret;
 }();
 
+constexpr auto CANNON_MOVES_10 = []() {
+    std::array<std::array<POS, 4>, 1024> ret {};
+    return ret;
+}();
+constexpr auto CANNON_MOVES_9 = []() {
+    std::array<std::array<POS, 4>, 512> ret {};
+    return ret;
+}();
+
+constexpr auto ROOK_MOVES_10 = []() {
+    std::array<std::array<POS, 4>, 1024> ret {};
+    return ret;
+}();
+constexpr auto ROOK_MOVES_9 = []() {
+    std::array<std::array<POS, 4>, 512> ret {};
+    return ret;
+}();
+
 constexpr auto PAWN_MOVES = []() {
+    // AI generated
     std::array<std::array<std::array<POS, 3>, 90>, 2> ret {};
     for (int side = 0; side < 2; ++side) {
         for (POS pos = 0; pos < 90; ++pos) {
@@ -138,7 +172,7 @@ constexpr auto PAWN_MOVES = []() {
             const int y = pos / 9;
             int k = 0;
             if (side == 0) {
-                if (y < 9){
+                if (y < 9) {
                     arr[k++] = static_cast<POS>(pos + 9);
                 }
                 if (y >= 5) {
@@ -179,7 +213,11 @@ MOVES king(POS pos)
         if (i == _) {
             break;
         } else if (pid_on(i) * team <= 0) {
-            ret.emplace_back(pos, i);
+            const POS r_pos = pindex_piece(r_king_index).pos % 9;
+            const POS b_pos = pindex_piece(b_king_index).pos % 9;
+            if (r_pos != b_pos || !KING_FACES[boardbl10[r_pos % 9]]) {
+                ret.emplace_back(pos, i);
+            }
         }
     }
     return ret;
