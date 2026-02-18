@@ -18,6 +18,9 @@ std::vector<int> history_hashkey {};
 std::vector<int> history_hashlock {};
 int hashkey { 0 };
 int hashlock { 0 };
+// bitlines
+std::array<int, 9> boardbl9 {};
+std::array<int, 10> boardbl10 {};
 
 }
 
@@ -34,6 +37,8 @@ void init(const MATRIX& matrix, TEAM t)
     history_moves.reserve(256);
     history_captured_pindeces.clear();
     history_captured_pindeces.reserve(256);
+    pieces.clear();
+    pieces.emplace_back(Piece {});
     for (POS i = 0; i < 90; i++) {
         assert(-7 <= matrix[i] && matrix[i] <= 7);
         if (matrix[i] != 0) {
@@ -46,6 +51,9 @@ void init(const MATRIX& matrix, TEAM t)
             // hash
             hashkey ^= hash::key_on(matrix[i], i);
             hashlock ^= hash::lock_on(matrix[i], i);
+            // bitlines
+            boardbl9[i % 9] |= 1u << (i / 9);
+            boardbl10[i / 9] |= 1u << (i % 9);
         }
     }
 }
@@ -69,13 +77,18 @@ void do_move(Move move)
     // hash update
     hashkey ^= hash::key_on(board[move.beg], move.beg);
     hashlock ^= hash::lock_on(board[move.beg], move.beg);
+    // bitline update
+    boardbl9[move.beg % 9] &= ~(1u << (move.beg / 9));
+    boardbl9[move.end % 9] |= (1u << (move.end / 9));
+    boardbl10[move.beg / 9] &= ~(1u << (move.beg % 9));
+    boardbl10[move.end / 9] |= (1u << (move.end % 9));
 }
 
 void undo_move()
 {
     assert(!history_moves.empty());
-    const Move& move = history_moves.back();
-    const PINDEX& captured_pindex = history_captured_pindeces.back();
+    const Move move = history_moves.back();
+    const PINDEX captured_pindex = history_captured_pindeces.back();
     // pindex update
     pieces[pos_pindex[move.end]].pos = move.beg;
     pieces[captured_pindex].live = true;
@@ -93,6 +106,11 @@ void undo_move()
     history_captured_pindeces.pop_back();
     history_hashkey.pop_back();
     history_hashlock.pop_back();
+    // bitline update
+    boardbl9[move.end % 9] &= ~(1u << (move.end / 9));
+    boardbl10[move.end / 9] &= ~(1u << (move.end % 9));
+    boardbl9[move.end % 9] |= (captured_pindex != 0) << (move.end / 9);
+    boardbl10[move.end / 9] |= (captured_pindex != 0) << (move.end % 9);
 }
 
 }
