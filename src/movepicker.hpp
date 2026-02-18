@@ -215,7 +215,7 @@ MOVES king(POS pos)
         } else if (pid_on(i) * team <= 0) {
             const POS r_pos = pindex_piece(r_king_index).pos % 9;
             const POS b_pos = pindex_piece(b_king_index).pos % 9;
-            if (r_pos != b_pos || !KING_FACES[boardbl10[r_pos % 9]]) {
+            if (r_pos != b_pos || !KING_FACES[boardbl10[r_pos]]) {
                 ret.emplace_back(pos, i);
             }
         }
