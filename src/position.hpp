@@ -1,8 +1,6 @@
 #pragma once
 #include "hash.hpp"
 
-namespace {
-
 MATRIX board {};
 TEAM board_team { 0 };
 // pindex
@@ -10,6 +8,8 @@ PIECES pieces {};
 MATRIX pos_pindex {};
 // pid_pindeces const
 std::array<std::vector<PINDEX>, 15> pid_pindeces {};
+PINDEX r_king_index { 0 };
+PINDEX b_king_index { 0 };
 // history
 MOVES history_moves {};
 PINDECES history_captured_pindeces {};
@@ -21,8 +21,6 @@ int hashlock { 0 };
 // bitlines
 std::array<int, 9> boardbl9 {};
 std::array<int, 10> boardbl10 {};
-
-}
 
 namespace position {
 
@@ -54,6 +52,10 @@ void init(const MATRIX& matrix, TEAM t)
             // bitlines
             boardbl9[i % 9] |= 1u << (i / 9);
             boardbl10[i / 9] |= 1u << (i % 9);
+        }
+        // set king pindex
+        if (matrix[i] == R_KING || matrix[i] == B_KING) {
+            (matrix[i] == R_KING ? r_king_index : b_king_index) = i;
         }
     }
 }
@@ -132,4 +134,10 @@ PID pindex_pid(PINDEX pindex)
 {
     assert(0 <= pindex && pindex < pieces.size());
     return pieces[static_cast<size_t>(pindex)].pid;
+}
+
+Piece pindex_piece(PINDEX pindex)
+{
+    assert(0 <= pindex && pindex < pieces.size());
+    return pieces[static_cast<size_t>(pindex)];
 }
