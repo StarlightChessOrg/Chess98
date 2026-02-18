@@ -98,6 +98,50 @@ constexpr auto BISHOP_MOVES = []() {
     return ret;
 }();
 
+constexpr auto KNIGHT_LEGS = []() {
+    std::array<std::array<POS, 4>, 90> ret {};
+    constexpr int lx[4] = { 0, -1, 0, 1 };
+    constexpr int ly[4] = { -1, 0, 1, 0 };
+    for (POS pos = 0; pos < 90; ++pos) {
+        const int x = pos % 9;
+        const int y = pos / 9;
+        auto& legs = ret[pos];
+        for (int d = 0; d < 4; ++d) {
+            const int leg_x = x + lx[d];
+            const int leg_y = y + ly[d];
+            if (leg_x < 0 || leg_x >= 9 || leg_y < 0 || leg_y >= 10) {
+                legs[d] = _;
+            } else {
+                legs[d] = static_cast<POS>(leg_y * 9 + leg_x);
+            }
+        }
+    }
+    return ret;
+}();
+constexpr auto KNIGHT_MOVES = []() {
+    std::array<std::array<std::array<POS, 2>, 4>, 90> ret {};
+    constexpr int mx[4][2] = { { -1, 1 }, { -2, -2 }, { -1, 1 }, { 2, 2 } };
+    constexpr int my[4][2] = { { -2, -2 }, { -1, 1 }, { 2, 2 }, { -1, 1 } };
+    for (POS pos = 0; pos < 90; ++pos) {
+        const int x = pos % 9;
+        const int y = pos / 9;
+        auto& dirs = ret[pos];
+        for (int d = 0; d < 4; ++d) {
+            auto& two = dirs[d];
+            for (int k = 0; k < 2; ++k) {
+                const int nx = x + mx[d][k];
+                const int ny = y + my[d][k];
+                if (nx < 0 || nx >= 9 || ny < 0 || ny >= 10) {
+                    two[k] = _;
+                } else {
+                    two[k] = static_cast<POS>(ny * 9 + nx);
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
 }
 
 MOVES king(POS pos)
@@ -105,8 +149,7 @@ MOVES king(POS pos)
     assert(pid_on(pos) == R_KING || pid_on(pos) == B_KING);
     MOVES ret {};
     ret.reserve(4);
-    const PID pid = pid_on(pos);
-    const TEAM team = pid > 0 ? R : B;
+    const TEAM team = pid_on(pos) > 0 ? R : B;
     for (const POS i : KING_MOVES[pos]) {
         if (i == _) {
             break;
@@ -120,8 +163,7 @@ MOVES king(POS pos)
 MOVES advisor(POS pos)
 {
     assert(pid_on(pos) == R_ADVISOR || pid_on(pos) == B_ADVISOR);
-    const PID pid = pid_on(pos);
-    const TEAM team = pid > 0 ? R : B;
+    const TEAM team = pid_on(pos) > 0 ? R : B;
     if (pos == ADVISOR_CENTER_R || pos == ADVISOR_CENTER_B) {
         MOVES ret {};
         ret.reserve(4);
@@ -142,8 +184,7 @@ MOVES advisor(POS pos)
 MOVES bishop(POS pos)
 {
     assert(pid_on(pos) == R_BISHOP || pid_on(pos) == B_BISHOP);
-    const PID pid = pid_on(pos);
-    const TEAM team = pid > 0 ? R : B;
+    const TEAM team = pid_on(pos) > 0 ? R : B;
     MOVES ret {};
     ret.reserve(4);
     for (int i = 0; i < 4; ++i) {
@@ -152,6 +193,25 @@ MOVES bishop(POS pos)
             break;
         } else if (pid_on(eye) == 0 && !same_team(team, BISHOP_MOVES[pos][i])) {
             ret.emplace_back(pos, BISHOP_MOVES[pos][i]);
+        }
+    }
+    return ret;
+}
+
+MOVES knight(POS pos)
+{
+    assert(pid_on(pos) == R_KNIGHT || pid_on(pos) == B_KNIGHT);
+    const TEAM team = pid_on(pos) > 0 ? R : B;
+    MOVES ret {};
+    ret.reserve(8);
+    for (int i = 0; i < 4; i++) {
+        const POS leg = KNIGHT_LEGS[pos][i];
+        if (leg != _ && pid_on(leg) == 0) {
+            for (const POS to : KNIGHT_MOVES[pos][i]) {
+                if (!same_team(team, to)) {
+                    ret.emplace_back(pos, to);
+                }
+            }
         }
     }
     return ret;
