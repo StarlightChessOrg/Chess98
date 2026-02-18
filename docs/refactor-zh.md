@@ -71,7 +71,7 @@ movepicker.hpp    evaluate.hpp
 
 - using 定义POS位置类型为char，范围0~89。
 - using 定义PID棋子id类型为char，范围-7~7，直接-pid就可以表示对方队伍的棋子。
-- using 定义PINDEX棋子唯一编号类型为char，范围0~31，用于精确地指示棋子。
+- using 定义PINDEX棋子唯一编号类型为char，范围0~32，用于精确地指示棋子。
 - using 定义TEAM队伍id类型为char，范围-1~1。
 - using 定义DEPTH类型为unsigned char，定义VL类型为short。
 - using 定义SEARCH_RET为`std::pair<Move, short>`，存储搜索结果。
