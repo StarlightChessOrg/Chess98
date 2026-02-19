@@ -120,14 +120,14 @@ void undo_move()
 PID pid_on(int pos)
 {
     assert(0 <= pos && pos < 90);
-    return board[static_cast<POS>(pos)];
+    return board[static_cast<size_t>(pos)];
 }
 
 TEAM same_team(int t, int pos)
 {
     assert(0 <= pos && pos < 90);
     assert(t == R || t == B || t == 0);
-    return board[static_cast<POS>(pos)] * t > 0;
+    return board[static_cast<size_t>(pos)] * t > 0;
 }
 
 PID pindex_pid(PINDEX pindex)
