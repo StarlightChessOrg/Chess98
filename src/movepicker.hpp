@@ -153,7 +153,7 @@ constexpr auto PAWN_MOVES = []() {
             const int x = pos % 9;
             const int y = pos / 9;
             int k = 0;
-            if (side == 0) {
+            if (side == 1) {
                 if (y < 9) {
                     arr[k++] = static_cast<POS>(pos + 9);
                 }
@@ -355,3 +355,63 @@ std::pair<MOVES, MOVES> rook(POS pos)
     }
     return { quiet, captures };
 }
+
+class MovePicker {
+    MOVES list {};
+    int i { -1 };
+    int step { 0 };
+
+public:
+    Move next()
+    {
+        i++;
+        if (i == list.size()) {
+            gen();
+        }
+        return i != list.size() ? list[i] : Move {};
+    }
+
+private:
+    void gen()
+    {
+        if (step == 0) {
+            for (const PINDEX pindex : pid_pindeces(R_ROOK * board_team)) {
+                const auto& moves = rook(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.first.begin(), moves.first.end());
+                list.insert(list.end(), moves.second.begin(), moves.second.end());
+            }
+        } else if (step == 1) {
+            for (const PINDEX pindex : pid_pindeces(R_CANNON * board_team)) {
+                const auto& moves = cannon(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.first.begin(), moves.first.end());
+                list.insert(list.end(), moves.second.begin(), moves.second.end());
+            }
+        } else if (step == 2) {
+            for (const PINDEX pindex : pid_pindeces(R_KNIGHT * board_team)) {
+                const auto& moves = knight(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.begin(), moves.end());
+            }
+        } else if (step == 3) {
+            for (const PINDEX pindex : pid_pindeces(R_PAWN * board_team)) {
+                const auto& moves = pawn(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.begin(), moves.end());
+            }
+        } else if (step == 4) {
+            for (const PINDEX pindex : pid_pindeces(R_BISHOP * board_team)) {
+                const auto& moves = bishop(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.begin(), moves.end());
+            }
+        } else if (step == 5) {
+            for (const PINDEX pindex : pid_pindeces(R_ADVISOR * board_team)) {
+                const auto& moves = advisor(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.begin(), moves.end());
+            }
+        } else if (step == 6) {
+            for (const PINDEX pindex : pid_pindeces(R_KING * board_team)) {
+                const auto& moves = king(pindex_piece(pindex).pos);
+                list.insert(list.end(), moves.begin(), moves.end());
+            }
+        }
+        step++;
+    }
+};
