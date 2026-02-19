@@ -7,7 +7,7 @@ TEAM board_team { 0 };
 PIECES pieces {};
 MATRIX pos_pindex {};
 // pid_pindeces const
-std::array<std::vector<PINDEX>, 15> pid_pindeces {};
+std::array<std::vector<PINDEX>, 15> pid_pindeces_table {};
 PINDEX r_king_index { 0 };
 PINDEX b_king_index { 0 };
 // history
@@ -39,11 +39,20 @@ void init(const MATRIX& matrix, TEAM t)
     pieces.emplace_back(Piece {});
     for (POS i = 0; i < 90; i++) {
         assert(-7 <= matrix[i] && matrix[i] <= 7);
+        // set king pindex
+        if (matrix[i] == R_KING)
+        {
+            r_king_index = static_cast<PINDEX>(pieces.size());
+        }
+        else if (matrix[i] == B_KING)
+        {
+            b_king_index = static_cast<PINDEX>(pieces.size());
+        }
         if (matrix[i] != 0) {
             // pindex and ptypes
             const PINDEX size = static_cast<PINDEX>(pieces.size());
             const size_t k = static_cast<size_t>(matrix[i] + 7);
-            pid_pindeces[k].emplace_back(size);
+            pid_pindeces_table[k].emplace_back(size);
             pos_pindex[i] = size;
             pieces.emplace_back(Piece { matrix[i], size, i });
             // hash
@@ -52,10 +61,6 @@ void init(const MATRIX& matrix, TEAM t)
             // bitlines
             boardbl9[i % 9] |= 1u << (i / 9);
             boardbl10[i / 9] |= 1u << (i % 9);
-        }
-        // set king pindex
-        if (matrix[i] == R_KING || matrix[i] == B_KING) {
-            (matrix[i] == R_KING ? r_king_index : b_king_index) = i;
         }
     }
 }
@@ -140,4 +145,9 @@ Piece pindex_piece(PINDEX pindex)
 {
     assert(0 <= pindex && pindex < pieces.size());
     return pieces[static_cast<size_t>(pindex)];
+}
+
+PINDECES pid_pindeces(PID pid)
+{
+    return pid_pindeces_table[pid + 7];
 }
