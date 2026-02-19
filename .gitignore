@@ -2,6 +2,8 @@
 .vs
 .vscode
 .idea
+**/cmake-build-debug
+**/cmake-build-release
 
 # Build Files
 .build
