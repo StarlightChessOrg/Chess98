@@ -71,8 +71,8 @@ constexpr auto BISHOP_EYES = []() {
     ret[63] = { 73, 55, _, _ };
     ret[67] = { 57, 59, 75, 77 };
     ret[71] = { 61, 79, _, _ };
-    ret[83] = { 73, 75, _, _ };
-    ret[87] = { 77, 79, _, _ };
+    ret[47] = { 63, 67, _, _ };
+    ret[51] = { 67, 71, _, _ };
     return ret;
 }();
 constexpr auto BISHOP_MOVES = []() {
@@ -140,24 +140,6 @@ constexpr auto KNIGHT_MOVES = []() {
             }
         }
     }
-    return ret;
-}();
-
-constexpr auto CANNON_MOVES_10 = []() {
-    std::array<std::array<POS, 4>, 1024> ret {};
-    return ret;
-}();
-constexpr auto CANNON_MOVES_9 = []() {
-    std::array<std::array<POS, 4>, 512> ret {};
-    return ret;
-}();
-
-constexpr auto ROOK_MOVES_10 = []() {
-    std::array<std::array<POS, 4>, 1024> ret {};
-    return ret;
-}();
-constexpr auto ROOK_MOVES_9 = []() {
-    std::array<std::array<POS, 4>, 512> ret {};
     return ret;
 }();
 
@@ -292,6 +274,80 @@ MOVES pawn(POS pos)
         } else if (!same_team(team, i)) {
             ret.emplace_back(pos, i);
         }
+    }
+    return ret;
+}
+
+MOVES cannon(POS pos)
+{
+    assert(pid_on(pos) == R_CANNON || pid_on(pos) == B_CANNON);
+    const TEAM team = pid_on(pos) > 0 ? R : B;
+    MOVES ret {};
+    ret.reserve(17);
+    for (int p = pos - 9; 0 <= p; p -= 9) {
+        if (!pid_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (p -= 9; 0 <= p && !pid_on(p); p -= 9) { }
+            if (0 <= p && !same_team(team, p)) {
+                ret.emplace_back(pos, p);
+                break;
+            }
+        }
+    }
+    for (int p = pos + 9; p < 90; p += 9) {
+        if (!pid_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (p += 9; p < 90 && !pid_on(p); p += 9) { }
+            if (p < 90 && !same_team(team, p)) {
+                ret.emplace_back(pos, p);
+                break;
+            }
+        }
+    }
+    for (int p = pos - 1; 0 <= p && p / 9 == pos / 9; p -= 1) {
+        if (!pid_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (p -= 1; 0 <= p && p / 9 == pos / 9 && !pid_on(p); p -= 1) { };
+            if (0 <= p && p / 9 == pos / 9 && !same_team(team, p)) {
+                ret.emplace_back(pos, p);
+                break;
+            }
+        }
+    }
+    for (int p = pos + 1; p / 9 == pos / 9; p += 1) {
+        if (!pid_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (p += 1; p / 9 == pos / 9 && !pid_on(p); p += 1) { };
+            if (p / 9 == pos / 9 && !same_team(team, p)) {
+                ret.emplace_back(pos, p);
+                break;
+            }
+        }
+    }
+    return ret;
+}
+
+MOVES rook(POS pos)
+{
+    assert(pid_on(pos) == R_ROOK || pid_on(pos) == B_ROOK);
+    const TEAM team = pid_on(pos) > 0 ? R : B;
+    MOVES ret {};
+    ret.reserve(17);
+    for (int p = pos - 9; 0 <= p && !same_team(team, p); p -= 9) {
+        ret.emplace_back(pos, p);
+    }
+    for (int p = pos + 9; p < 90 && !same_team(team, p); p += 9) {
+        ret.emplace_back(pos, p);
+    }
+    for (int p = pos - 1; 0 <= p && p / 9 == pos / 9 && !same_team(team, p); p -= 1) {
+        ret.emplace_back(pos, p);
+    }
+    for (int p = pos + 1; p / 9 == pos / 9 && !same_team(team, p); p += 1) {
+        ret.emplace_back(pos, p);
     }
     return ret;
 }
