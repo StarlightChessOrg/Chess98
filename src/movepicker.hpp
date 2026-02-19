@@ -194,7 +194,7 @@ MOVES king(POS pos)
     for (const POS i : KING_MOVES[pos]) {
         if (i == _) {
             break;
-        } else if (pid_on(i) * team <= 0) {
+        } else if (!same_team(team, i)) {
             const POS r_pos = pindex_piece(r_king_index).pos % 9;
             const POS b_pos = pindex_piece(b_king_index).pos % 9;
             if (r_pos != b_pos || !KING_FACES[boardbl10[r_pos]]) {
@@ -278,76 +278,80 @@ MOVES pawn(POS pos)
     return ret;
 }
 
-MOVES cannon(POS pos)
+std::pair<MOVES, MOVES> cannon(POS pos)
 {
     assert(pid_on(pos) == R_CANNON || pid_on(pos) == B_CANNON);
     const TEAM team = pid_on(pos) > 0 ? R : B;
-    MOVES ret {};
-    ret.reserve(17);
+    MOVES quiet {};
+    MOVES captures {};
+    quiet.reserve(17);
+    captures.reserve(4);
     for (int p = pos - 9; 0 <= p; p -= 9) {
         if (!pid_on(p)) {
-            ret.emplace_back(pos, p);
+            quiet.emplace_back(pos, p);
         } else {
             for (p -= 9; 0 <= p && !pid_on(p); p -= 9) { }
             if (0 <= p && !same_team(team, p)) {
-                ret.emplace_back(pos, p);
+                captures.emplace_back(pos, p);
                 break;
             }
         }
     }
     for (int p = pos + 9; p < 90; p += 9) {
         if (!pid_on(p)) {
-            ret.emplace_back(pos, p);
+            quiet.emplace_back(pos, p);
         } else {
             for (p += 9; p < 90 && !pid_on(p); p += 9) { }
             if (p < 90 && !same_team(team, p)) {
-                ret.emplace_back(pos, p);
+                captures.emplace_back(pos, p);
                 break;
             }
         }
     }
     for (int p = pos - 1; 0 <= p && p / 9 == pos / 9; p -= 1) {
         if (!pid_on(p)) {
-            ret.emplace_back(pos, p);
+            quiet.emplace_back(pos, p);
         } else {
             for (p -= 1; 0 <= p && p / 9 == pos / 9 && !pid_on(p); p -= 1) { };
             if (0 <= p && p / 9 == pos / 9 && !same_team(team, p)) {
-                ret.emplace_back(pos, p);
+                captures.emplace_back(pos, p);
                 break;
             }
         }
     }
     for (int p = pos + 1; p / 9 == pos / 9; p += 1) {
         if (!pid_on(p)) {
-            ret.emplace_back(pos, p);
+            quiet.emplace_back(pos, p);
         } else {
             for (p += 1; p / 9 == pos / 9 && !pid_on(p); p += 1) { };
             if (p / 9 == pos / 9 && !same_team(team, p)) {
-                ret.emplace_back(pos, p);
+                captures.emplace_back(pos, p);
                 break;
             }
         }
     }
-    return ret;
+    return { quiet, captures };
 }
 
-MOVES rook(POS pos)
+std::pair<MOVES, MOVES> rook(POS pos)
 {
     assert(pid_on(pos) == R_ROOK || pid_on(pos) == B_ROOK);
     const TEAM team = pid_on(pos) > 0 ? R : B;
-    MOVES ret {};
-    ret.reserve(17);
+    MOVES quiet {};
+    MOVES captures {};
+    quiet.reserve(17);
+    captures.reserve(4);
     for (int p = pos - 9; 0 <= p && !same_team(team, p); p -= 9) {
-        ret.emplace_back(pos, p);
+        (pid_on(p) == 0 ? quiet : captures).emplace_back(pos, p);
     }
     for (int p = pos + 9; p < 90 && !same_team(team, p); p += 9) {
-        ret.emplace_back(pos, p);
+        (pid_on(p) == 0 ? quiet : captures).emplace_back(pos, p);
     }
     for (int p = pos - 1; 0 <= p && p / 9 == pos / 9 && !same_team(team, p); p -= 1) {
-        ret.emplace_back(pos, p);
+        (pid_on(p) == 0 ? quiet : captures).emplace_back(pos, p);
     }
     for (int p = pos + 1; p / 9 == pos / 9 && !same_team(team, p); p += 1) {
-        ret.emplace_back(pos, p);
+        (pid_on(p) == 0 ? quiet : captures).emplace_back(pos, p);
     }
-    return ret;
+    return { quiet, captures };
 }
