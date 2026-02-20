@@ -6,19 +6,6 @@ namespace {
 
 constexpr POS _ = 100;
 
-constexpr auto KING_FACES = []() {
-    std::array<bool, 1024> ret {};
-    ret[0b100000001] = true;
-    ret[0b100000010] = true;
-    ret[0b100000100] = true;
-    ret[0b010000001] = true;
-    ret[0b010000010] = true;
-    ret[0b010000100] = true;
-    ret[0b001000001] = true;
-    ret[0b001000010] = true;
-    ret[0b001000100] = true;
-    return ret;
-}();
 constexpr auto KING_MOVES = []() {
     std::array<std::array<POS, 4>, 90> ret {};
     // black
@@ -195,11 +182,7 @@ MOVES king(POS pos)
         if (i == _) {
             break;
         } else if (!same_team(team, i)) {
-            const POS r_pos = pindex_piece(r_king_index).pos % 9;
-            const POS b_pos = pindex_piece(b_king_index).pos % 9;
-            if (r_pos != b_pos || !KING_FACES[boardbl10[r_pos]]) {
-                ret.emplace_back(pos, i);
-            }
+            ret.emplace_back(pos, i);
         }
     }
     return ret;
