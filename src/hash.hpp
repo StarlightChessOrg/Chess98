@@ -386,7 +386,7 @@ constexpr std::array<std::array<int, 90>, 15> LOCKS {
 
 namespace hash {
 
-constexpr int key_on(PID pid, POS pos)
+int key_on(PID pid, POS pos)
 {
     assert(-7 <= pid && pid <= 7);
     assert(pos < 90);
@@ -394,7 +394,7 @@ constexpr int key_on(PID pid, POS pos)
     return KEYS[k][pos];
 }
 
-constexpr int lock_on(PID pid, POS pos)
+int lock_on(PID pid, POS pos)
 {
     assert(-7 <= pid && pid <= 7);
     assert(pos < 90);
