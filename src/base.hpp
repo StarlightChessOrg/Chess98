@@ -67,6 +67,9 @@ struct Move {
     {
         return !(*this == m);
     }
+    operator bool() const {
+        return beg != end;
+    }
 };
 
 struct Piece {
