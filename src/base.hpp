@@ -10,13 +10,13 @@
 struct Move;
 struct Piece;
 struct Timer;
-using POS = std::uint8_t;
-using PID = std::int8_t;
-using PINDEX = std::uint8_t;
-using TEAM = std::int8_t;
-using DEPTH = std::uint8_t;
-using VL = std::int16_t;
-using GAME_TYPE = std::uint8_t;
+using POS = unsigned char;
+using PID = char;
+using PINDEX = unsigned char;
+using TEAM = char;
+using DEPTH = unsigned char;
+using VL = short;
+using GAME_TYPE = unsigned char;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PID, 90>;
@@ -105,8 +105,9 @@ struct Timer {
     }
     int duration() const
     {
-        const std::chrono::duration duration = std::chrono::steady_clock::now() - beg;
-        const long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
+        using namespace std::chrono;
+        const auto duration = steady_clock::now() - beg;
+        const auto ms = duration_cast<milliseconds>(duration).count();
         return static_cast<int>(ms);
     }
 };

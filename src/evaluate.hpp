@@ -1,7 +1,7 @@
 #pragma once
 #include "position.hpp"
 
-namespace {
+namespace evaluate {
 
 std::array<VL, 90> OPEN_ATTACK_KING_PAWN_WEIGHT {
     0, 0, 0, 10037, 10053, 10037, 0, 0, 0,
@@ -189,13 +189,9 @@ GAME_TYPE get_game_type(const PIECES& pieces)
     }
 }
 
-}
-
-namespace evaluate {
-
-void init()
+void init(const MATRIX& matrix)
 {
-    for (PID p : board) {
+    for (PID p : matrix) {
         if (p != 0) {
 
         }

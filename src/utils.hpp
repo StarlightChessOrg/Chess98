@@ -1,6 +1,6 @@
 #include "base.hpp"
-#include <random>
 #include <iostream>
+#include <random>
 
 namespace utils {
 
@@ -84,24 +84,23 @@ constexpr std::array<char, 15> pid_char = []() {
                 fen += pid_char[pid + 7];
             }
         }
-        if (empty > 0)
+        if (empty > 0) {
             fen += char('0' + empty);
-        if (r != 9)
+        }
+        if (r != 9) {
             fen += '/';
+        }
     }
     return fen;
 }
 
 [[maybe_unused]] std::string to_ucci_move(Move move)
 {
-    int beg = static_cast<int>(move.beg);
-    int end = static_cast<int>(move.end);
-    std::string s;
-    s.reserve(4);
-    s.push_back(static_cast<char>('a' + beg / 9));
-    s.push_back(static_cast<char>('0' + beg % 9));
-    s.push_back(static_cast<char>('a' + end / 9));
-    s.push_back(static_cast<char>('0' + end % 9));
+    std::string s { "" };
+    s += 'a' + move.beg / 9;
+    s += '0' + move.beg % 9;
+    s += 'a' + move.end / 9;
+    s += '0' + move.end % 9;
     return s;
 }
 

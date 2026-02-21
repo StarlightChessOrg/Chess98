@@ -12,7 +12,7 @@ void init(const MATRIX& matrix, TEAM team)
     position::init(matrix, team);
     history::init();
     killer::init();
-    evaluate::init();
+    evaluate::init(matrix);
 }
 
 void search(int time_limit_ms)

@@ -2,7 +2,7 @@
 #include "heuristic.hpp"
 #include "position.hpp"
 
-namespace {
+namespace movegen {
 
 constexpr POS _ = 100;
 
@@ -170,8 +170,6 @@ constexpr auto PAWN_MOVES = []() {
     return ret;
 }();
 
-}
-
 MOVES king(POS pos)
 {
     assert(pid_on(pos) == R_KING || pid_on(pos) == B_KING);
@@ -265,8 +263,8 @@ std::pair<MOVES, MOVES> cannon(POS pos)
 {
     assert(pid_on(pos) == R_CANNON || pid_on(pos) == B_CANNON);
     const TEAM team = pid_on(pos) > 0 ? R : B;
-    MOVES quiet {};
     MOVES captures {};
+    MOVES quiet {};
     quiet.reserve(17);
     captures.reserve(4);
     for (int p = pos - 9; 0 <= p; p -= 9) {
@@ -313,15 +311,15 @@ std::pair<MOVES, MOVES> cannon(POS pos)
             }
         }
     }
-    return { quiet, captures };
+    return { captures, quiet };
 }
 
 std::pair<MOVES, MOVES> rook(POS pos)
 {
     assert(pid_on(pos) == R_ROOK || pid_on(pos) == B_ROOK);
     const TEAM team = pid_on(pos) > 0 ? R : B;
-    MOVES quiet {};
     MOVES captures {};
+    MOVES quiet {};
     quiet.reserve(17);
     captures.reserve(4);
     for (int p = pos - 9; 0 <= p && !same_team(team, p); p -= 9) {
@@ -336,11 +334,13 @@ std::pair<MOVES, MOVES> rook(POS pos)
     for (int p = pos + 1; p / 9 == pos / 9 && !same_team(team, p); p += 1) {
         (pid_on(p) == 0 ? quiet : captures).emplace_back(pos, p);
     }
-    return { quiet, captures };
+    return { captures, quiet };
+}
+
 }
 
 class MovePicker {
-    MOVES list {};
+    MOVES gen {};
     int i { -1 };
     int step { 0 };
 
@@ -348,51 +348,51 @@ public:
     Move next()
     {
         i++;
-        if (i == list.size()) {
-            gen();
+        if (i == gen.size()) {
+            update();
         }
-        return i != list.size() ? list[i] : Move {};
+        return i != gen.size() ? gen[i] : Move {};
     }
 
 private:
-    void gen()
+    void update()
     {
         if (step == 0) {
-            for (const PINDEX pindex : pid_pindeces(R_ROOK * board_team)) {
-                const auto& moves = rook(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.first.begin(), moves.first.end());
-                list.insert(list.end(), moves.second.begin(), moves.second.end());
+            for (const PINDEX pindex : pid_pindeces(R_ROOK * team_now())) {
+                const auto& moves = movegen::rook(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.first.begin(), moves.first.end());
+                gen.insert(gen.end(), moves.second.begin(), moves.second.end());
             }
         } else if (step == 1) {
-            for (const PINDEX pindex : pid_pindeces(R_CANNON * board_team)) {
-                const auto& moves = cannon(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.first.begin(), moves.first.end());
-                list.insert(list.end(), moves.second.begin(), moves.second.end());
+            for (const PINDEX pindex : pid_pindeces(R_CANNON * team_now())) {
+                const auto& moves = movegen::cannon(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.first.begin(), moves.first.end());
+                gen.insert(gen.end(), moves.second.begin(), moves.second.end());
             }
         } else if (step == 2) {
-            for (const PINDEX pindex : pid_pindeces(R_KNIGHT * board_team)) {
-                const auto& moves = knight(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.begin(), moves.end());
+            for (const PINDEX pindex : pid_pindeces(R_KNIGHT * team_now())) {
+                const auto& moves = movegen::knight(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.begin(), moves.end());
             }
         } else if (step == 3) {
-            for (const PINDEX pindex : pid_pindeces(R_PAWN * board_team)) {
-                const auto& moves = pawn(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.begin(), moves.end());
+            for (const PINDEX pindex : pid_pindeces(R_PAWN * team_now())) {
+                const auto& moves = movegen::pawn(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.begin(), moves.end());
             }
         } else if (step == 4) {
-            for (const PINDEX pindex : pid_pindeces(R_BISHOP * board_team)) {
-                const auto& moves = bishop(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.begin(), moves.end());
+            for (const PINDEX pindex : pid_pindeces(R_BISHOP * team_now())) {
+                const auto& moves = movegen::bishop(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.begin(), moves.end());
             }
         } else if (step == 5) {
-            for (const PINDEX pindex : pid_pindeces(R_ADVISOR * board_team)) {
-                const auto& moves = advisor(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.begin(), moves.end());
+            for (const PINDEX pindex : pid_pindeces(R_ADVISOR * team_now())) {
+                const auto& moves = movegen::advisor(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.begin(), moves.end());
             }
         } else if (step == 6) {
-            for (const PINDEX pindex : pid_pindeces(R_KING * board_team)) {
-                const auto& moves = king(pindex_piece(pindex).pos);
-                list.insert(list.end(), moves.begin(), moves.end());
+            for (const PINDEX pindex : pid_pindeces(R_KING * team_now())) {
+                const auto& moves = movegen::king(pindex_piece(pindex).pos);
+                gen.insert(gen.end(), moves.begin(), moves.end());
             }
         }
         step++;

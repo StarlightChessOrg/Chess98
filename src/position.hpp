@@ -1,6 +1,9 @@
 #pragma once
 #include "hash.hpp"
 
+namespace position {
+
+// board and team
 MATRIX board {};
 TEAM board_team { 0 };
 // pindex
@@ -18,8 +21,6 @@ std::vector<int> history_hashkey {};
 std::vector<int> history_hashlock {};
 int hashkey { 0 };
 int hashlock { 0 };
-
-namespace position {
 
 void init(const MATRIX& matrix, TEAM t)
 {
@@ -106,32 +107,37 @@ void undo_move()
 
 }
 
+TEAM team_now()
+{
+    return position::board_team;
+}
+
 PID pid_on(int pos)
 {
     assert(0 <= pos && pos < 90);
-    return board[static_cast<size_t>(pos)];
+    return position::board[static_cast<size_t>(pos)];
 }
 
 TEAM same_team(int t, int pos)
 {
     assert(0 <= pos && pos < 90);
     assert(t == R || t == B || t == 0);
-    return board[static_cast<size_t>(pos)] * t > 0;
+    return position::board[static_cast<size_t>(pos)] * t > 0;
 }
 
 PID pindex_pid(PINDEX pindex)
 {
-    assert(0 <= pindex && pindex < pieces.size());
-    return pieces[static_cast<size_t>(pindex)].pid;
+    assert(pindex < position::pieces.size());
+    return position::pieces[static_cast<size_t>(pindex)].pid;
 }
 
 Piece pindex_piece(PINDEX pindex)
 {
-    assert(0 <= pindex && pindex < pieces.size());
-    return pieces[static_cast<size_t>(pindex)];
+    assert(pindex < position::pieces.size());
+    return position::pieces[static_cast<size_t>(pindex)];
 }
 
 PINDECES pid_pindeces(PID pid)
 {
-    return pid_pindeces_table[pid + 7];
+    return position::pid_pindeces_table[pid + 7];
 }
