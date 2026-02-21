@@ -53,7 +53,7 @@ SEARCH_RET search_root(DEPTH depth)
     Move move_best {};
     VL vl_best { -INF };
     MovePicker mp {};
-    for (Move m = mp.next(); m != Move {}; m = mp.next()) {
+    for (Move m = mp.next(); m; m = mp.next()) {
         move(m);
         VL vl { -INF };
         if (vl_best == -INF) {
@@ -77,6 +77,26 @@ VL search_pv(DEPTH depth, VL a, VL b)
 {
     if (depth <= 0) {
         return search_q(Q_DEPTH, a, b);
+    }
+    int vl_best { -INF };
+    Move move_best {};
+    MovePicker mp {};
+    for (Move m = mp.next(); m; m = mp.next()) {
+        move(m);
+        VL vl { -INF };
+        if (vl_best == -INF) {
+            vl = -search_pv(depth - 1, a, b);
+        } else {
+            vl = -search_cut(depth - 1, b);
+            if (a < vl && vl < b) {
+                vl = -search_pv(depth - 1, a, b);
+            }
+        }
+        if (vl > vl_best) {
+            vl_best = vl;
+            move_best = m;
+            if ()
+        }
     }
 }
 
