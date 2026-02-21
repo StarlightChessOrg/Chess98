@@ -1,8 +1,6 @@
 #pragma once
 #include "base.hpp"
 
-namespace {
-
 constexpr int PLAYER_KEY = 1099503838;
 constexpr int PLAYER_LOCK = 1730021002;
 
@@ -381,8 +379,6 @@ constexpr std::array<std::array<int, 90>, 15> LOCKS {
     {},
     R_KING_LOCK, R_GUARD_LOCK, R_BISHOP_LOCK, R_KNIGHT_LOCK, R_ROOK_LOCK, R_CANNON_LOCK, R_PAWN_LOCK
 };
-
-}
 
 namespace hash {
 

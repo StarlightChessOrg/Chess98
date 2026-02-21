@@ -16,6 +16,7 @@ using PINDEX = std::uint8_t;
 using TEAM = std::int8_t;
 using DEPTH = std::uint8_t;
 using VL = std::int16_t;
+using GAME_TYPE = std::uint8_t;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PID, 90>;
@@ -41,6 +42,9 @@ constexpr TEAM R = 1;
 constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
+constexpr GAME_TYPE OPENGAME = 0;
+constexpr GAME_TYPE MIDGAME = 1;
+constexpr GAME_TYPE ENDGAME = 2;
 
 struct Move {
     POS beg { 0 };
@@ -58,6 +62,10 @@ struct Move {
     bool operator==(Move m) const
     {
         return beg == m.beg && end == m.end;
+    }
+    bool operator!=(Move m) const
+    {
+        return !(*this == m);
     }
 };
 

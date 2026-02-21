@@ -80,6 +80,7 @@ std::array<VL, 90> DANGER_GUARD_BISHOP_WEIGHT {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+
 std::array<VL, 90> OPEN_KNIGHT_WEIGHT {
     264, 255, 270, 264, 270, 264, 270, 255, 264,
     255, 270, 276, 279, 234, 279, 276, 270, 255,
@@ -158,10 +159,57 @@ std::array<VL, 90> END_CANNON_WEIGHT {
     300, 300, 300, 300, 300, 300, 300, 300, 300
 };
 
+constexpr std::array<std::array<VL, 90>, 7> pid_vl_open {
+
+};
+constexpr std::array<int, 15> pid_vl {
+    1, 3, 7, 3, 2, 2, 0, 0, 0, 2, 2, 3, 7, 3, 1
+};
+
+constexpr int OPENGAME_MIN_VL = 60;
+constexpr int MIDGAME_MIN_VL = 40;
+constexpr int ADVANCED_VL = 5;
+
+VL vl_total { 0 };
+
+GAME_TYPE get_game_type(const PIECES& pieces)
+{
+    int total = 0;
+    for (const Piece p : pieces) {
+        if (p.live) {
+            total += pid_vl[static_cast<size_t>(p.pid + 7)];
+        }
+    }
+    if (total >= OPENGAME_MIN_VL) {
+        return OPENGAME;
+    } else if (total >= MIDGAME_MIN_VL) {
+        return MIDGAME;
+    } else {
+        return ENDGAME;
+    }
+}
+
+}
+
+namespace evaluate {
+
+void init()
+{
+    for (PID p : board) {
+        if (p != 0) {
+
+        }
+    }
+}
+
+void update(Move m) {
+    // TODO:
 }
 
 VL evaluate()
 {
     // TODO: implement evaluation function
     return 0;
+}
+
 }
