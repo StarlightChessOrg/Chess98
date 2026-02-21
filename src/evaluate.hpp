@@ -206,6 +206,10 @@ void update(Move m) {
     // TODO:
 }
 
+void undo_update() {
+    // TODO:
+}
+
 VL evaluate()
 {
     // TODO: implement evaluation function

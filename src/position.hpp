@@ -59,7 +59,7 @@ void init(const MATRIX& matrix, TEAM t)
     }
 }
 
-void do_move(Move move)
+void move(Move move)
 {
     // history and hash update
     history_moves.emplace_back(move);
