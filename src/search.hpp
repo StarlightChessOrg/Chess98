@@ -25,7 +25,7 @@ void init(const MATRIX& matrix, TEAM team)
     evaluate::init(matrix);
 }
 
-void move(Move m) 
+void move(Move m)
 {
     distance++;
     position::move(m);
@@ -40,7 +40,7 @@ void undo_move()
 }
 
 VL search(DEPTH depth, VL a, VL b, bool pv);
-VL search_q(DEPTH distance, VL a, VL b);
+VL search_q(DEPTH q_depth, VL a, VL b);
 
 VL search(DEPTH depth, VL a, VL b, bool pv)
 {
@@ -61,16 +61,24 @@ VL search(DEPTH depth, VL a, VL b, bool pv)
                 vl = -search(depth - 1, -b, -a, PV);
             }
         }
+        if (vl >= b && is_quiet(m) && !pv) {
+            killer::update(m, depth);
+            undo_move();
+            return vl;
+        }
         if (vl > vlbest) {
             vlbest = vl;
             movebest = m;
         }
         undo_move();
     }
+    if (movebest && is_quiet(movebest) && !pv) {
+        history::update(movebest, depth);
+    }
     return vlbest;
 }
 
-VL search_q(DEPTH distance, VL a, VL b)
+VL search_q(DEPTH q_depth, VL a, VL b)
 {
     return evaluate::evaluate();
 }

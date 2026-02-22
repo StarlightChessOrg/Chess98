@@ -6,10 +6,6 @@ namespace history {
 namespace {
     std::array<std::array<unsigned int, 90>, 90> r_table {};
     std::array<std::array<unsigned int, 90>, 90> b_table {};
-    constexpr unsigned int strategy(DEPTH distance)
-    {
-        return distance * distance;
-    }
 }
 
 void init()
@@ -17,9 +13,9 @@ void init()
     r_table = b_table = {};
 }
 
-void update(Move move, TEAM team, DEPTH distance)
+void update(Move move, DEPTH d)
 {
-    (team == R ? r_table : b_table)[move.beg][move.end] += strategy(distance);
+    (team_now() == R ? r_table : b_table)[move.beg][move.end] += d * d;
 }
 
 void sort(MOVES& moves, TEAM team)
@@ -43,15 +39,15 @@ void init()
     table = {};
 }
 
-void update(Move move, DEPTH distance)
+void update(Move move, DEPTH d)
 {
-    table[distance][1] = table[distance][0];
-    table[distance][0] = move;
+    table[d][1] = table[d][0];
+    table[d][0] = move;
 }
 
-std::array<Move, 2> get(DEPTH distance)
+std::array<Move, 2> get(DEPTH d)
 {
-    return table[distance];
+    return table[d];
 }
 
 }
