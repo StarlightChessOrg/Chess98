@@ -39,79 +39,40 @@ void undo_move()
     evaluate::undo_update();
 }
 
-void search(int time_limit_ms)
-{
-    Timer timer { time_limit_ms };
-    for (DEPTH depth = 0; !timer.time_up(); depth++) {
-        rets.emplace_back(search_root(depth));
-        durations.emplace_back(timer.duration());
-    }
-}
+VL search(DEPTH depth, VL a, VL b, bool pv);
+VL search_q(DEPTH distance, VL a, VL b);
 
-SEARCH_RET search_root(DEPTH depth)
-{
-    Move move_best {};
-    VL vl_best { -INF };
-    MovePicker mp {};
-    for (Move m = mp.next(); m; m = mp.next()) {
-        move(m);
-        VL vl { -INF };
-        if (vl_best == -INF) {
-            vl = -search_pv(depth - 1, -INF, INF);
-        } else {
-            vl = -search_cut(depth - 1, -vl_best);
-            if (vl > vl_best) {
-                vl = -search_pv(depth - 1, -INF, -vl_best);
-            }
-        }
-        if (vl > vl_best) {
-            vl_best = vl;
-            move_best = m;
-        }
-        undo_move();
-    }
-    return { move_best, vl_best };
-}
-
-VL search_pv(DEPTH depth, VL a, VL b)
+VL search(DEPTH depth, VL a, VL b, bool pv)
 {
     if (depth <= 0) {
         return search_q(Q_DEPTH, a, b);
     }
-    int vl_best { -INF };
-    Move move_best {};
+    int vlbest { -INF };
+    Move movebest {};
     MovePicker mp {};
     for (Move m = mp.next(); m; m = mp.next()) {
         move(m);
         VL vl { -INF };
-        if (vl_best == -INF) {
-            vl = -search_pv(depth - 1, a, b);
+        if (vlbest == -INF) {
+            vl = -search(depth - 1, -b, -a, PV);
         } else {
-            vl = -search_cut(depth - 1, b);
+            vl = -search(depth - 1, -a - 1, -a, CUT);
             if (a < vl && vl < b) {
-                vl = -search_pv(depth - 1, a, b);
+                vl = -search(depth - 1, -b, -a, PV);
             }
         }
-        if (vl > vl_best) {
-            vl_best = vl;
-            move_best = m;
-            if ()
+        if (vl > vlbest) {
+            vlbest = vl;
+            movebest = m;
         }
+        undo_move();
     }
+    return vlbest;
 }
 
-VL search_cut(DEPTH depth, VL b)
+VL search_q(DEPTH distance, VL a, VL b)
 {
-    if (depth <= 0) {
-        return search_q(Q_DEPTH, -INF, b);
-    }
-}
-
-VL search_q(DEPTH q_depth, VL a, VL b)
-{
-    if (q_depth <= 0) {
-        return evaluate::evaluate();
-    }
+    return evaluate::evaluate();
 }
 
 }

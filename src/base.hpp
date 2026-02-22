@@ -45,6 +45,8 @@ constexpr VL BAN = 20000;
 constexpr GAME_TYPE OPENGAME = 0;
 constexpr GAME_TYPE MIDGAME = 1;
 constexpr GAME_TYPE ENDGAME = 2;
+constexpr bool PV = true;
+constexpr bool CUT = false;
 
 struct Move {
     POS beg { 0 };
