@@ -1,5 +1,5 @@
 #pragma once
-#include "hash.hpp"
+#include "base.hpp"
 
 namespace position {
 
@@ -20,7 +20,6 @@ PINDECES history_captured_pindeces {};
 std::vector<int> history_hashkey {};
 std::vector<int> history_hashlock {};
 int hashkey { 0 };
-int hashlock { 0 };
 
 void init(const MATRIX& matrix, TEAM t)
 {
@@ -54,8 +53,7 @@ void init(const MATRIX& matrix, TEAM t)
             pos_pindex[i] = size;
             pieces.emplace_back(Piece { matrix[i], size, i });
             // hash
-            hashkey ^= hash::key_on(matrix[i], i);
-            hashlock ^= hash::lock_on(matrix[i], i);
+            hashkey ^= hash::on(matrix[i], i);
         }
     }
 }
@@ -66,7 +64,6 @@ void move(Move move)
     history_moves.emplace_back(move);
     history_captured_pindeces.emplace_back(pos_pindex[move.end]);
     history_hashkey.emplace_back(hashkey);
-    history_hashlock.emplace_back(hashlock);
     // pindex update
     pieces[pos_pindex[move.end]].live = board[move.end] == 0;
     pieces[pos_pindex[move.beg]].pos = move.end;
@@ -77,8 +74,9 @@ void move(Move move)
     board[move.beg] = 0;
     board_team = -board_team;
     // hash update
-    hashkey ^= hash::key_on(board[move.beg], move.beg);
-    hashlock ^= hash::lock_on(board[move.beg], move.beg);
+    hashkey ^= hash::on(board[move.beg], move.beg);
+    hashkey ^= hash::on(board[move.end], move.end);
+    hashkey ^= hash::SIDE_KEY;
 }
 
 void undo_move()
@@ -97,7 +95,6 @@ void undo_move()
     board_team = -board_team;
     // hash update
     hashkey = history_hashkey.back();
-    hashlock = history_hashlock.back();
     // history update
     history_moves.pop_back();
     history_captured_pindeces.pop_back();

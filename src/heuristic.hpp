@@ -3,10 +3,8 @@
 
 namespace history {
 
-namespace {
-    std::array<std::array<unsigned int, 90>, 90> r_table {};
-    std::array<std::array<unsigned int, 90>, 90> b_table {};
-}
+std::array<std::array<unsigned int, 90>, 90> r_table {};
+std::array<std::array<unsigned int, 90>, 90> b_table {};
 
 void init()
 {
@@ -30,9 +28,7 @@ void sort(MOVES& moves, TEAM team)
 
 namespace killer {
 
-namespace {
-    std::array<std::array<Move, 2>, 128> table {};
-}
+std::array<std::array<Move, 2>, 128> table {};
 
 void init()
 {
@@ -54,6 +50,29 @@ std::array<Move, 2> get(DEPTH d)
 
 namespace tt {
 
-// TODO: implement tt
+constexpr char EXACT = 0;
+constexpr char ALPHA = 1;
+constexpr char BETA = 2;
+
+struct Entry {
+    HASH key { 0 };
+    char flag { 0 };
+    VL vl { 0 };
+    DEPTH depth { 0 };
+    Move move {};
+};
+
+std::vector<Entry> table {};
+
+void init(int size)
+{
+    table.clear();
+    table.resize(1 << static_cast<unsigned int>(size));
+}
+
+void set()
+{
+
+}
 
 }

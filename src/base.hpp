@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <chrono>
+#include <random>
 #include <string>
 #include <utility>
 #include <vector>
@@ -17,6 +18,7 @@ using TEAM = char;
 using DEPTH = unsigned char;
 using VL = short;
 using GAME_TYPE = unsigned char;
+using HASH = long long;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PID, 90>;
@@ -69,7 +71,8 @@ struct Move {
     {
         return !(*this == m);
     }
-    operator bool() const {
+    operator bool() const
+    {
         return beg != end;
     }
 };
@@ -116,3 +119,38 @@ struct Timer {
         return static_cast<int>(ms);
     }
 };
+
+namespace hash {
+
+std::mt19937_64 rng(2820795095);
+std::uniform_int_distribution<long long> dis(
+    std::numeric_limits<long long>::min(),
+    std::numeric_limits<long long>::max());
+
+HASH gen_hash()
+{
+    return dis(rng);
+}
+
+HASH SIDE_KEY = gen_hash();
+
+std::array<std::array<HASH, 90>, 15> KEYS = []() {
+    std::array<std::array<HASH, 90>, 15> ret {};
+    for (std::array<HASH, 90>& m : ret) {
+        for (HASH& h : m) {
+            h = gen_hash();
+        }
+    }
+    ret[7].fill(0);
+    return ret;
+}();
+
+HASH on(PID pid, POS pos)
+{
+    assert(-7 <= pid && pid <= 7);
+    assert(pos < 90);
+    const auto k = static_cast<size_t>(pid + 7);
+    return KEYS[k][pos];
+}
+
+}
