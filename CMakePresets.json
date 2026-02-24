@@ -2,24 +2,6 @@
   "version": 6,
   "configurePresets": [
     {
-      "name": "MSVC_Debug",
-      "displayName": "MSVC Debug",
-      "generator": "Visual Studio 18 2026",
-      "binaryDir": "${sourceDir}/.build/msvc-debug",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "MSVC_Release",
-      "displayName": "MSVC Release",
-      "generator": "Visual Studio 18 2026",
-      "binaryDir": "${sourceDir}/.build/msvc-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release"
-      }
-    },
-    {
       "name": "GCC_Debug",
       "displayName": "GCC Debug",
       "generator": "Ninja",
