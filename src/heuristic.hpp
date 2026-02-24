@@ -50,29 +50,75 @@ std::array<Move, 2> get(DEPTH d)
 
 namespace tt {
 
-constexpr char EXACT = 0;
-constexpr char ALPHA = 1;
-constexpr char BETA = 2;
+using FLAG = char;
+constexpr FLAG EXACT = 0;
+constexpr FLAG ALPHA = 1;
+constexpr FLAG BETA = 2;
 
 struct Entry {
     HASH key { 0 };
-    char flag { 0 };
+    FLAG flag { 0 };
     VL vl { 0 };
     DEPTH depth { 0 };
     Move move {};
 };
 
 std::vector<Entry> table {};
+int size { 0 };
+int mask { 0 };
 
-void init(int size)
+void init(int _size)
 {
     table.clear();
-    table.resize(1 << static_cast<unsigned int>(size));
+    table.resize(1 << _size);
+    size = _size;
+    mask = (1 << _size) - 1;
 }
 
-void set()
+void set(HASH hashkey, FLAG flag, DEPTH depth, Move move, VL vl)
 {
+    Entry& e = table[hashkey & mask];
+    if (e.key == 0) { // empty set
+        e.key = hashkey;
+        e.flag = flag;
+        e.depth = depth;
+        e.move = move;
+        e.vl = vl;
+    } else if (e.key == hashkey) { // same position replace
+        if (depth >= e.depth) { // only deeper
+            e.flag = flag;
+            e.depth = depth;
+            e.move = move;
+            e.vl = vl;
+        }
+    } else { // collision
+        e.key = hashkey;
+        e.flag = flag;
+        e.depth = depth;
+        e.move = move;
+        e.vl = vl;
+    }
+}
 
+VL get_vl(HASH hashkey, FLAG flag, DEPTH depth, VL alpha, VL beta)
+{
+    const Entry& e = table[hashkey & mask];
+    if (e.key != hashkey || e.depth < depth) {
+        return INVALID_VL;
+    } else if (e.flag == EXACT) {
+        return e.vl;
+    } else if (e.flag == ALPHA && e.vl <= alpha) {
+        return e.vl;
+    } else if (e.flag == BETA && e.vl >= beta) {
+        return e.vl;
+    }
+    return INVALID_VL;
+}
+
+Move get_move(HASH hashkey)
+{
+    const Entry& e = table[hashkey & mask];
+    return e.move;
 }
 
 }

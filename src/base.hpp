@@ -44,6 +44,7 @@ constexpr TEAM R = 1;
 constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
+constexpr VL INVALID_VL = -31000;
 constexpr GAME_TYPE OPENGAME = 0;
 constexpr GAME_TYPE MIDGAME = 1;
 constexpr GAME_TYPE ENDGAME = 2;

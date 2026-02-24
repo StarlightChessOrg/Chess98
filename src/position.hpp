@@ -19,7 +19,7 @@ PINDECES history_captured_pindeces {};
 // hash
 std::vector<int> history_hashkey {};
 std::vector<int> history_hashlock {};
-int hashkey { 0 };
+HASH hashkey { 0 };
 
 void init(const MATRIX& matrix, TEAM t)
 {
