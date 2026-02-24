@@ -29,7 +29,7 @@ void move(Move m)
 {
     distance++;
     position::move(m);
-    evaluate::update(m);
+    evaluate::update();
 }
 
 void undo_move()
@@ -44,12 +44,16 @@ VL search_q(DEPTH q_depth, VL a, VL b);
 
 VL search(DEPTH depth, VL a, VL b, bool pv)
 {
+    VL tt_vl = tt::get_vl(position::hashkey, depth, a, b);
+    if (tt_vl != INVALID_VL) {
+        return tt_vl;
+    }
     if (depth <= 0) {
         return search_q(Q_DEPTH, a, b);
     }
-    int vlbest { -INF };
+    VL vlbest = -INF;
     Move movebest {};
-    MovePicker mp {};
+    MovePicker mp{};
     for (Move m = mp.next(); m; m = mp.next()) {
         move(m);
         VL vl { -INF };
@@ -61,25 +65,33 @@ VL search(DEPTH depth, VL a, VL b, bool pv)
                 vl = -search(depth - 1, -b, -a, PV);
             }
         }
+        undo_move();
         if (vl >= b && is_quiet(m) && !pv) {
             killer::update(m, depth);
-            undo_move();
+            tt::set(position::hashkey, tt::BETA, depth, m, vl);
             return vl;
         }
         if (vl > vlbest) {
             vlbest = vl;
             movebest = m;
         }
-        undo_move();
     }
     if (movebest && is_quiet(movebest) && !pv) {
         history::update(movebest, depth);
+    }
+    if (vlbest <= a) {
+        tt::set(position::hashkey, tt::ALPHA, depth, movebest, vlbest);
+    } else if (vlbest >= b) {
+        tt::set(position::hashkey, tt::BETA, depth, movebest, vlbest);
+    } else {
+        tt::set(position::hashkey, tt::EXACT, depth, movebest, vlbest);
     }
     return vlbest;
 }
 
 VL search_q(DEPTH q_depth, VL a, VL b)
 {
+    std::cout << q_depth << a << b;
     return evaluate::evaluate();
 }
 

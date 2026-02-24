@@ -100,7 +100,7 @@ void set(HASH hashkey, FLAG flag, DEPTH depth, Move move, VL vl)
     }
 }
 
-VL get_vl(HASH hashkey, FLAG flag, DEPTH depth, VL alpha, VL beta)
+VL get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 {
     const Entry& e = table[hashkey & mask];
     if (e.key != hashkey || e.depth < depth) {

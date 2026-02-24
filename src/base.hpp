@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 struct Move;
 struct Piece;
@@ -136,14 +137,14 @@ HASH gen_hash()
 HASH SIDE_KEY = gen_hash();
 
 std::array<std::array<HASH, 90>, 15> KEYS = []() {
-    std::array<std::array<HASH, 90>, 15> ret {};
-    for (std::array<HASH, 90>& m : ret) {
-        for (HASH& h : m) {
-            h = gen_hash();
-        }
-    }
-    ret[7].fill(0);
-    return ret;
+   std::array<std::array<HASH, 90>, 15> ret {};
+   for (std::array<HASH, 90>& m : ret) {
+       for (HASH& h : m) {
+           h = gen_hash();
+       }
+   }
+   ret[7].fill(0);
+   return ret;
 }();
 
 HASH on(PID pid, POS pos)
@@ -152,6 +153,7 @@ HASH on(PID pid, POS pos)
     assert(pos < 90);
     const auto k = static_cast<size_t>(pid + 7);
     return KEYS[k][pos];
+    return 0ll;
 }
 
 }

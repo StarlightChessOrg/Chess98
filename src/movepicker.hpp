@@ -341,55 +341,55 @@ std::pair<MOVES, MOVES> rook(POS pos)
 
 class MovePicker {
     MOVES gen {};
-    int i { -1 };
+    size_t i { 0 };
     int step { 0 };
 
 public:
     Move next()
     {
         i++;
-        if (i == gen.size()) {
+        if (i >= gen.size()) {
             update();
         }
-        return i != gen.size() ? gen[i] : Move {};
+        return i < gen.size() ? gen[static_cast<size_t>(i - 1)] : Move {};
     }
 
 private:
     void update()
     {
-        if (step == 0) {
+        if (step == 1) {
             for (const PINDEX pindex : pid_pindeces(R_ROOK * team_now())) {
                 const auto& moves = movegen::rook(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.first.begin(), moves.first.end());
                 gen.insert(gen.end(), moves.second.begin(), moves.second.end());
             }
-        } else if (step == 1) {
+        } else if (step == 2) {
             for (const PINDEX pindex : pid_pindeces(R_CANNON * team_now())) {
                 const auto& moves = movegen::cannon(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.first.begin(), moves.first.end());
                 gen.insert(gen.end(), moves.second.begin(), moves.second.end());
             }
-        } else if (step == 2) {
+        } else if (step == 3) {
             for (const PINDEX pindex : pid_pindeces(R_KNIGHT * team_now())) {
                 const auto& moves = movegen::knight(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.begin(), moves.end());
             }
-        } else if (step == 3) {
+        } else if (step == 4) {
             for (const PINDEX pindex : pid_pindeces(R_PAWN * team_now())) {
                 const auto& moves = movegen::pawn(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.begin(), moves.end());
             }
-        } else if (step == 4) {
+        } else if (step == 5) {
             for (const PINDEX pindex : pid_pindeces(R_BISHOP * team_now())) {
                 const auto& moves = movegen::bishop(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.begin(), moves.end());
             }
-        } else if (step == 5) {
+        } else if (step == 6) {
             for (const PINDEX pindex : pid_pindeces(R_ADVISOR * team_now())) {
                 const auto& moves = movegen::advisor(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.begin(), moves.end());
             }
-        } else if (step == 6) {
+        } else if (step == 7) {
             for (const PINDEX pindex : pid_pindeces(R_KING * team_now())) {
                 const auto& moves = movegen::king(pindex_piece(pindex).pos);
                 gen.insert(gen.end(), moves.begin(), moves.end());

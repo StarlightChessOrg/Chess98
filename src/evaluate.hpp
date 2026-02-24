@@ -193,12 +193,12 @@ void init(const MATRIX& matrix)
 {
     for (PID p : matrix) {
         if (p != 0) {
-
+            
         }
     }
 }
 
-void update(Move m) {
+void update() {
     // TODO:
 }
 

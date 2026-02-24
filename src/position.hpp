@@ -136,7 +136,7 @@ Piece pindex_piece(PINDEX pindex)
 
 PINDECES pid_pindeces(PID pid)
 {
-    return position::pid_pindeces_table[pid + 7];
+    return position::pid_pindeces_table[static_cast<size_t>(pid + 7)];
 }
 
 bool is_quiet(Move m) {
