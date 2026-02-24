@@ -1,7 +1,6 @@
 #pragma once
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <chrono>
 #include <random>
 #include <string>
@@ -51,6 +50,15 @@ constexpr GAME_TYPE MIDGAME = 1;
 constexpr GAME_TYPE ENDGAME = 2;
 constexpr bool PV = true;
 constexpr bool CUT = false;
+
+void assert(bool exp)
+{
+    if (!exp) {
+        std::cout << "\nAssert Failed" << std::endl;
+        system("pause");
+        throw std::exception();
+    }
+}
 
 struct Move {
     POS beg { 0 };

@@ -67,7 +67,7 @@ std::vector<Entry> table {};
 int size { 0 };
 int mask { 0 };
 
-void init(int _size)
+void init(int _size = 8)
 {
     table.clear();
     table.resize(1 << _size);

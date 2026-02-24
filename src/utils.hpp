@@ -102,4 +102,15 @@ constexpr std::array<char, 15> pid_char = []() {
     return s;
 }
 
+[[maybe_unused]] void print_board(MATRIX board)
+{
+    for (int r = 0; r < 10; ++r) {
+        for (int c = 0; c < 9; ++c) {
+            int pos = r * 9 + c;
+            std::cout << int(board[pos]) << ' ';
+        }
+        std::cout << '\n';
+    }
+}
+
 }

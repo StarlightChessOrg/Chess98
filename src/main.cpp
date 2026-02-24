@@ -5,6 +5,5 @@ int main()
 {
     ucci_loop();
     test();
-    system("pause");
     return 0;
 }

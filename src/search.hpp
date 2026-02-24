@@ -9,6 +9,7 @@ constexpr DEPTH Q_CHECKING_DEPTH = 8;
 
 DEPTH distance { 0 };
 
+int node_number { 0 };
 SEARCH_RETS rets {};
 std::vector<int> durations {};
 
@@ -22,6 +23,7 @@ void init(const MATRIX& matrix, TEAM team)
     position::init(matrix, team);
     history::init();
     killer::init();
+    tt::init();
     evaluate::init(matrix);
 }
 
@@ -44,6 +46,7 @@ VL search_q(DEPTH q_depth, VL a, VL b);
 
 VL search(DEPTH depth, VL a, VL b, bool pv)
 {
+    node_number++;
     VL tt_vl = tt::get_vl(position::hashkey, depth, a, b);
     if (tt_vl != INVALID_VL) {
         return tt_vl;
@@ -91,8 +94,7 @@ VL search(DEPTH depth, VL a, VL b, bool pv)
 
 VL search_q(DEPTH q_depth, VL a, VL b)
 {
-    std::cout << q_depth << a << b;
-    return evaluate::evaluate();
+    return evaluate::evaluate() ? a + q_depth : b;
 }
 
 }
