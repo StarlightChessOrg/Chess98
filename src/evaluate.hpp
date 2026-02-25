@@ -1,9 +1,7 @@
 #pragma once
 #include "position.hpp"
 
-namespace evaluate {
-
-std::array<VL, 90> OPEN_ATTACK_KING_PAWN_WEIGHT {
+static std::array<VL, 90> OPEN_ATTACK_KING_PAWN_WEIGHT {
     0, 0, 0, 10037, 10053, 10037, 0, 0, 0,
     0, 0, 0, 10006, 10020, 10006, 0, 0, 0,
     0, 0, 0, 10000, 10000, 10000, 0, 0, 0,
@@ -16,7 +14,7 @@ std::array<VL, 90> OPEN_ATTACK_KING_PAWN_WEIGHT {
     7, 7, 7, 13, 19, 13, 7, 7, 7
 };
 
-std::array<VL, 90> OPEN_DEFEND_KING_PAWN_WEIGHT {
+static std::array<VL, 90> OPEN_DEFEND_KING_PAWN_WEIGHT {
     0, 0, 0, 10033, 10045, 10033, 0, 0, 0,
     0, 0, 0, 10006, 10006, 10006, 0, 0, 0,
     0, 0, 0, 10003, 10003, 10003, 0, 0, 0,
@@ -29,7 +27,7 @@ std::array<VL, 90> OPEN_DEFEND_KING_PAWN_WEIGHT {
     27, 27, 27, 33, 39, 33, 27, 27, 27
 };
 
-std::array<VL, 90> END_ATTACK_KING_PAWN_WEIGHT {
+static std::array<VL, 90> END_ATTACK_KING_PAWN_WEIGHT {
     0, 0, 0, 10003, 10033, 10003, 0, 0, 0,
     0, 0, 0, 10009, 10039, 10009, 0, 0, 0,
     0, 0, 0, 10015, 10045, 10015, 0, 0, 0,
@@ -42,7 +40,7 @@ std::array<VL, 90> END_ATTACK_KING_PAWN_WEIGHT {
     10, 10, 10, 25, 25, 25, 10, 10, 10
 };
 
-std::array<VL, 90> END_DEFEND_KING_PAWN_WEIGHT {
+static std::array<VL, 90> END_DEFEND_KING_PAWN_WEIGHT {
     0, 0, 0, 10003, 10033, 10003, 0, 0, 0,
     0, 0, 0, 10009, 10036, 10009, 0, 0, 0,
     0, 0, 0, 10015, 10039, 10015, 0, 0, 0,
@@ -55,7 +53,7 @@ std::array<VL, 90> END_DEFEND_KING_PAWN_WEIGHT {
     30, 30, 30, 45, 45, 45, 30, 30, 30
 };
 
-std::array<VL, 90> SAFE_GUARD_BISHOP_WEIGHT {
+static std::array<VL, 90> SAFE_GUARD_BISHOP_WEIGHT {
     0, 0, 60, 60, 0, 60, 60, 0, 0,
     0, 0, 0, 0, 69, 0, 0, 0, 0,
     50, 0, 0, 60, 69, 60, 0, 0, 50,
@@ -68,7 +66,7 @@ std::array<VL, 90> SAFE_GUARD_BISHOP_WEIGHT {
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-std::array<VL, 90> DANGER_GUARD_BISHOP_WEIGHT {
+static std::array<VL, 90> DANGER_GUARD_BISHOP_WEIGHT {
     0, 0, 120, 120, 0, 120, 120, 0, 0,
     0, 0, 0, 0, 129, 0, 0, 0, 0,
     108, 0, 0, 120, 129, 120, 0, 0, 108,
@@ -81,7 +79,7 @@ std::array<VL, 90> DANGER_GUARD_BISHOP_WEIGHT {
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-std::array<VL, 90> OPEN_KNIGHT_WEIGHT {
+static std::array<VL, 90> OPEN_KNIGHT_WEIGHT {
     264, 255, 270, 264, 270, 264, 270, 255, 264,
     255, 270, 276, 279, 234, 279, 276, 270, 255,
     270, 276, 282, 285, 276, 285, 282, 276, 270,
@@ -94,7 +92,7 @@ std::array<VL, 90> OPEN_KNIGHT_WEIGHT {
     270, 270, 270, 288, 270, 288, 270, 270, 270
 };
 
-std::array<VL, 90> END_KNIGHT_WEIGHT {
+static std::array<VL, 90> END_KNIGHT_WEIGHT {
     264, 270, 276, 270, 270, 270, 276, 270, 264,
     270, 276, 282, 276, 276, 276, 282, 276, 270,
     276, 282, 288, 288, 288, 288, 288, 282, 276,
@@ -107,7 +105,7 @@ std::array<VL, 90> END_KNIGHT_WEIGHT {
     276, 282, 288, 288, 288, 288, 288, 282, 276
 };
 
-std::array<VL, 90> OPEN_ROOK_WEIGHT {
+static std::array<VL, 90> OPEN_ROOK_WEIGHT {
     582, 618, 612, 636, 600, 636, 612, 618, 582,
     600, 624, 618, 636, 600, 636, 618, 624, 600,
     594, 624, 612, 636, 636, 636, 612, 624, 594,
@@ -120,7 +118,7 @@ std::array<VL, 90> OPEN_ROOK_WEIGHT {
     618, 624, 621, 639, 642, 639, 621, 624, 618
 };
 
-std::array<VL, 90> END_ROOK_WEIGHT {
+static std::array<VL, 90> END_ROOK_WEIGHT {
     540, 540, 540, 546, 552, 546, 540, 540, 540,
     540, 540, 540, 546, 552, 546, 540, 540, 540,
     540, 540, 540, 546, 552, 546, 540, 540, 540,
@@ -133,7 +131,7 @@ std::array<VL, 90> END_ROOK_WEIGHT {
     546, 546, 546, 552, 558, 552, 546, 546, 546
 };
 
-std::array<VL, 90> OPEN_CANNON_WEIGHT {
+static std::array<VL, 90> OPEN_CANNON_WEIGHT {
     288, 288, 291, 297, 297, 297, 291, 288, 288,
     288, 291, 294, 294, 294, 294, 294, 291, 288,
     291, 288, 300, 297, 303, 297, 300, 288, 291,
@@ -146,7 +144,7 @@ std::array<VL, 90> OPEN_CANNON_WEIGHT {
     300, 300, 288, 273, 270, 273, 288, 300, 300
 };
 
-std::array<VL, 90> END_CANNON_WEIGHT {
+static std::array<VL, 90> END_CANNON_WEIGHT {
     300, 300, 300, 312, 318, 312, 300, 300, 300,
     300, 300, 300, 312, 318, 312, 300, 300, 300,
     300, 300, 300, 306, 312, 306, 300, 300, 300,
@@ -158,58 +156,3 @@ std::array<VL, 90> END_CANNON_WEIGHT {
     300, 300, 300, 300, 300, 300, 300, 300, 300,
     300, 300, 300, 300, 300, 300, 300, 300, 300
 };
-
-constexpr std::array<std::array<VL, 90>, 7> pid_vl_open {
-
-};
-constexpr std::array<int, 15> pid_vl {
-    1, 3, 7, 3, 2, 2, 0, 0, 0, 2, 2, 3, 7, 3, 1
-};
-
-constexpr int OPENGAME_MIN_VL = 60;
-constexpr int MIDGAME_MIN_VL = 40;
-constexpr int ADVANCED_VL = 5;
-
-VL vl_total { 0 };
-
-GAME_TYPE get_game_type(const PIECES& pieces)
-{
-    int total = 0;
-    for (const Piece p : pieces) {
-        if (p.live) {
-            total += pid_vl[static_cast<size_t>(p.pid + 7)];
-        }
-    }
-    if (total >= OPENGAME_MIN_VL) {
-        return OPENGAME;
-    } else if (total >= MIDGAME_MIN_VL) {
-        return MIDGAME;
-    } else {
-        return ENDGAME;
-    }
-}
-
-void init(const MATRIX& matrix)
-{
-    for (PID p : matrix) {
-        if (p != 0) {
-            
-        }
-    }
-}
-
-void update() {
-    // TODO:
-}
-
-void undo_update() {
-    // TODO:
-}
-
-VL evaluate()
-{
-    // TODO: implement evaluation function
-    return 0;
-}
-
-}

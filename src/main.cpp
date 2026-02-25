@@ -3,7 +3,5 @@
 
 int main()
 {
-    ucci_loop();
-    test();
     return 0;
 }

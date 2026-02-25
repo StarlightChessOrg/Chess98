@@ -71,7 +71,7 @@ constexpr std::array<char, 15> pid_char = []() {
     for (int r = 0; r < 10; r++) {
         int empty = 0;
         for (int c = 0; c < 9; c++) {
-            PID pid = m[r * 9 + c];
+            PTYPE pid = m[r * 9 + c];
             if (pid == 0) {
                 empty++;
             } else {

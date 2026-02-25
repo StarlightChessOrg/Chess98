@@ -3,23 +3,28 @@
 
 namespace history {
 
-std::array<std::array<unsigned int, 90>, 90> r_table {};
-std::array<std::array<unsigned int, 90>, 90> b_table {};
+static std::array<std::array<unsigned int, 90>, 90> r_table {};
+static std::array<std::array<unsigned int, 90>, 90> b_table {};
 
 void init()
 {
-    r_table = b_table = {};
+    r_table.fill({});
+    b_table.fill({});
 }
 
-void update(Move move, DEPTH d)
+void update(Move move, TEAM team, DEPTH depth)
 {
-    (team_now() == R ? r_table : b_table)[move.beg][move.end] += d * d;
+    if (team == R) {
+        r_table[move.beg][move.end] += depth * depth;
+    } else {
+        b_table[move.beg][move.end] += depth * depth;
+    }
 }
 
-void sort(MOVES& moves, TEAM team)
+void sort_moves(MOVE_LIST& moves, TEAM team)
 {
     const auto& table = team == R ? r_table : b_table;
-    std::sort(moves.begin(), moves.end(), [&](const Move& a, const Move& b) {
+    std::sort(moves.begin(), moves.end(), [&](Move a, Move b) {
         return table[a.beg][a.end] > table[b.beg][b.end];
     });
 }
@@ -32,7 +37,7 @@ std::array<std::array<Move, 2>, 128> table {};
 
 void init()
 {
-    table = {};
+    table.fill({});
 }
 
 void update(Move move, DEPTH d)
@@ -70,7 +75,7 @@ int mask { 0 };
 void init(int _size = 8)
 {
     table.clear();
-    table.resize(1 << _size);
+    table.resize(1ll << _size);
     size = _size;
     mask = (1 << _size) - 1;
 }
@@ -117,8 +122,7 @@ VL get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 
 Move get_move(HASH hashkey)
 {
-    const Entry& e = table[hashkey & mask];
-    return e.move;
+    return table[hashkey & mask].move;
 }
 
 }

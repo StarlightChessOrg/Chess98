@@ -1,19 +1,20 @@
 #pragma once
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <chrono>
+#include <iostream>
 #include <random>
 #include <string>
 #include <utility>
 #include <vector>
-#include <iostream>
 
 struct Move;
 struct Piece;
 struct Timer;
 using POS = unsigned char;
+using PTYPE = char;
 using PID = char;
-using PINDEX = unsigned char;
 using TEAM = char;
 using DEPTH = unsigned char;
 using VL = short;
@@ -21,57 +22,44 @@ using GAME_TYPE = unsigned char;
 using HASH = long long;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
-using MATRIX = std::array<PID, 90>;
-using MOVES = std::vector<Move>;
-using PIECES = std::vector<Piece>;
-using PINDECES = std::vector<PINDEX>;
-using SEARCH_RETS = std::vector<SEARCH_RET>;
-constexpr PID R_KING = 1;
-constexpr PID R_ADVISOR = 2;
-constexpr PID R_BISHOP = 3;
-constexpr PID R_KNIGHT = 4;
-constexpr PID R_ROOK = 5;
-constexpr PID R_CANNON = 6;
-constexpr PID R_PAWN = 7;
-constexpr PID B_KING = -1;
-constexpr PID B_ADVISOR = -2;
-constexpr PID B_BISHOP = -3;
-constexpr PID B_KNIGHT = -4;
-constexpr PID B_ROOK = -5;
-constexpr PID B_CANNON = -6;
-constexpr PID B_PAWN = -7;
+using MATRIX = std::array<PTYPE, 90>;
+using MOVE_LIST = std::vector<Move>;
+using PTYPE_LIST = std::vector<PTYPE>;
+using PIDPOS_LIST = std::vector<POS>;
+using PTYPEPOS_LIST = std::vector<std::vector<POS>>;
+HASH gen_random();
+HASH hashkey_on(PTYPE ptype, POS pos);
+constexpr PTYPE R_KING = 1;
+constexpr PTYPE R_ADVISOR = 2;
+constexpr PTYPE R_BISHOP = 3;
+constexpr PTYPE R_KNIGHT = 4;
+constexpr PTYPE R_ROOK = 5;
+constexpr PTYPE R_CANNON = 6;
+constexpr PTYPE R_PAWN = 7;
+constexpr PTYPE B_KING = -1;
+constexpr PTYPE B_ADVISOR = -2;
+constexpr PTYPE B_BISHOP = -3;
+constexpr PTYPE B_KNIGHT = -4;
+constexpr PTYPE B_ROOK = -5;
+constexpr PTYPE B_CANNON = -6;
+constexpr PTYPE B_PAWN = -7;
 constexpr TEAM R = 1;
 constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
-constexpr GAME_TYPE OPENGAME = 0;
-constexpr GAME_TYPE MIDGAME = 1;
-constexpr GAME_TYPE ENDGAME = 2;
-constexpr bool PV = true;
-constexpr bool CUT = false;
-
-void assert(bool exp)
-{
-    if (!exp) {
-        std::cout << "\nAssert Failed" << std::endl;
-        system("pause");
-        throw std::exception();
-    }
-}
+const HASH SIDE_KEY = gen_random();
 
 struct Move {
     POS beg { 0 };
     POS end { 0 };
 
     Move() = default;
-    Move(int _beg, int _end)
-        : beg(static_cast<POS>(_beg))
-        , end(static_cast<POS>(_end))
+    Move(int beg, int end)
+        : beg(static_cast<POS>(beg))
+        , end(static_cast<POS>(end))
     {
-        assert(_beg != _end);
-        assert(0 <= _beg && _beg <= 89);
-        assert(0 <= _end && _end <= 89);
+        assert(beg != end && beg < 90 && end < 90);
     }
     bool operator==(Move m) const
     {
@@ -88,21 +76,17 @@ struct Move {
 };
 
 struct Piece {
-    PID pid { 0 };
-    PINDEX pindex { 0 };
+    PTYPE ptype { 0 };
     POS pos { 0 };
-    bool live { false };
+    PID pid { 0 };
 
     Piece() = default;
-    Piece(int _pid, int _pindex, int _pos)
-        : pid(static_cast<PID>(_pid))
-        , pindex(static_cast<PINDEX>(_pindex))
-        , pos(static_cast<POS>(_pos))
-        , live(true)
+    Piece(int ptype, int pos, int pid)
+        : ptype(static_cast<PTYPE>(ptype))
+        , pos(static_cast<POS>(pos))
+        , pid(static_cast<PID>(pid))
     {
-        assert(-7 <= _pid && _pid <= 7 && _pid != 0);
-        assert(0 <= _pindex && _pindex <= 33);
-        assert(0 <= _pos && _pos <= 89);
+        assert(-7 <= ptype && ptype <= 7 && ptype != 0 && pos < 90);
     }
 };
 
@@ -130,38 +114,29 @@ struct Timer {
     }
 };
 
-namespace hash {
-
-std::mt19937_64 rng(2820795095);
-std::uniform_int_distribution<long long> dis(
-    std::numeric_limits<long long>::min(),
-    std::numeric_limits<long long>::max());
-
-HASH gen_hash()
+HASH gen_random()
 {
-    return dis(rng);
+    static std::mt19937_64 rand_engine(2820795095);
+    static std::uniform_int_distribution<long long> gen_rand {
+        std::numeric_limits<long long>::min(),
+        std::numeric_limits<long long>::max()
+    };
+    return gen_rand(rand_engine);
 }
 
-HASH SIDE_KEY = gen_hash();
-
-std::array<std::array<HASH, 90>, 15> KEYS = []() {
-   std::array<std::array<HASH, 90>, 15> ret {};
-   for (std::array<HASH, 90>& m : ret) {
-       for (HASH& h : m) {
-           h = gen_hash();
-       }
-   }
-   ret[7].fill(0);
-   return ret;
-}();
-
-HASH on(PID pid, POS pos)
+HASH hashkey_on(PTYPE ptype, POS pos)
 {
-    assert(-7 <= pid && pid <= 7);
-    assert(pos < 90);
-    const auto k = static_cast<size_t>(pid + 7);
-    return KEYS[k][pos];
-    return 0ll;
-}
-
+    assert(-7 <= ptype && ptype <= 7 && pos < 90);
+    static const std::array<std::array<HASH, 90>, 15> HASH_KEYS = []() {
+        std::array<std::array<HASH, 90>, 15> ret {};
+        for (std::array<HASH, 90>& m : ret) {
+            for (HASH& h : m) {
+                h = gen_random();
+            }
+        }
+        ret[7].fill(0);
+        return ret;
+    }();
+    ptype += 7;
+    return HASH_KEYS[ptype][pos];
 }
