@@ -39,7 +39,7 @@ void position_init(const MATRIX& board, TEAM team)
             pos_list_r_.emplace_back(i);
         } else if (board[i] < 0 && board[i] != B_KING){
             pos_pid_b_[i] = static_cast<PID>(pos_list_b_.size());
-            pos_list_r_.emplace_back(i);
+            pos_list_b_.emplace_back(i);
         }
     }
     // vector reservations
@@ -51,7 +51,7 @@ void position_init(const MATRIX& board, TEAM team)
 // do move
 void position_move(Move move)
 {
-    assert(move && g_board[move.beg]);
+    assert(move && g_board[move.beg] * g_team > 0);
     assert(!pos_list_r_.empty() && !pos_list_b_.empty());
     history_moves_.emplace_back(move);
     history_captures_.emplace_back(g_board[move.end]);

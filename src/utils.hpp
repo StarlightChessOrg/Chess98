@@ -101,8 +101,10 @@ constexpr std::array<char, 15> pid_char = []() {
     return s;
 }
 
-[[maybe_unused]] void print_board(MATRIX board)
+template <typename T>
+[[maybe_unused]] void print_matrix(const std::array<T, 90>& board)
 {
+    std::cout << "\n";
     for (int r = 0; r < 10; ++r) {
         for (int c = 0; c < 9; ++c) {
             int pos = r * 9 + c;
@@ -110,6 +112,7 @@ constexpr std::array<char, 15> pid_char = []() {
         }
         std::cout << '\n';
     }
+    std::cout << std::endl;
 }
 
 template <typename T>
