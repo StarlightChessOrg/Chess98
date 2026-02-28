@@ -1,7 +1,7 @@
 #pragma once
 #include "position.hpp"
 
-static std::array<VL, 90> OPEN_ATTACK_KING_PAWN_WEIGHT {
+constexpr std::array<VL, 90> OPEN_ATTACK_KING_PAWN_ {
     0, 0, 0, 10037, 10053, 10037, 0, 0, 0,
     0, 0, 0, 10006, 10020, 10006, 0, 0, 0,
     0, 0, 0, 10000, 10000, 10000, 0, 0, 0,
@@ -14,7 +14,7 @@ static std::array<VL, 90> OPEN_ATTACK_KING_PAWN_WEIGHT {
     7, 7, 7, 13, 19, 13, 7, 7, 7
 };
 
-static std::array<VL, 90> OPEN_DEFEND_KING_PAWN_WEIGHT {
+constexpr std::array<VL, 90> OPEN_DEFEND_KING_PAWN_ {
     0, 0, 0, 10033, 10045, 10033, 0, 0, 0,
     0, 0, 0, 10006, 10006, 10006, 0, 0, 0,
     0, 0, 0, 10003, 10003, 10003, 0, 0, 0,
@@ -27,7 +27,7 @@ static std::array<VL, 90> OPEN_DEFEND_KING_PAWN_WEIGHT {
     27, 27, 27, 33, 39, 33, 27, 27, 27
 };
 
-static std::array<VL, 90> END_ATTACK_KING_PAWN_WEIGHT {
+constexpr std::array<VL, 90> END_ATTACK_KING_PAWN_ {
     0, 0, 0, 10003, 10033, 10003, 0, 0, 0,
     0, 0, 0, 10009, 10039, 10009, 0, 0, 0,
     0, 0, 0, 10015, 10045, 10015, 0, 0, 0,
@@ -40,7 +40,7 @@ static std::array<VL, 90> END_ATTACK_KING_PAWN_WEIGHT {
     10, 10, 10, 25, 25, 25, 10, 10, 10
 };
 
-static std::array<VL, 90> END_DEFEND_KING_PAWN_WEIGHT {
+constexpr std::array<VL, 90> END_DEFEND_KING_PAWN_ {
     0, 0, 0, 10003, 10033, 10003, 0, 0, 0,
     0, 0, 0, 10009, 10036, 10009, 0, 0, 0,
     0, 0, 0, 10015, 10039, 10015, 0, 0, 0,
@@ -53,7 +53,7 @@ static std::array<VL, 90> END_DEFEND_KING_PAWN_WEIGHT {
     30, 30, 30, 45, 45, 45, 30, 30, 30
 };
 
-static std::array<VL, 90> SAFE_GUARD_BISHOP_WEIGHT {
+constexpr std::array<VL, 90> SAFE_GUARD_BISHOP_ {
     0, 0, 60, 60, 0, 60, 60, 0, 0,
     0, 0, 0, 0, 69, 0, 0, 0, 0,
     50, 0, 0, 60, 69, 60, 0, 0, 50,
@@ -66,7 +66,7 @@ static std::array<VL, 90> SAFE_GUARD_BISHOP_WEIGHT {
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static std::array<VL, 90> DANGER_GUARD_BISHOP_WEIGHT {
+constexpr std::array<VL, 90> DANGER_GUARD_BISHOP_ {
     0, 0, 120, 120, 0, 120, 120, 0, 0,
     0, 0, 0, 0, 129, 0, 0, 0, 0,
     108, 0, 0, 120, 129, 120, 0, 0, 108,
@@ -79,7 +79,7 @@ static std::array<VL, 90> DANGER_GUARD_BISHOP_WEIGHT {
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static std::array<VL, 90> OPEN_KNIGHT_WEIGHT {
+constexpr std::array<VL, 90> OPEN_KNIGHT_ {
     264, 255, 270, 264, 270, 264, 270, 255, 264,
     255, 270, 276, 279, 234, 279, 276, 270, 255,
     270, 276, 282, 285, 276, 285, 282, 276, 270,
@@ -92,7 +92,7 @@ static std::array<VL, 90> OPEN_KNIGHT_WEIGHT {
     270, 270, 270, 288, 270, 288, 270, 270, 270
 };
 
-static std::array<VL, 90> END_KNIGHT_WEIGHT {
+constexpr std::array<VL, 90> END_KNIGHT_ {
     264, 270, 276, 270, 270, 270, 276, 270, 264,
     270, 276, 282, 276, 276, 276, 282, 276, 270,
     276, 282, 288, 288, 288, 288, 288, 282, 276,
@@ -105,7 +105,7 @@ static std::array<VL, 90> END_KNIGHT_WEIGHT {
     276, 282, 288, 288, 288, 288, 288, 282, 276
 };
 
-static std::array<VL, 90> OPEN_ROOK_WEIGHT {
+constexpr std::array<VL, 90> OPEN_ROOK_ {
     582, 618, 612, 636, 600, 636, 612, 618, 582,
     600, 624, 618, 636, 600, 636, 618, 624, 600,
     594, 624, 612, 636, 636, 636, 612, 624, 594,
@@ -118,7 +118,7 @@ static std::array<VL, 90> OPEN_ROOK_WEIGHT {
     618, 624, 621, 639, 642, 639, 621, 624, 618
 };
 
-static std::array<VL, 90> END_ROOK_WEIGHT {
+constexpr std::array<VL, 90> END_ROOK_ {
     540, 540, 540, 546, 552, 546, 540, 540, 540,
     540, 540, 540, 546, 552, 546, 540, 540, 540,
     540, 540, 540, 546, 552, 546, 540, 540, 540,
@@ -131,7 +131,7 @@ static std::array<VL, 90> END_ROOK_WEIGHT {
     546, 546, 546, 552, 558, 552, 546, 546, 546
 };
 
-static std::array<VL, 90> OPEN_CANNON_WEIGHT {
+constexpr std::array<VL, 90> OPEN_CANNON_ {
     288, 288, 291, 297, 297, 297, 291, 288, 288,
     288, 291, 294, 294, 294, 294, 294, 291, 288,
     291, 288, 300, 297, 303, 297, 300, 288, 291,
@@ -144,7 +144,7 @@ static std::array<VL, 90> OPEN_CANNON_WEIGHT {
     300, 300, 288, 273, 270, 273, 288, 300, 300
 };
 
-static std::array<VL, 90> END_CANNON_WEIGHT {
+constexpr std::array<VL, 90> END_CANNON_ {
     300, 300, 300, 312, 318, 312, 300, 300, 300,
     300, 300, 300, 312, 318, 312, 300, 300, 300,
     300, 300, 300, 306, 312, 306, 300, 300, 300,
@@ -156,3 +156,12 @@ static std::array<VL, 90> END_CANNON_WEIGHT {
     300, 300, 300, 300, 300, 300, 300, 300, 300,
     300, 300, 300, 300, 300, 300, 300, 300, 300
 };
+
+VL evaluate()
+{
+    VL ret { 0 };
+    for (const PTYPE p : g_board) {
+        ret += p;
+    }
+    return ret;
+}
