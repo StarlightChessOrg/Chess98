@@ -9,12 +9,14 @@
 #include <utility>
 #include <vector>
 
+// defines
+
 struct Move;
 struct Piece;
 struct Timer;
 using POS = unsigned char;
 using PTYPE = char;
-using PID = char;
+using PID = unsigned char;
 using TEAM = char;
 using DEPTH = unsigned char;
 using VL = short;
@@ -23,12 +25,10 @@ using HASH = long long;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
-using MOVE_LIST = std::vector<Move>;
-using PTYPE_LIST = std::vector<PTYPE>;
-using PIDPOS_LIST = std::vector<POS>;
-using PTYPEPOS_LIST = std::vector<std::vector<POS>>;
-HASH gen_random();
-HASH hashkey_on(PTYPE ptype, POS pos);
+using FLAG = char;
+constexpr FLAG EXACT = 0;
+constexpr FLAG ALPHA = 1;
+constexpr FLAG BETA = 2;
 constexpr PTYPE R_KING = 1;
 constexpr PTYPE R_ADVISOR = 2;
 constexpr PTYPE R_BISHOP = 3;
@@ -48,7 +48,8 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
-const HASH SIDE_KEY = gen_random();
+
+// move
 
 struct Move {
     POS beg { 0 };
@@ -61,19 +62,33 @@ struct Move {
     {
         assert(beg != end && beg < 90 && end < 90);
     }
-    bool operator==(Move m) const
+    bool operator==(Move m) const noexcept
     {
         return beg == m.beg && end == m.end;
     }
-    bool operator!=(Move m) const
+    bool operator!=(Move m) const noexcept
     {
-        return !(*this == m);
+        return beg != m.beg || end != m.end;
     }
-    operator bool() const
+    operator bool() const noexcept
     {
         return beg != end;
     }
 };
+
+// tt entry
+
+struct TTEntry {
+    HASH key { 0 };
+    FLAG flag { 0 };
+    VL vl { 0 };
+    DEPTH depth { 0 };
+    Move move {};
+
+    TTEntry() = default;
+};
+
+// piece
 
 struct Piece {
     PTYPE ptype { 0 };
@@ -90,6 +105,8 @@ struct Piece {
     }
 };
 
+// timer
+
 struct Timer {
     std::chrono::steady_clock::time_point beg;
     std::chrono::milliseconds limit;
@@ -101,11 +118,11 @@ struct Timer {
     {
         assert(_limit > 0);
     }
-    bool time_up() const
+    bool time_up() const noexcept
     {
         return std::chrono::steady_clock::now() - beg >= limit;
     }
-    int duration() const
+    int duration() const noexcept
     {
         using namespace std::chrono;
         const auto duration = steady_clock::now() - beg;
@@ -114,7 +131,9 @@ struct Timer {
     }
 };
 
-HASH gen_random()
+// hash
+
+static long long gen_random_()
 {
     static std::mt19937_64 rand_engine(2820795095);
     static std::uniform_int_distribution<long long> gen_rand {
@@ -124,19 +143,22 @@ HASH gen_random()
     return gen_rand(rand_engine);
 }
 
+static const std::array<std::array<HASH, 90>, 15> HASH_KEYS_ = []() {
+    std::array<std::array<HASH, 90>, 15> ret {};
+    for (std::array<HASH, 90>& m : ret) {
+        for (HASH& h : m) {
+            h = gen_random_();
+        }
+    }
+    ret[7].fill(0);
+    return ret;
+}();
+
+const HASH SIDE_KEY = gen_random_();
+
 HASH hashkey_on(PTYPE ptype, POS pos)
 {
     assert(-7 <= ptype && ptype <= 7 && pos < 90);
-    static const std::array<std::array<HASH, 90>, 15> HASH_KEYS = []() {
-        std::array<std::array<HASH, 90>, 15> ret {};
-        for (std::array<HASH, 90>& m : ret) {
-            for (HASH& h : m) {
-                h = gen_random();
-            }
-        }
-        ret[7].fill(0);
-        return ret;
-    }();
     ptype += 7;
-    return HASH_KEYS[ptype][pos];
+    return HASH_KEYS_[ptype][pos];
 }

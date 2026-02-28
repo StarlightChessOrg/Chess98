@@ -1,7 +1,5 @@
 #include "base.hpp"
 
-namespace utils {
-
 constexpr std::array<char, 128> char_pid = []() {
     std::array<char, 128> arr {};
     arr['K'] = R_KING;
@@ -71,15 +69,16 @@ constexpr std::array<char, 15> pid_char = []() {
     for (int r = 0; r < 10; r++) {
         int empty = 0;
         for (int c = 0; c < 9; c++) {
-            PTYPE pid = m[r * 9 + c];
-            if (pid == 0) {
+            const int k = r * 9 + c;
+            const PTYPE ptype_i = m[k] + 7;
+            if (ptype_i == 7) {
                 empty++;
             } else {
                 if (empty > 0) {
                     fen += char('0' + empty);
                     empty = 0;
                 }
-                fen += pid_char[pid + 7];
+                fen += pid_char[ptype_i];
             }
         }
         if (empty > 0) {
@@ -107,10 +106,20 @@ constexpr std::array<char, 15> pid_char = []() {
     for (int r = 0; r < 10; ++r) {
         for (int c = 0; c < 9; ++c) {
             int pos = r * 9 + c;
-            std::cout << int(board[pos]) << ' ';
+            std::cout << static_cast<int>(board[pos]) << '\t';
         }
         std::cout << '\n';
     }
 }
 
+template <typename T>
+[[maybe_unused]] void print_vector(std::vector<T> vec)
+{
+    std::cout << "\n[vector] { ";
+    for (T v : vec) {
+        std::cout << static_cast<int>(v);
+        std::cout << ", ";
+    }
+    std::cout << "}";
+    std::cout << std::endl;
 }
