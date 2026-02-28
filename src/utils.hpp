@@ -1,6 +1,6 @@
 #include "base.hpp"
 
-constexpr std::array<char, 128> char_pid = []() {
+const std::array<char, 128> char_pid_ = []() {
     std::array<char, 128> arr {};
     arr['K'] = R_KING;
     arr['A'] = R_ADVISOR;
@@ -27,7 +27,7 @@ constexpr std::array<char, 128> char_pid = []() {
     return arr;
 }();
 
-constexpr std::array<char, 15> pid_char = []() {
+const std::array<char, 15> pid_char_ = []() {
     std::array<char, 15> arr {};
     arr[R_KING + 7] = 'K';
     arr[R_ADVISOR + 7] = 'A';
@@ -46,7 +46,7 @@ constexpr std::array<char, 15> pid_char = []() {
     return arr;
 }();
 
-[[maybe_unused]] MATRIX fen_to_matrix(const std::string& fen)
+MATRIX utils_fen_to_matrix(const std::string& fen)
 {
     MATRIX ret {};
     int i = 0;
@@ -56,13 +56,13 @@ constexpr std::array<char, 15> pid_char = []() {
         } else if (c >= '1' && c <= '9') {
             i += (c - '0');
         } else if (c != '/') {
-            ret[i++] = char_pid[static_cast<unsigned char>(c)];
+            ret[i++] = char_pid_[static_cast<unsigned char>(c)];
         }
     }
     return ret;
 }
 
-[[maybe_unused]] std::string matrix_to_fen(const MATRIX& m)
+std::string utils_matrix_to_fen(const MATRIX& m)
 {
     std::string fen;
     fen.reserve(100);
@@ -78,7 +78,7 @@ constexpr std::array<char, 15> pid_char = []() {
                     fen += char('0' + empty);
                     empty = 0;
                 }
-                fen += pid_char[ptype_i];
+                fen += pid_char_[ptype_i];
             }
         }
         if (empty > 0) {
@@ -91,7 +91,7 @@ constexpr std::array<char, 15> pid_char = []() {
     return fen;
 }
 
-[[maybe_unused]] std::string to_ucci_move(Move move)
+std::string utils_to_ucci_move(Move move)
 {
     std::string s { "" };
     s += 'a' + move.beg / 9;
@@ -102,7 +102,7 @@ constexpr std::array<char, 15> pid_char = []() {
 }
 
 template <typename T>
-[[maybe_unused]] void print_matrix(const std::array<T, 90>& board)
+void utils_print_matrix(const std::array<T, 90>& board)
 {
     std::cout << "\n";
     for (int r = 0; r < 10; ++r) {
@@ -116,7 +116,7 @@ template <typename T>
 }
 
 template <typename T>
-[[maybe_unused]] void print_vector(std::vector<T> vec)
+void utils_print_vector(std::vector<T> vec)
 {
     std::cout << "\n[vector] { ";
     for (T v : vec) {

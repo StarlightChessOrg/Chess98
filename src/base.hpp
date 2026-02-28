@@ -133,7 +133,7 @@ struct Timer {
 
 // hash
 
-static long long gen_random_()
+long long gen_random_()
 {
     static std::mt19937_64 rand_engine(2820795095);
     static std::uniform_int_distribution<long long> gen_rand {
@@ -143,7 +143,7 @@ static long long gen_random_()
     return gen_rand(rand_engine);
 }
 
-static const std::array<std::array<HASH, 90>, 15> HASH_KEYS_ = []() {
+const std::array<std::array<HASH, 90>, 15> HASH_KEYS_ = []() {
     std::array<std::array<HASH, 90>, 15> ret {};
     for (std::array<HASH, 90>& m : ret) {
         for (HASH& h : m) {

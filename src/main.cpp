@@ -16,25 +16,25 @@ int main()
         0, 0, 0, 0, R_KING, 0, 0, 0, 0
     };
     position_init(test_matrix, R);
-    print_matrix<PTYPE>(g_board);
-    print_matrix<PID>(pos_pid_r_);
-    print_matrix<PID>(pos_pid_b_);
-    print_vector<POS>(pos_list_r_);
-    print_vector<POS>(pos_list_b_);
+    utils_print_matrix<PTYPE>(g_board);
+    utils_print_matrix<PID>(pos_pid_r_);
+    utils_print_matrix<PID>(pos_pid_b_);
+    utils_print_vector<POS>(pos_list_r_);
+    utils_print_vector<POS>(pos_list_b_);
 
     position_move(Move(85, 84));
-    print_matrix<PTYPE>(g_board);
-    print_matrix<PID>(pos_pid_r_);
-    print_matrix<PID>(pos_pid_b_);
-    print_vector<POS>(pos_list_r_);
-    print_vector<POS>(pos_list_b_);
+    utils_print_matrix<PTYPE>(g_board);
+    utils_print_matrix<PID>(pos_pid_r_);
+    utils_print_matrix<PID>(pos_pid_b_);
+    utils_print_vector<POS>(pos_list_r_);
+    utils_print_vector<POS>(pos_list_b_);
 
     position_undo();
-    print_matrix<PTYPE>(g_board);
-    print_matrix<PID>(pos_pid_r_);
-    print_matrix<PID>(pos_pid_b_);
-    print_vector<POS>(pos_list_r_);
-    print_vector<POS>(pos_list_b_);
+    utils_print_matrix<PTYPE>(g_board);
+    utils_print_matrix<PID>(pos_pid_r_);
+    utils_print_matrix<PID>(pos_pid_b_);
+    utils_print_vector<POS>(pos_list_r_);
+    utils_print_vector<POS>(pos_list_b_);
 
     return 0;
 }
