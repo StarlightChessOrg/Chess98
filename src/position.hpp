@@ -111,3 +111,15 @@ void position_undo()
     g_hashkey = hashkey;
     g_team = -g_team;
 }
+
+// position util same_team
+bool same_team(PTYPE p)
+{
+    return g_team * p > 0;
+}
+
+// position util piece_on
+PTYPE piece_on(POS p)
+{
+    return g_board[p];
+}
