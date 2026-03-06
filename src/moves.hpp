@@ -75,7 +75,37 @@ std::vector<Move> gen_bishop_(POS pos)
     return ret;
 }
 
-std::pair<std::vector<Move>, std::vector<Move>> gen_knight(POS pos)
+// knight moves
+template <bool CAPTURE>
+std::vector<Move> gen_knight_(POS pos)
 {
-    return {};
+    std::vector<Move> ret {};
+    ret.reserve(8);
+    if (pos / 9 < 2) {
+        
+    }
+}
+
+// rook moves
+template <bool CAPTURE>
+std::vector<Move> gen_rook_(POS pos)
+{
+    std::vector<Move> ret {};
+    ret.reserve(17);
+}
+
+// cannon moves
+template <bool CAPTURE>
+std::vector<Move> gen_cannon_(POS pos)
+{
+    std::vector<Move> ret {};
+    ret.reserve(17);
+}
+
+// pawn moves
+template <bool CAPTURE>
+std::vector<Move> gen_pawn(POS pos)
+{
+    std::vector<Move> ret {};
+    ret.reserve(3);
 }

@@ -12,7 +12,6 @@
 // defines
 
 struct Move;
-struct Piece;
 struct Timer;
 using POS = unsigned char;
 using PTYPE = char;
@@ -48,6 +47,8 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
+constexpr bool CAPTURE = false;
+constexpr bool NORMAL = true;
 
 // move
 
@@ -74,6 +75,10 @@ struct Move {
     {
         return beg != end;
     }
+    operator int() const noexcept
+    {
+        return beg * 100 + end;
+    }
 };
 
 // tt entry
@@ -86,23 +91,6 @@ struct TTEntry {
     Move move {};
 
     TTEntry() = default;
-};
-
-// piece
-
-struct Piece {
-    PTYPE ptype { 0 };
-    POS pos { 0 };
-    PID pid { 0 };
-
-    Piece() = default;
-    Piece(int ptype, int pos, int pid)
-        : ptype(static_cast<PTYPE>(ptype))
-        , pos(static_cast<POS>(pos))
-        , pid(static_cast<PID>(pid))
-    {
-        assert(-7 <= ptype && ptype <= 7 && ptype != 0 && pos < 90);
-    }
 };
 
 // timer

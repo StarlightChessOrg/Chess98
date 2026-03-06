@@ -107,3 +107,7 @@ Move tt_get_move(HASH hashkey)
 {
     return tt_table[hashkey & mask].move;
 }
+
+// capture
+
+

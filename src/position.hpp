@@ -118,6 +118,12 @@ bool same_team(PTYPE p)
     return g_team * p > 0;
 }
 
+// position util opposite
+bool opposite(PTYPE p)
+{
+    return g_team * p < 0;
+}
+
 // position util piece_on
 PTYPE piece_on(POS p)
 {

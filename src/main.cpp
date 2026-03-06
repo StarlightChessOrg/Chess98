@@ -17,25 +17,6 @@ int main()
     };
 
     position_init(test_matrix, R);
-    utils_print_matrix<PTYPE>(g_board);
-    utils_print_matrix<PID>(pos_pid_r_);
-    utils_print_matrix<PID>(pos_pid_b_);
-    utils_print_vector<POS>(pos_list_r_);
-    utils_print_vector<POS>(pos_list_b_);
-
-    position_move(Move(64, 65));
-    utils_print_matrix<PTYPE>(g_board);
-    utils_print_matrix<PID>(pos_pid_r_);
-    utils_print_matrix<PID>(pos_pid_b_);
-    utils_print_vector<POS>(pos_list_r_);
-    utils_print_vector<POS>(pos_list_b_);
-
-    position_undo();
-    utils_print_matrix<PTYPE>(g_board);
-    utils_print_matrix<PID>(pos_pid_r_);
-    utils_print_matrix<PID>(pos_pid_b_);
-    utils_print_vector<POS>(pos_list_r_);
-    utils_print_vector<POS>(pos_list_b_);
 
     return 0;
 }
