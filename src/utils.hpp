@@ -123,3 +123,28 @@ void utils_print_vector(std::vector<T> vec)
     std::cout << "}";
     std::cout << std::endl;
 }
+
+template <int n>
+void utils_print_bitline(std::array<unsigned short, n> bitline)
+{
+    std::cout << "\n[bitline]\n";
+    for (int col = 0; col < n; col++) {
+        const short mask = bitline[col];
+        std::cout << "col " << col << ": ";
+        for (int row = n; row >= 0; --row) {
+            std::cout << ((mask >> row) & 1);
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::endl;
+}
+
+void utils_print_bitline8(std::array<unsigned short, 9> bitline8)
+{
+    utils_print_bitline<9>(bitline8);
+}
+
+void utils_print_bitline9(std::array<unsigned short, 10> bitline9)
+{
+    utils_print_bitline<10>(bitline9);
+}

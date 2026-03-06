@@ -102,7 +102,7 @@ std::vector<Move> gen_knight_(POS pos)
             ret.emplace_back(pos, pos - 11);
         }
         if (pos / 9 != 9 && opposite<GEN_CAPTURE>(pos + 7)) {
-            ret.emplace_back(pos, pos + 7)
+            ret.emplace_back(pos, pos + 7);
         }
     }
     if (pos % 9 < 7 && !piece_on(pos + 1)) {
@@ -138,5 +138,17 @@ std::vector<Move> gen_pawn(POS pos)
 {
     std::vector<Move> ret {};
     ret.reserve(3);
-    
+    const int target = pos - 9 * g_team;
+    if (0 <= target && target < 90 && opposite<GEN_CAPTURE>(target)) {
+        ret.emplace_back(pos, target);
+    }
+    if ((pos / 9 < 5 && g_team == R) || (pos / 9 > 4 && g_team == B)) {
+        if (pos % 9 != 0 && opposite<GEN_CAPTURE>(pos - 1)) {
+            ret.emplace_back(pos, pos - 1);
+        }
+        if (pos % 9 != 8 && opposite<GEN_CAPTURE>(pos + 1)) {
+            ret.emplace_back(pos, pos + 1);
+        }
+    }
+    return ret;
 }

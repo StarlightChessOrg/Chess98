@@ -14,6 +14,8 @@ std::vector<POS> pos_list_r_ {};
 std::vector<POS> pos_list_b_ {};
 std::array<PID, 90> pos_pid_r_ {};
 std::array<PID, 90> pos_pid_b_ {};
+std::array<unsigned short, 9> bitline8_ {};
+std::array<unsigned short, 10> bitline9_ {};
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -21,7 +23,7 @@ void position_init(const MATRIX& board, TEAM team)
     // variables init
     g_board = board;
     g_team = team;
-    // init king pos first
+    // init king pos first in order to keep it in the 1st position
     for (int i = 0; i < 90; i++) {
         if (board[i] == R_KING) {
             pos_pid_r_[i] = 0;
@@ -34,10 +36,15 @@ void position_init(const MATRIX& board, TEAM team)
     // init pos list and hash
     for (int i = 0; i < 90; i++) {
         g_hashkey ^= hashkey_on(board[i], i);
+        if (board[i] != 0) {
+            bitline8_[i % 9] |= 1 << (i / 9);
+            bitline9_[i / 9] |= 1 << (i % 9);
+        }
         if (board[i] > 0 && board[i] != R_KING) {
             pos_pid_r_[i] = static_cast<PID>(pos_list_r_.size());
             pos_list_r_.emplace_back(i);
-        } else if (board[i] < 0 && board[i] != B_KING){
+        }
+        if (board[i] < 0 && board[i] != B_KING){
             pos_pid_b_[i] = static_cast<PID>(pos_list_b_.size());
             pos_list_b_.emplace_back(i);
         }
@@ -73,6 +80,10 @@ void position_move(Move move)
             pos_pid_r_[move.end] = 0;
         }
     }
+    bitline8_[move.end % 9] |= 1 << (move.end / 9);
+    bitline9_[move.end / 9] |= 1 << (move.end % 9);
+    bitline8_[move.beg % 9] &= ~(1 << (move.beg / 9));
+    bitline9_[move.beg / 9] &= ~(1 << (move.beg % 9));
     g_hashkey ^= hashkey_on(g_board[move.beg], move.beg);
     g_hashkey ^= hashkey_on(g_board[move.end], move.end);
     g_hashkey ^= SIDE_KEY;
@@ -106,6 +117,10 @@ void position_undo()
             pos_list_b_.emplace_back(move.end);
         }
     }
+    bitline8_[move.end % 9] &= captured ? ~(1 << (move.end / 9)) : 0xfff;
+    bitline9_[move.end / 9] &= captured ? ~(1 << (move.end % 9)) : 0xfff;
+    bitline8_[move.beg % 9] |= 1 << (move.beg / 9);
+    bitline9_[move.beg / 9] |= 1 << (move.beg % 9);
     g_board[move.beg] = g_board[move.end];
     g_board[move.end] = captured;
     g_hashkey = hashkey;
@@ -123,7 +138,7 @@ template <bool GEN_CAPTURE>
 bool opposite(POS p)
 {
     if constexpr (GEN_CAPTURE) {
-        return g_team * g_board[p] < 0
+        return g_team * g_board[p] < 0;
     } else {
         return diffteam(p);
     }
