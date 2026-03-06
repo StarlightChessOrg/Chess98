@@ -8,17 +8,17 @@ std::vector<Move> gen_king_(POS pos)
     std::vector<Move> ret {};
     ret.reserve(4);
     const bool condition1 = (2 < pos && pos < 15) || (65 < pos && pos < 78);
-    if (condition1 && !same_team(piece_on(pos + 9))) {
+    if (condition1 && diffteam(pos + 9)) {
         ret.emplace_back(pos, pos + 9);
     }
     const bool condition2 = (11 < pos && pos < 24) || (74 < pos && pos < 87);
-    if (condition2 && !same_team(piece_on(pos - 9))) {
+    if (condition2 && diffteam(pos - 9)) {
         ret.emplace_back(pos, pos - 9);
     }
-    if (pos % 9 == 4 && !same_team(piece_on(pos - 1))) {
+    if (pos % 9 == 4 && diffteam(pos - 1)) {
         ret.emplace_back(pos, pos - 1);
     }
-    if (pos % 9 == 4 && !same_team(piece_on(pos + 1))) {
+    if (pos % 9 == 4 && diffteam(pos + 1)) {
         ret.emplace_back(pos, pos + 1);
     }
     return ret;
@@ -30,22 +30,22 @@ std::vector<Move> gen_advisor_(POS pos)
     if (pos == 13 || pos == 76) { // black center
         std::vector<Move> ret {};
         ret.reserve(4);
-        if (!same_team(piece_on(pos - 10))) {
+        if (diffteam(pos - 10)) {
             ret.emplace_back(pos, pos - 10);
         }
-        if (!same_team(piece_on(pos - 8))) {
+        if (diffteam(pos - 8)) {
             ret.emplace_back(pos, pos - 8);
         }
-        if (!same_team(piece_on(pos + 10))) {
+        if (diffteam(pos + 10)) {
             ret.emplace_back(pos, pos + 10);
         }
-        if (!same_team(piece_on(pos + 8))) {
+        if (diffteam(pos + 8)) {
             ret.emplace_back(pos, pos + 8);
         }
         return ret;
-    } else if (pos < 24 && !same_team(piece_on(13))) { // black corner
+    } else if (pos < 24 && diffteam(13)) { // black corner
         return { Move(pos, 13) };
-    } else if (!same_team(piece_on(76))) { // red corner
+    } else if (diffteam(76)) { // red corner
         return { Move(pos, 76) };
     }
     return {};
@@ -57,18 +57,18 @@ std::vector<Move> gen_bishop_(POS pos)
     std::vector<Move> ret {};
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!same_team(piece_on(pos + 16))) {
+        if (!piece_on(pos + 10) && diffteam(pos + 16)) {
             ret.emplace_back(pos, pos + 16);
         }
-        if (!same_team(piece_on(pos + 20))) {
+        if (!piece_on(pos + 12) && diffteam(pos + 20)) {
             ret.emplace_back(pos, pos + 20);
         }
     }
     if (pos / 9 == 4 || pos / 9 == 9 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!same_team(piece_on(pos - 16))) {
+        if (!piece_on(pos - 10) && diffteam(pos - 16)) {
             ret.emplace_back(pos, pos - 16);
         }
-        if (!same_team(piece_on(pos - 20))) {
+        if (!piece_on(pos - 12) && diffteam(pos - 20)) {
             ret.emplace_back(pos, pos - 20);
         }
     }
@@ -76,18 +76,48 @@ std::vector<Move> gen_bishop_(POS pos)
 }
 
 // knight moves
-template <bool CAPTURE>
+template <bool GEN_CAPTURE>
 std::vector<Move> gen_knight_(POS pos)
 {
     std::vector<Move> ret {};
     ret.reserve(8);
-    if (pos / 9 < 2) {
-        
+    if (pos > 17 && !piece_on(pos - 9)) {
+        if (pos % 9 != 0 && opposite<GEN_CAPTURE>(pos - 19)) {
+            ret.emplace_back(pos, pos - 19);
+        }
+        if (pos % 9 != 8 && opposite<GEN_CAPTURE>(pos - 17)) {
+            ret.emplace_back(pos, pos - 17);
+        }
     }
+    if (pos < 72 && !piece_on(pos + 9)) {
+        if (pos % 9 != 0 && opposite<GEN_CAPTURE>(pos + 19)) {
+            ret.emplace_back(pos, pos + 19);
+        }
+        if (pos % 9 != 8 && opposite<GEN_CAPTURE>(pos + 17)) {
+            ret.emplace_back(pos, pos + 17);
+        }
+    }
+    if (pos % 9 > 1 && !piece_on(pos - 1)) {
+        if (pos / 9 != 0 && opposite<GEN_CAPTURE>(pos - 11)) {
+            ret.emplace_back(pos, pos - 11);
+        }
+        if (pos / 9 != 9 && opposite<GEN_CAPTURE>(pos + 7)) {
+            ret.emplace_back(pos, pos + 7)
+        }
+    }
+    if (pos % 9 < 7 && !piece_on(pos + 1)) {
+        if (pos / 9 != 0 && opposite<GEN_CAPTURE>(pos + 11)) {
+            ret.emplace_back(pos, pos + 11);
+        }
+        if (pos / 9 != 9 && opposite<GEN_CAPTURE>(pos - 7)) {
+            ret.emplace_back(pos, pos - 7);
+        }
+    }
+    return ret;
 }
 
 // rook moves
-template <bool CAPTURE>
+template <bool GEN_CAPTURE>
 std::vector<Move> gen_rook_(POS pos)
 {
     std::vector<Move> ret {};
@@ -95,7 +125,7 @@ std::vector<Move> gen_rook_(POS pos)
 }
 
 // cannon moves
-template <bool CAPTURE>
+template <bool GEN_CAPTURE>
 std::vector<Move> gen_cannon_(POS pos)
 {
     std::vector<Move> ret {};
@@ -103,9 +133,10 @@ std::vector<Move> gen_cannon_(POS pos)
 }
 
 // pawn moves
-template <bool CAPTURE>
+template <bool GEN_CAPTURE>
 std::vector<Move> gen_pawn(POS pos)
 {
     std::vector<Move> ret {};
     ret.reserve(3);
+    
 }

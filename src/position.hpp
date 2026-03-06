@@ -112,16 +112,21 @@ void position_undo()
     g_team = -g_team;
 }
 
-// position util same_team
-bool same_team(PTYPE p)
+// position util diffteam
+bool diffteam(POS p)
 {
-    return g_team * p > 0;
+    return g_team * g_board[p] <= 0;
 }
 
 // position util opposite
-bool opposite(PTYPE p)
+template <bool GEN_CAPTURE>
+bool opposite(POS p)
 {
-    return g_team * p < 0;
+    if constexpr (GEN_CAPTURE) {
+        return g_team * g_board[p] < 0
+    } else {
+        return diffteam(p);
+    }
 }
 
 // position util piece_on
