@@ -148,3 +148,29 @@ void utils_print_bitline9(std::array<unsigned short, 10> bitline9)
 {
     utils_print_bitline<10>(bitline9);
 }
+
+std::string utils_to_binary(int x, int bits)
+{
+    std::string s { "" };
+    for (int i = bits - 1; i >= 0; i--) {
+        s += ((x >> i) & 1) ? '1' : '0';
+    }
+    return s;
+}
+
+template <typename T>
+void utils_print_pregen(const std::array<std::array<T, 512>, 10>& t)
+{
+    for (int col = 0; col < 10; col++) {
+        std::cout << "=== Column " << col << " ===\n";
+        for (int key = 0; key < 32; key++) {
+            const auto tb = t[col][key];
+            std::cout << "key " << utils_to_binary(key, 10) << " : (";
+            for (const auto v : tb) {
+                std::cout << static_cast<int>(v) << ", ";
+            }
+            std::cout << ")\n";
+        }
+        std::cout << "\n";
+    }
+}

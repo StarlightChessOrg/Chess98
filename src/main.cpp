@@ -20,6 +20,7 @@ int main()
     position_move(Move(85, 86));
     utils_print_bitline8(bitline8_);
     utils_print_bitline9(bitline9_);
+    utils_print_pregen<CANNON_KEY_POS>(cannon_table_);
 
     return 0;
 }
