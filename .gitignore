@@ -1,25 +1,9 @@
-**/.vs
-**/.vscode
-**/.idea
-**/*.exe
-**/_*_.*
-**/BOOK.DAT
-**/*.vcxproj.user
-**/.VSCodeCounter
-**/build
+# IDE Files
+.vs
+.vscode
+.idea
 **/cmake-build-debug
 **/cmake-build-release
-**/package.json
-**/package-lock.json
-**/nnue/data/*.json
-**/*.out
-**/pytorch_env
-**/example/
-**/runs
-**/__pycache__/
-**/*.pyc
-**/node_modules/
-**/dist/
-**/enc_temp_folder
-**/x64/
-**/x86/
+
+# Build Files
+.build
