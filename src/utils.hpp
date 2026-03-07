@@ -134,7 +134,7 @@ void utils_print_bitline(std::array<unsigned short, n> bitline)
         for (int row = n; row >= 0; --row) {
             std::cout << ((mask >> row) & 1);
         }
-        std::cout << '\n';
+        std::cout << "\n";
     }
     std::cout << std::endl;
 }

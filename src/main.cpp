@@ -19,6 +19,7 @@ int main()
     position_init(test_matrix, R);
     position_move(Move(85, 86));
     utils_print_bitline8(bitline8_);
+    utils_print_bitline9(bitline9_);
 
     return 0;
 }

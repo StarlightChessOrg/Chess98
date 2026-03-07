@@ -117,6 +117,46 @@ std::vector<Move> gen_knight_(POS pos)
 }
 
 // rook moves
+using ROOK_KEY_POS = std::array<POS, 2>;
+constexpr auto rook_table_9_ = []() {
+    std::array<std::array<ROOK_KEY_POS, 512>, 10> ret {};
+    for (int i = 0; i < 10; i++) { // i is the position of the rook
+        for (int j = 0; j < 512; j++) { // j is the possible line stuation
+            ret[i][j][1] = 9; // by default, and ret[i][j][0] = 0 as default
+            for (int p = i; p >= 0; p--) {
+                if (((j >> p) & 1) == 0) {
+                    ret[i][j][0] = p;
+                }
+            }
+            for (int p = i; p <= 9; p++) {
+                if (((j >> p) & 1) == 0) {
+                    ret[i][j][1] = p;
+                }
+            }
+        }
+    }
+    return ret;
+}();
+constexpr auto rook_table_8_ = []() {
+    std::array<std::array<ROOK_KEY_POS, 256>, 10> ret {};
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 256; j++) {
+            ret[i][j][1] = 8;
+            for (int p = i; p >= 0; p--) {
+                if (((j >> p) & 1) == 0) {
+                    ret[i][j][0] = p;
+                }
+            }
+            for (int p = i; p <= 9; p++) {
+                if (((j >> p) & 1) == 0) {
+                    ret[i][j][1] = p;
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_rook_(POS pos)
 {
