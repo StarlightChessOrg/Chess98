@@ -116,11 +116,44 @@ std::vector<Move> gen_knight_(POS pos)
     return ret;
 }
 
+// rook moves
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_rook_(POS pos)
 {
     std::vector<Move> ret {};
     ret.reserve(17);
+    for (int p = pos - 9; p >= 0; p -= 9) {
+        if (diffteam(p)) {
+            ret.emplace_back(pos, p);
+        }
+        if (piece_on(p)) {
+            break;
+        }
+    }
+    for (int p = pos + 9; p < 90; p += 9) {
+        if (diffteam(p)) {
+            ret.emplace_back(pos, p);
+        }
+        if (piece_on(p)) {
+            break;
+        }
+    }
+    for (int p = pos + 1; p / 9 == pos / 9; p += 1) {
+        if (diffteam(p)) {
+            ret.emplace_back(pos, p);
+        }
+        if (piece_on(p)) {
+            break;
+        }
+    }
+    for (int p = pos - 1; p / 9 == pos / 9; p -= 1) {
+        if (diffteam(p)) {
+            ret.emplace_back(pos, p);
+        }
+        if (piece_on(p)) {
+            break;
+        }
+    }
     return ret;
 }
 
@@ -129,6 +162,52 @@ std::vector<Move> gen_cannon_(POS pos)
 {
     std::vector<Move> ret {};
     ret.reserve(17);
+    for (int p = pos - 9; p >= 0; p -= 9) {
+        if (!piece_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (int j = p - 9; p >= 0 && !piece_on(p); p -= 9) { }
+            if (p >= 0 && opposite<GEN_CAPTURE>(p)) {
+                ret.emplace_back(pos, p);
+            }
+            break;
+        }
+    }
+    for (int p = pos + 9; p < 90; p += 9) {
+        if (!piece_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (int j = p + 9; p < 90 && !piece_on(p); p += 9) { }
+            if (p < 90 && opposite<GEN_CAPTURE>(p)) {
+                ret.emplace_back(pos, p);
+            }
+            break;
+        }
+    }
+    for (int p = pos + 1; p / 9 == pos / 9; p += 1) {
+        if (!piece_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (int j = p + 1; p / 9 == pos / 9 && !piece_on(p); p += 1) { }
+            if (p / 9 == pos / 9 && opposite<GEN_CAPTURE>(p)) {
+                ret.emplace_back(pos, p);
+            }
+            break;
+        }
+    }
+    for (int p = pos - 1; p / 9 == pos / 9; p -= 1) {
+        if (!piece_on(p)) {
+            ret.emplace_back(pos, p);
+        } else {
+            for (int j = p - 1; p / 9 == pos / 9 && !piece_on(p); p -= 1) { }
+            if (p / 9 == pos / 9 && opposite<GEN_CAPTURE>(p)) {
+                ret.emplace_back(pos, p);
+            }
+            break;
+        }
+    }
+
+    return ret;
 }
 
 // pawn moves
