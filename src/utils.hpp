@@ -159,11 +159,11 @@ std::string utils_to_binary(int x, int bits)
 }
 
 template <typename T>
-void utils_print_pregen(const std::array<std::array<T, 512>, 10>& t)
+void utils_print_pregen(const std::array<std::array<T, 1024>, 10>& t)
 {
     for (int col = 0; col < 10; col++) {
         std::cout << "=== Column " << col << " ===\n";
-        for (int key = 0; key < 32; key++) {
+        for (int key = 0; key < 1024; key++) {
             const auto tb = t[col][key];
             std::cout << "key " << utils_to_binary(key, 10) << " : (";
             for (const auto v : tb) {

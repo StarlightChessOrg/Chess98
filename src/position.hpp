@@ -149,3 +149,13 @@ PTYPE piece_on(POS p)
 {
     return g_board[p];
 }
+
+unsigned short get_bl8(POS pos)
+{
+    return bitline8_[pos % 9];
+}
+
+unsigned short get_bl9(POS pos)
+{
+    return bitline9_[pos / 9];
+}

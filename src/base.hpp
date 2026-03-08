@@ -25,6 +25,7 @@ using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
 using FLAG = char;
+constexpr POS INVALID_POS = 100;
 constexpr FLAG EXACT = 0;
 constexpr FLAG ALPHA = 1;
 constexpr FLAG BETA = 2;
@@ -47,8 +48,8 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
-constexpr bool CAPTURE = false;
-constexpr bool NORMAL = true;
+constexpr bool CAPTURE = true;
+constexpr bool NORMAL = false;
 
 // move
 
