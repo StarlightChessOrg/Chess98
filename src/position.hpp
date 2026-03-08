@@ -127,20 +127,25 @@ void position_undo()
     g_team = -g_team;
 }
 
-// position util diffteam
-bool diffteam(POS p)
+// position util no_same_team
+bool no_same_team(POS p)
 {
     return g_team * g_board[p] <= 0;
 }
 
-// position util opposite
-template <bool GEN_CAPTURE>
 bool opposite(POS p)
 {
+    return g_team * g_board[p] < 0;
+}
+
+// position util team_diff
+template <bool GEN_CAPTURE>
+bool team_diff(POS p)
+{
     if constexpr (GEN_CAPTURE) {
-        return g_team * g_board[p] < 0;
+        return opposite(p);
     } else {
-        return diffteam(p);
+        return no_same_team(p);
     }
 }
 
