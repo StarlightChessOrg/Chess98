@@ -1,5 +1,4 @@
 #pragma once
-#include "heuristic.hpp"
 #include "position.hpp"
 
 // king moves
@@ -219,7 +218,7 @@ std::vector<Move> gen_cannon_(POS pos)
 
 // pawn moves
 template <bool GEN_CAPTURE>
-std::vector<Move> gen_pawn(POS pos)
+std::vector<Move> gen_pawn_(POS pos)
 {
     std::vector<Move> ret {};
     ret.reserve(3);
