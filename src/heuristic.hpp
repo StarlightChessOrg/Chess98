@@ -110,4 +110,7 @@ Move tt_get_move(HASH hashkey)
 
 // capture
 
-
+bool see_ge(Move m, VL target_vl)
+{
+    
+}

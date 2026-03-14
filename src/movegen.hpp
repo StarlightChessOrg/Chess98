@@ -7,19 +7,11 @@ std::vector<Move> gen_king_(POS pos)
     std::vector<Move> ret {};
     ret.reserve(4);
     const bool condition1 = (2 < pos && pos < 15) || (65 < pos && pos < 78);
-    if (condition1 && no_same_team(pos + 9)) {
-        ret.emplace_back(pos, pos + 9);
-    }
+    if (condition1 && not_same_team(pos + 9)) ret.emplace_back(pos, pos + 9);
     const bool condition2 = (11 < pos && pos < 24) || (74 < pos && pos < 87);
-    if (condition2 && no_same_team(pos - 9)) {
-        ret.emplace_back(pos, pos - 9);
-    }
-    if (pos % 9 == 4 && no_same_team(pos - 1)) {
-        ret.emplace_back(pos, pos - 1);
-    }
-    if (pos % 9 == 4 && no_same_team(pos + 1)) {
-        ret.emplace_back(pos, pos + 1);
-    }
+    if (condition2 && not_same_team(pos - 9)) ret.emplace_back(pos, pos - 9);
+    if (pos % 9 == 4 && not_same_team(pos - 1)) ret.emplace_back(pos, pos - 1);
+    if (pos % 9 == 4 && not_same_team(pos + 1)) ret.emplace_back(pos, pos + 1);
     return ret;
 }
 
@@ -29,22 +21,14 @@ std::vector<Move> gen_advisor_(POS pos)
     if (pos == 13 || pos == 76) { // black center
         std::vector<Move> ret {};
         ret.reserve(4);
-        if (no_same_team(pos - 10)) {
-            ret.emplace_back(pos, pos - 10);
-        }
-        if (no_same_team(pos - 8)) {
-            ret.emplace_back(pos, pos - 8);
-        }
-        if (no_same_team(pos + 10)) {
-            ret.emplace_back(pos, pos + 10);
-        }
-        if (no_same_team(pos + 8)) {
-            ret.emplace_back(pos, pos + 8);
-        }
+        if (not_same_team(pos - 10)) ret.emplace_back(pos, pos - 10);
+        if (not_same_team(pos - 8)) ret.emplace_back(pos, pos - 8);
+        if (not_same_team(pos + 10)) ret.emplace_back(pos, pos + 10);
+        if (not_same_team(pos + 8)) ret.emplace_back(pos, pos + 8);
         return ret;
-    } else if (pos < 24 && no_same_team(13)) { // black corner
+    } else if (pos < 24 && not_same_team(13)) { // black corner
         return { Move(pos, 13) };
-    } else if (no_same_team(76)) { // red corner
+    } else if (not_same_team(76)) { // red corner
         return { Move(pos, 76) };
     }
     return {};
@@ -56,18 +40,18 @@ std::vector<Move> gen_bishop_(POS pos)
     std::vector<Move> ret {};
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos + 10) && no_same_team(pos + 16)) {
+        if (!piece_on(pos + 10) && not_same_team(pos + 16)) {
             ret.emplace_back(pos, pos + 16);
         }
-        if (!piece_on(pos + 12) && no_same_team(pos + 20)) {
+        if (!piece_on(pos + 12) && not_same_team(pos + 20)) {
             ret.emplace_back(pos, pos + 20);
         }
     }
     if (pos / 9 == 4 || pos / 9 == 9 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos - 10) && no_same_team(pos - 16)) {
+        if (!piece_on(pos - 10) && not_same_team(pos - 16)) {
             ret.emplace_back(pos, pos - 16);
         }
-        if (!piece_on(pos - 12) && no_same_team(pos - 20)) {
+        if (!piece_on(pos - 12) && not_same_team(pos - 20)) {
             ret.emplace_back(pos, pos - 20);
         }
     }

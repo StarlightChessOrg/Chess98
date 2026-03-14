@@ -44,7 +44,7 @@ void position_init(const MATRIX& board, TEAM team)
             pos_pid_r_[i] = static_cast<PID>(pos_list_r_.size());
             pos_list_r_.emplace_back(i);
         }
-        if (board[i] < 0 && board[i] != B_KING){
+        if (board[i] < 0 && board[i] != B_KING) {
             pos_pid_b_[i] = static_cast<PID>(pos_list_b_.size());
             pos_list_b_.emplace_back(i);
         }
@@ -127,12 +127,60 @@ void position_undo()
     g_team = -g_team;
 }
 
-// position util no_same_team
-bool no_same_team(POS p)
+// judge whether a move is valid or not in situation
+bool legal_move(Move move)
+{
+    const PTYPE p = g_board[move.beg];
+    // piece not exists or opposite, or same-team attack
+    if (g_team * g_board[move.end] > 0 || p * g_team <= 0) return false;
+    // specific piece legal judge
+    if (abs(p) == R_BISHOP) { // elephant eyes
+        const int d = move.end - move.beg;
+        if (d == 20) {
+            if (g_board[move.beg + 10]) return false;
+        } else if (d == 16) {
+            if (g_board[move.beg + 8]) return false;
+        } else if (d == -20) {
+            if (g_board[move.beg - 10]) return false;
+        } else if (g_board[move.beg - 8]) {
+            return false;
+        }
+    } else if (abs(p) == R_KNIGHT) { // knight legs
+        const int d = move.end - move.beg;
+        if (d == 17 || d == 15) {
+            if (g_board[move.beg + 9]) return false;
+        }
+        else if (d == -17 || d == -15) {
+            if (g_board[move.beg - 9]) return false;
+        }
+        else if (d == 10 || d == -6) {
+            if (g_board[move.beg + 1]) return false;
+        }
+        else if (d == 6 || d == -10) {
+            if (g_board[move.beg - 1]) return false;
+        }
+    } else if (abs(p) == R_CANNON) { // cannon moves
+
+    } else if (abs(p) == R_ROOK) { // rook moves
+
+    }
+    // in check after this move
+
+    return true;
+}
+
+// judge whether a position is attacked by enemy
+bool pos_attacked_by_enemy(POS pos)
+{
+}
+
+// position util not_same_team
+bool not_same_team(POS p)
 {
     return g_team * g_board[p] <= 0;
 }
 
+// position util opposite
 bool opposite(POS p)
 {
     return g_team * g_board[p] < 0;
@@ -142,11 +190,7 @@ bool opposite(POS p)
 template <bool GEN_CAPTURE>
 bool team_diff(POS p)
 {
-    if constexpr (GEN_CAPTURE) {
-        return opposite(p);
-    } else {
-        return no_same_team(p);
-    }
+    return GEN_CAPTURE ? opposite(p) : not_same_team(p);
 }
 
 // position util piece_on
@@ -155,11 +199,13 @@ PTYPE piece_on(POS p)
     return g_board[p];
 }
 
+// position util get_bl8 from bitlines
 unsigned short get_bl8(POS pos)
 {
     return bitline8_[pos % 9];
 }
 
+// position util get_bl9
 unsigned short get_bl9(POS pos)
 {
     return bitline9_[pos / 9];
