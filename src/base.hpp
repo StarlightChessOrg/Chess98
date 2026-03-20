@@ -1,11 +1,11 @@
 #pragma once
 #include <algorithm>
 #include <array>
+#include <bitset>
 #include <cassert>
 #include <chrono>
 #include <cmath>
 #include <iomanip>
-#include <bitset>
 #include <iostream>
 #include <random>
 #include <string>
@@ -189,9 +189,47 @@ constexpr auto CANNON_TARGETS = []() {
     PREGEN_TABLE ret {};
     for (unsigned int pos = 0; pos < 10; pos++) {
         for (unsigned int bitline = 0; bitline < 1024; bitline++) {
-            if (!((bitline >> pos) & 1)) { // invalid position
-                ret[pos][bitline] = ~(0); // set to 111111...111111
+            if (!((bitline >> pos) & 1)) {
+                ret[pos][bitline] = ~0;
                 continue;
+            }
+            for (unsigned int i = pos + 1; i < 10; i++) {
+                if ((bitline >> i) & 1) {
+                    ret[pos][bitline] |= i << 12;
+                    unsigned int j = i + 1;
+                    for (; j < 10 && !((bitline >> j) & 1); j++) { }
+                    if (j < 10 && ((bitline >> j) & 1))
+                        ret[pos][bitline] |= j << 4;
+                    else
+                        ret[pos][bitline] |= 0xF << 4;
+                    break;
+                } else if (i == 9) {
+                    ret[pos][bitline] |= i << 12;
+                    ret[pos][bitline] |= 0xF << 4;
+                }
+            }
+            if (pos == 9) {
+                ret[pos][bitline] |= 9 << 12;
+                ret[pos][bitline] |= 0xF << 4;
+            }
+            for (int i = pos - 1; i >= 0; i--) {
+                if ((bitline >> i) & 1) {
+                    ret[pos][bitline] |= i << 8;
+                    int j = i - 1;
+                    for (; j >= 0 && !((bitline >> j) & 1); j--) { }
+                    if (j >= 0 && ((bitline >> j) & 1))
+                        ret[pos][bitline] |= j;
+                    else
+                        ret[pos][bitline] |= 0xF;
+                    break;
+                } else if (i == 0) {
+                    ret[pos][bitline] |= i << 8;
+                    ret[pos][bitline] |= 0xF;
+                }
+            }
+            if (pos == 0) {
+                ret[pos][bitline] |= 0 << 8;
+                ret[pos][bitline] |= 0xF;
             }
         }
     }

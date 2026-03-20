@@ -193,7 +193,7 @@ void print_pregen_table_rook(const PREGEN_TABLE& table, unsigned int pos)
     }
 }
 
-void print_pregen_cannon_table(const PREGEN_TABLE& table, unsigned int pos)
+void print_pregen_table_cannon(const PREGEN_TABLE& table, unsigned int pos)
 {
     std::cout << "CANNON POS: " << pos << "\n";
     std::cout << "Index\tBitline\t\tNon-Eat\t\tEat-Targets\tVisual\n";
