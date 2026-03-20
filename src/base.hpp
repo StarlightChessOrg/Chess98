@@ -158,8 +158,8 @@ HASH hashkey_on(PTYPE ptype, POS pos)
 
 // pregen table
 
-constexpr auto ROOK_TARGETS = []() {
-    PREGEN_TABLE ret {};
+const auto ROOK_TARGETS = []() {
+    static PREGEN_TABLE ret {};
     for (unsigned int pos = 0; pos < 10; pos++) {
         for (unsigned int bitline = 0; bitline < 1024; bitline++) {
             if (!((bitline >> pos) & 1)) { // invalid position
@@ -185,8 +185,8 @@ constexpr auto ROOK_TARGETS = []() {
     return ret;
 }();
 
-constexpr auto CANNON_TARGETS = []() {
-    PREGEN_TABLE ret {};
+const auto CANNON_TARGETS = []() {
+    static PREGEN_TABLE ret {};
     for (unsigned int pos = 0; pos < 10; pos++) {
         for (unsigned int bitline = 0; bitline < 1024; bitline++) {
             if (!((bitline >> pos) & 1)) {

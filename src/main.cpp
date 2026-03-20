@@ -15,6 +15,6 @@ int main()
         0, B_CANNON, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, R_KING, 0, 0, 0, 0
     };
-    print_pregen_table_cannon(CANNON_TARGETS, 0);
+    print_pregen_table_cannon(CANNON_TARGETS, 4);
     return 0;
 }

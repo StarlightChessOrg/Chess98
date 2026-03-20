@@ -196,7 +196,7 @@ void print_pregen_table_rook(const PREGEN_TABLE& table, unsigned int pos)
 void print_pregen_table_cannon(const PREGEN_TABLE& table, unsigned int pos)
 {
     std::cout << "CANNON POS: " << pos << "\n";
-    std::cout << "Index\tBitline\t\tNon-Eat\t\tEat-Targets\tVisual\n";
+    std::cout << "Index\tBitline\t\tTarget\t\t\tVisual\n";
     std::cout << "------------------------------------------------\n";
     const auto& row = table[pos];
     for (unsigned int bl = 0; bl < 1024; ++bl) {
@@ -211,7 +211,7 @@ void print_pregen_table_cannon(const PREGEN_TABLE& table, unsigned int pos)
         unsigned int move_r = (val >> 4) & 0xF;
         unsigned int eat_l = (val >> 8) & 0xF;
         unsigned int eat_r = (val >> 12) & 0xF;
-        std::cout << "L:" << move_l << " R:" << move_r << "\t";
+        std::cout << "L:" << move_l << " R:" << move_r << " ";
         std::cout << "EL:";
         if (eat_l == 0xF)
             std::cout << "N ";
