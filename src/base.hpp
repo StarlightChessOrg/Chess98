@@ -3,6 +3,9 @@
 #include <array>
 #include <cassert>
 #include <chrono>
+#include <cmath>
+#include <iomanip>
+#include <bitset>
 #include <iostream>
 #include <random>
 #include <string>
@@ -25,6 +28,7 @@ using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
 using FLAG = char;
+using PREGEN_TABLE = std::array<std::array<unsigned short, 1024>, 10>;
 constexpr POS INVALID_POS = 100;
 constexpr FLAG EXACT = 0;
 constexpr FLAG ALPHA = 1;
@@ -151,3 +155,45 @@ HASH hashkey_on(PTYPE ptype, POS pos)
     ptype += 7;
     return HASH_KEYS_[ptype][pos];
 }
+
+// pregen table
+
+constexpr auto ROOK_TARGETS = []() {
+    PREGEN_TABLE ret {};
+    for (unsigned int pos = 0; pos < 10; pos++) {
+        for (unsigned int bitline = 0; bitline < 1024; bitline++) {
+            if (!((bitline >> pos) & 1)) { // invalid position
+                ret[pos][bitline] = ~(0); // set to 111111...111111
+                continue;
+            }
+            for (unsigned int i = pos + 1; i < 10; i++) {
+                if ((bitline >> i) & 1) { // set pos data to the 8~16 bit
+                    ret[pos][bitline] |= i << 8;
+                    break;
+                } else if (i == 9) { // end
+                    ret[pos][bitline] |= i << 8;
+                }
+            }
+            for (unsigned int i = pos; i-- > 0;) {
+                if ((bitline >> i) & 1) { // set pos data to the 1~8 bit
+                    ret[pos][bitline] |= i;
+                    break;
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
+constexpr auto CANNON_TARGETS = []() {
+    PREGEN_TABLE ret {};
+    for (unsigned int pos = 0; pos < 10; pos++) {
+        for (unsigned int bitline = 0; bitline < 1024; bitline++) {
+            if (!((bitline >> pos) & 1)) { // invalid position
+                ret[pos][bitline] = ~(0); // set to 111111...111111
+                continue;
+            }
+        }
+    }
+    return ret;
+}();

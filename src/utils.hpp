@@ -158,18 +158,82 @@ std::string utils_to_binary(int x, int bits)
     return s;
 }
 
-template <typename T>
-void utils_print_pregen(const std::array<std::array<T, 1024>, 10>& t)
+void print_pregen_table_rook(const PREGEN_TABLE& table, unsigned int pos)
 {
-    for (int col = 0; col < 10; col++) {
-        std::cout << "=== Column " << col << " ===\n";
-        for (int key = 0; key < 1024; key++) {
-            const auto tb = t[col][key];
-            std::cout << "key " << utils_to_binary(key, 10) << " : (";
-            for (const auto v : tb) {
-                std::cout << static_cast<int>(v) << ", ";
-            }
-            std::cout << ")\n";
+    std::cout << "POS: " << pos << "\n";
+    std::cout << "Index\tBitline\t\tTargets\t\tVisual\n";
+    std::cout << "-------------------------------------\n";
+    const auto& row = table[pos];
+    for (unsigned int bl = 0; bl < 1024; ++bl) {
+        if (!((bl >> pos) & 1)) continue;
+        unsigned short val = row[bl];
+        std::cout << bl << "\t";
+        for (int i = 9; i >= 0; i--) {
+            std::cout << ((bl >> i) & 1);
+        }
+        std::cout << "\t";
+        if (val == 0xFFFF) {
+            std::cout << "INVALID\n";
+            continue;
+        }
+        unsigned int left = val & 0xFF;
+        unsigned int right = (val >> 8) & 0xFF;
+        std::cout << "L:" << left << " R:" << right << "\t\t";
+        for (int i = 0; i < 10; i++) {
+            if (i == pos)
+                std::cout << "R";
+            else if (i == left || i == right)
+                std::cout << "X";
+            else if ((bl >> i) & 1)
+                std::cout << "#";
+            else
+                std::cout << ".";
+        }
+        std::cout << "\n";
+    }
+}
+
+void print_pregen_cannon_table(const PREGEN_TABLE& table, unsigned int pos)
+{
+    std::cout << "CANNON POS: " << pos << "\n";
+    std::cout << "Index\tBitline\t\tNon-Eat\t\tEat-Targets\tVisual\n";
+    std::cout << "------------------------------------------------\n";
+    const auto& row = table[pos];
+    for (unsigned int bl = 0; bl < 1024; ++bl) {
+        if (!((bl >> pos) & 1)) continue;
+        unsigned short val = row[bl];
+        std::cout << bl << "\t";
+        for (int i = 9; i >= 0; i--) {
+            std::cout << ((bl >> i) & 1);
+        }
+        std::cout << "\t";
+        unsigned int move_l = val & 0xF;
+        unsigned int move_r = (val >> 4) & 0xF;
+        unsigned int eat_l = (val >> 8) & 0xF;
+        unsigned int eat_r = (val >> 12) & 0xF;
+        std::cout << "L:" << move_l << " R:" << move_r << "\t";
+        std::cout << "EL:";
+        if (eat_l == 0xF)
+            std::cout << "N ";
+        else
+            std::cout << eat_l << " ";
+        std::cout << "ER:";
+        if (eat_r == 0xF)
+            std::cout << "N ";
+        else
+            std::cout << eat_r << " ";
+        std::cout << "\t";
+        for (int i = 0; i < 10; i++) {
+            if (i == pos)
+                std::cout << "R";
+            else if (i == eat_l || i == eat_r)
+                std::cout << "E";
+            else if (i == move_l || i == move_r)
+                std::cout << "m";
+            else if ((bl >> i) & 1)
+                std::cout << "#";
+            else
+                std::cout << ".";
         }
         std::cout << "\n";
     }

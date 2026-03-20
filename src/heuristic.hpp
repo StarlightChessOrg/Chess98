@@ -52,20 +52,20 @@ std::array<Move, 2> get(DEPTH d)
 // tt
 
 static std::vector<TTEntry> tt_table {};
-static int size { 0 };
-static int mask { 0 };
+static int tt_size { 0 };
+static int tt_mask { 0 };
 
 void tt_init(int _size = 8)
 {
     tt_table.clear();
     tt_table.resize(1ll << _size);
-    size = _size;
-    mask = (1 << _size) - 1;
+    tt_size = _size;
+    tt_mask = (1 << _size) - 1;
 }
 
 void tt_set(HASH hashkey, FLAG flag, DEPTH depth, Move move, VL vl)
 {
-    TTEntry& e = tt_table[hashkey & mask];
+    TTEntry& e = tt_table[hashkey & tt_mask];
     if (e.key == 0) { // empty set
         e.key = hashkey;
         e.flag = flag;
@@ -90,7 +90,7 @@ void tt_set(HASH hashkey, FLAG flag, DEPTH depth, Move move, VL vl)
 
 VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 {
-    const TTEntry& e = tt_table[hashkey & mask];
+    const TTEntry& e = tt_table[hashkey & tt_mask];
     if (e.key != hashkey || e.depth < depth) {
         return INVALID_VL;
     } else if (e.flag == EXACT) {
@@ -105,12 +105,12 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 
 Move tt_get_move(HASH hashkey)
 {
-    return tt_table[hashkey & mask].move;
+    return tt_table[hashkey & tt_mask].move;
 }
 
 // capture
 
 bool see_ge(Move m, VL target_vl)
 {
-    
+    return false;
 }
