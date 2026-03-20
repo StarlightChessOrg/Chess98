@@ -31,7 +31,10 @@
     <ClInclude Include="utils.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="moves.hpp">
+    <ClInclude Include="movegen.hpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="movepicker.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
