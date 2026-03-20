@@ -158,6 +158,9 @@ HASH hashkey_on(PTYPE ptype, POS pos)
 
 // pregen table
 
+// strcture of the PREGEN_TABLE(aka unsigned short) below: (8 bits as one pos)
+//     00000000           00000000
+// the first target    the second target
 const auto ROOK_TARGETS = []() {
     static PREGEN_TABLE ret {};
     for (unsigned int pos = 0; pos < 10; pos++) {
@@ -185,6 +188,9 @@ const auto ROOK_TARGETS = []() {
     return ret;
 }();
 
+// structure (unsigned short) below: (4 bits as one pos)
+//     0000-0000---------------------0000-0000
+// pos of cannon-banner    eaten targets(default 1111 as empty)
 const auto CANNON_TARGETS = []() {
     static PREGEN_TABLE ret {};
     for (unsigned int pos = 0; pos < 10; pos++) {
