@@ -101,10 +101,13 @@ struct TTEntry {
 // timer
 
 struct Timer {
-    std::chrono::steady_clock::time_point beg;
-    std::chrono::milliseconds limit;
+    std::chrono::steady_clock::time_point beg {};
+    std::chrono::milliseconds limit {};
 
-    Timer() = default;
+    Timer()
+        : beg(std::chrono::steady_clock::now())
+    {
+    }
     Timer(int _limit)
         : beg(std::chrono::steady_clock::now())
         , limit(std::chrono::milliseconds(_limit))
