@@ -1,46 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
+    <ClInclude Include="pregen.hpp" />
+    <ClInclude Include="base.hpp" />
+    <ClInclude Include="evaluate.hpp" />
+    <ClInclude Include="heuristic.hpp" />
+    <ClInclude Include="movegen.hpp" />
+    <ClInclude Include="movepicker.hpp" />
+    <ClInclude Include="position.hpp" />
+    <ClInclude Include="search.hpp" />
+    <ClInclude Include="test.hpp" />
+    <ClInclude Include="ucci.hpp" />
+    <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="base.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="evaluate.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="heuristic.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="position.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="search.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ucci.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="movegen.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="movepicker.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
 </Project>
