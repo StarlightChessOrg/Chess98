@@ -14,8 +14,8 @@ std::vector<POS> pos_list_r_ {};
 std::vector<POS> pos_list_b_ {};
 std::array<PID, 90> pos_pid_r_ {};
 std::array<PID, 90> pos_pid_b_ {};
-std::array<unsigned short, 9> bitline8_ {};
-std::array<unsigned short, 10> bitline9_ {};
+std::array<unsigned short, 9> bl10_container {};
+std::array<unsigned short, 10> bl9_container {};
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -37,8 +37,8 @@ void position_init(const MATRIX& board, TEAM team)
     for (int i = 0; i < 90; i++) {
         g_hashkey ^= hashkey_on(board[i], i);
         if (board[i] != 0) {
-            bitline8_[i % 9] |= 1 << (i / 9);
-            bitline9_[i / 9] |= 1 << (i % 9);
+            bl10_container[i % 9] |= 1 << (i / 9);
+            bl9_container[i / 9] |= 1 << (i % 9);
         }
         if (board[i] > 0 && board[i] != R_KING) {
             pos_pid_r_[i] = static_cast<PID>(pos_list_r_.size());
@@ -80,10 +80,10 @@ void position_move(Move move)
             pos_pid_r_[move.end] = 0;
         }
     }
-    bitline8_[move.end % 9] |= 1 << (move.end / 9);
-    bitline9_[move.end / 9] |= 1 << (move.end % 9);
-    bitline8_[move.beg % 9] &= ~(1 << (move.beg / 9));
-    bitline9_[move.beg / 9] &= ~(1 << (move.beg % 9));
+    bl10_container[move.end % 9] |= 1 << (move.end / 9);
+    bl9_container[move.end / 9] |= 1 << (move.end % 9);
+    bl10_container[move.beg % 9] &= ~(1 << (move.beg / 9));
+    bl9_container[move.beg / 9] &= ~(1 << (move.beg % 9));
     g_hashkey ^= hashkey_on(g_board[move.beg], move.beg);
     g_hashkey ^= hashkey_on(g_board[move.end], move.end);
     g_hashkey ^= SIDE_KEY;
@@ -117,10 +117,10 @@ void position_undo()
             pos_list_b_.emplace_back(move.end);
         }
     }
-    bitline8_[move.end % 9] &= captured ? ~(1 << (move.end / 9)) : 0xfff;
-    bitline9_[move.end / 9] &= captured ? ~(1 << (move.end % 9)) : 0xfff;
-    bitline8_[move.beg % 9] |= 1 << (move.beg / 9);
-    bitline9_[move.beg / 9] |= 1 << (move.beg % 9);
+    bl10_container[move.end % 9] &= captured ? ~(1 << (move.end / 9)) : 0xfff;
+    bl9_container[move.end / 9] &= captured ? ~(1 << (move.end % 9)) : 0xfff;
+    bl10_container[move.beg % 9] |= 1 << (move.beg / 9);
+    bl9_container[move.beg / 9] |= 1 << (move.beg % 9);
     g_board[move.beg] = g_board[move.end];
     g_board[move.end] = captured;
     g_hashkey = hashkey;
@@ -152,16 +152,16 @@ PTYPE piece_on(POS p)
     return g_board[p];
 }
 
-// position util get_bl8 from bitlines
-unsigned short get_bl8(POS pos)
+// position util get_bl10 from bitlines
+unsigned short get_bl10(POS pos)
 {
-    return bitline8_[pos % 9];
+    return bl10_container[pos % 9];
 }
 
 // position util get_bl9
 unsigned short get_bl9(POS pos)
 {
-    return bitline9_[pos / 9];
+    return bl9_container[pos / 9];
 }
 
 // judge whether a move is valid or not in situation

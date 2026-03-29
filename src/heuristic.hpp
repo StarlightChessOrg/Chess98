@@ -63,7 +63,7 @@ void tt_init(int _size = 8)
     tt_mask = (1 << _size) - 1;
 }
 
-void tt_set(HASH hashkey, FLAG flag, DEPTH depth, Move move, VL vl)
+void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
 {
     TTEntry& e = tt_table[hashkey & tt_mask];
     if (e.key == 0) { // empty set

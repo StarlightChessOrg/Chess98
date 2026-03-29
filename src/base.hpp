@@ -16,23 +16,22 @@
 
 struct Move;
 struct Timer;
+struct TTEntry;
 using POS = unsigned char;
 using PTYPE = char;
 using PID = unsigned char;
 using TEAM = char;
 using DEPTH = unsigned char;
 using VL = short;
-using GAME_TYPE = unsigned char;
 using HASH = long long;
+using HASH_FLAG = char;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
-using FLAG = char;
-using PREGEN_TABLE = std::array<std::array<short, 1024>, 10>;
 constexpr POS INVALID_POS = 100;
-constexpr FLAG EXACT = 0;
-constexpr FLAG ALPHA = 1;
-constexpr FLAG BETA = 2;
+constexpr HASH_FLAG EXACT = 0;
+constexpr HASH_FLAG ALPHA = 1;
+constexpr HASH_FLAG BETA = 2;
 constexpr PTYPE R_KING = 1;
 constexpr PTYPE R_ADVISOR = 2;
 constexpr PTYPE R_BISHOP = 3;
@@ -52,8 +51,6 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
-constexpr bool CAPTURE = true;
-constexpr bool NORMAL = false;
 
 // move
 
@@ -90,7 +87,7 @@ struct Move {
 
 struct TTEntry {
     HASH key { 0 };
-    FLAG flag { 0 };
+    HASH_FLAG flag { 0 };
     VL vl { 0 };
     DEPTH depth { 0 };
     Move move {};
