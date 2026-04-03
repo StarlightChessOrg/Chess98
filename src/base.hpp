@@ -5,6 +5,7 @@
 #include <cassert>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -17,17 +18,22 @@
 struct Move;
 struct Timer;
 struct TTEntry;
-using POS = unsigned char;
-using PTYPE = char;
-using PID = unsigned char;
-using TEAM = char;
-using DEPTH = unsigned char;
-using VL = short;
-using HASH = long long;
-using HASH_FLAG = char;
+using UINT32 = std::uint32_t;
+using UINT16 = std::uint16_t;
+using UINT8 = std::uint8_t;
+using POS = std::uint8_t;
+using PTYPE = std::int8_t;
+using PID = std::uint8_t;
+using TEAM = std::int8_t;
+using DEPTH = std::uint8_t;
+using VL = std::int16_t;
+using HASH = std::int64_t;
+using HASH_FLAG = std::int8_t;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
+using PREGEN_DATA = UINT8;
+using PREGEN_TABLE = std::array<std::array<PREGEN_DATA, 1024>, 10>;
 constexpr POS INVALID_POS = 100;
 constexpr HASH_FLAG EXACT = 0;
 constexpr HASH_FLAG ALPHA = 1;
@@ -90,7 +96,7 @@ struct TTEntry {
     HASH_FLAG flag { 0 };
     VL vl { 0 };
     DEPTH depth { 0 };
-    Move move {};
+    Move move { };
 
     TTEntry() = default;
 };
@@ -98,8 +104,8 @@ struct TTEntry {
 // timer
 
 struct Timer {
-    std::chrono::steady_clock::time_point beg {};
-    std::chrono::milliseconds limit {};
+    std::chrono::steady_clock::time_point beg { };
+    std::chrono::milliseconds limit { };
 
     Timer()
         : beg(std::chrono::steady_clock::now())
@@ -137,7 +143,7 @@ long long gen_random_()
 }
 
 const std::array<std::array<HASH, 90>, 15> HASH_KEYS_ = []() {
-    std::array<std::array<HASH, 90>, 15> ret {};
+    std::array<std::array<HASH, 90>, 15> ret { };
     for (std::array<HASH, 90>& m : ret) {
         for (HASH& h : m) {
             h = gen_random_();
@@ -155,3 +161,95 @@ HASH hashkey_on(PTYPE ptype, POS pos)
     ptype += 7;
     return HASH_KEYS_[ptype][pos];
 }
+
+// some bit functions
+
+constexpr void set_left_4bit_(PREGEN_DATA& data, UINT32 number)
+{
+    data |= number << 4;
+}
+
+constexpr void set_right_4bit_(PREGEN_DATA& data, UINT32 number)
+{
+    data |= number;
+}
+
+constexpr void set_invalid_all(PREGEN_DATA& data)
+{
+    data = ~0;
+}
+
+constexpr int get_bit_on_(PREGEN_DATA data, UINT32 index_from_right)
+{
+    return (data >> index_from_right) & 1;
+}
+
+constexpr int get_left_4bit(PREGEN_DATA data)
+{
+    return data >> 4;
+}
+
+constexpr int get_right_4bit(PREGEN_DATA data)
+{
+    return data & 0xF;
+}
+
+// rook captures or cannon scaffolds
+
+constexpr PREGEN_TABLE LINEAR_PREGEN = []() {
+    PREGEN_TABLE ret {};
+    for (UINT32 pos = 0; pos < 10; pos++) {
+        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
+            PREGEN_DATA& entry = ret[pos][bitline];
+            for (UINT32 i = pos + 1; i < 10; i++) {
+                if (get_bit_on_(bitline, i) || i == 9) {
+                    set_right_4bit_(entry, i);
+                    break;
+                }
+            }
+            for (UINT32 i = pos - 1; 0 <= i && i < 100; i--) {
+                if (get_bit_on_(bitline, i)) {
+                    set_left_4bit_(entry, i);
+                    break;
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
+// cannon captures
+
+constexpr PREGEN_TABLE CANNON_PREGEN = []() {
+    PREGEN_TABLE ret {};
+    for (UINT32 pos = 0; pos < 10; pos++) {
+        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
+            PREGEN_DATA& entry = ret[pos][bitline];
+            bool t = false;
+            for (UINT32 i = pos + 1; i < 10; i++) {
+                if (get_bit_on_(bitline, i)) {
+                    if (t == false) {
+                        t = true;
+                        continue;
+                    }
+                    set_right_4bit_(entry, i);
+                    break;
+                } else if (i == 9) {
+                    set_right_4bit_(entry, i);
+                }
+            }
+            t = false;
+            for (UINT32 i = pos; i-- > 0;) {
+                if (get_bit_on_(bitline, i)) {
+                    if (t == false) {
+                        t = true;
+                        continue;
+                    }
+                    set_left_4bit_(entry, i);
+                    break;
+                }
+            }
+        }
+    }
+    return ret;
+}();

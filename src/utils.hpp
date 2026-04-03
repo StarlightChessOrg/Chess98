@@ -36,7 +36,7 @@ MATRIX utils_fen_to_matrix(const std::string& fen)
         } else if (c >= '1' && c <= '9') {
             i += (c - '0');
         } else if (c != '/') {
-            ret[i++] = char_pid_[static_cast<unsigned char>(c)];
+            ret[i++] = char_pid_[c];
         }
     }
     return ret;
@@ -125,7 +125,7 @@ void utils_print_vector(std::vector<T> vec)
 }
 
 template <int n>
-void utils_print_bitline(std::array<unsigned short, n> bitline)
+void utils_print_bitline(std::array<UINT16, n> bitline)
 {
     std::cout << "\n[bitline]\n";
     for (int col = 0; col < n; col++) {
@@ -139,12 +139,12 @@ void utils_print_bitline(std::array<unsigned short, n> bitline)
     std::cout << std::endl;
 }
 
-void utils_print_bitline8(std::array<unsigned short, 9> bitline8)
+void utils_print_bitline8(std::array<UINT16, 9> bitline8)
 {
     utils_print_bitline<9>(bitline8);
 }
 
-void utils_print_bitline9(std::array<unsigned short, 10> bitline9)
+void utils_print_bitline9(std::array<UINT16, 10> bitline9)
 {
     utils_print_bitline<10>(bitline9);
 }

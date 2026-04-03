@@ -3,8 +3,8 @@
 
 // history
 
-static std::array<std::array<unsigned int, 90>, 90> history_table_r_ {};
-static std::array<std::array<unsigned int, 90>, 90> history_table_b_ {};
+static std::array<std::array<UINT32, 90>, 90> history_table_r_ {};
+static std::array<std::array<UINT32, 90>, 90> history_table_b_ {};
 
 void history_init()
 {

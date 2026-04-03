@@ -14,8 +14,8 @@ std::vector<POS> pos_list_r_ {};
 std::vector<POS> pos_list_b_ {};
 std::array<PID, 90> pos_pid_r_ {};
 std::array<PID, 90> pos_pid_b_ {};
-std::array<unsigned short, 9> bl10_container {};
-std::array<unsigned short, 10> bl9_container {};
+std::array<UINT16, 9> bl10_container {};
+std::array<UINT16, 10> bl9_container {};
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -143,7 +143,7 @@ bool opposite(POS p)
 template <bool GEN_CAPTURE>
 bool team_diff(POS p)
 {
-    return GEN_CAPTURE ? opposite(p) : not_same_team(p);
+    return GEN_CAPTURE ? opposite(p) : !g_board[p];
 }
 
 // position util piece_on
@@ -153,13 +153,13 @@ PTYPE piece_on(POS p)
 }
 
 // position util get_bl10 from bitlines
-unsigned short get_bl10(POS pos)
+UINT16 get_bl10(POS pos)
 {
     return bl10_container[pos % 9];
 }
 
 // position util get_bl9
-unsigned short get_bl9(POS pos)
+UINT16 get_bl9(POS pos)
 {
     return bl9_container[pos / 9];
 }
