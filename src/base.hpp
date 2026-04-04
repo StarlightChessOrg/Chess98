@@ -179,7 +179,7 @@ constexpr void set_invalid_all(PREGEN_DATA& data)
     data = ~0;
 }
 
-constexpr int get_bit_on_(PREGEN_DATA data, UINT32 index_from_right)
+constexpr int get_bit_on_(UINT32 data, UINT32 index_from_right)
 {
     return (data >> index_from_right) & 1;
 }

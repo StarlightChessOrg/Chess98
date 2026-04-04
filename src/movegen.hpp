@@ -4,7 +4,7 @@
 // king moves
 std::vector<Move> gen_king_(POS pos)
 {
-    std::vector<Move> ret {};
+    std::vector<Move> ret { };
     ret.reserve(4);
     const bool condition1 = (2 < pos && pos < 15) || (65 < pos && pos < 78);
     if (condition1 && not_same_team(pos + 9)) ret.emplace_back(pos, pos + 9);
@@ -19,7 +19,7 @@ std::vector<Move> gen_king_(POS pos)
 std::vector<Move> gen_advisor_(POS pos)
 {
     if (pos == 13 || pos == 76) { // black center
-        std::vector<Move> ret {};
+        std::vector<Move> ret { };
         ret.reserve(4);
         if (not_same_team(pos - 10)) ret.emplace_back(pos, pos - 10);
         if (not_same_team(pos - 8)) ret.emplace_back(pos, pos - 8);
@@ -31,13 +31,13 @@ std::vector<Move> gen_advisor_(POS pos)
     } else if (not_same_team(76)) { // red corner
         return { Move(pos, 76) };
     }
-    return {};
+    return { };
 }
 
 // bishop moves
 std::vector<Move> gen_bishop_(POS pos)
 {
-    std::vector<Move> ret {};
+    std::vector<Move> ret { };
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
         if (!piece_on(pos + 10) && not_same_team(pos + 16)) {
@@ -62,7 +62,7 @@ std::vector<Move> gen_bishop_(POS pos)
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_knight_(POS pos)
 {
-    std::vector<Move> ret {};
+    std::vector<Move> ret { };
     ret.reserve(8);
     if (pos > 17 && !piece_on(pos - 9)) {
         if (pos % 9 != 0 && team_diff<GEN_CAPTURE>(pos - 19)) {
@@ -103,7 +103,7 @@ std::vector<Move> gen_knight_(POS pos)
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_rook_legacy_(POS pos)
 {
-    std::vector<Move> ret {};
+    std::vector<Move> ret { };
     ret.reserve(GEN_CAPTURE ? 4 : 17);
     for (int p = pos - 9; p >= 0; p -= 9) {
         if (team_diff<GEN_CAPTURE>(p)) {
@@ -144,68 +144,53 @@ std::vector<Move> gen_rook_legacy_(POS pos)
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_cannon_legacy_(POS pos)
 {
-    std::vector<Move> ret {};
-    ret.reserve(GEN_CAPTURE ? 4 : 17);
-    for (int p = pos - 9; p >= 0; p -= 9) {
-        if (!piece_on(p)) {
-            if constexpr (!GEN_CAPTURE) {
-                ret.emplace_back(pos, p);
+    if constexpr (GEN_CAPTURE) {
+        std::vector<Move> ret { };
+        ret.reserve(GEN_CAPTURE ? 4 : 17);
+        bool t = false;
+        for (int p = pos - 9; p >= 0; p -= 9) {
+            if (t == false && piece_on(p)) {
+                t = true;
+                continue;
+            } else if (t == true && piece_on(p)) {
+                if (opposite(p)) ret.emplace_back(pos, p);
             }
-        } else {
-            for (p -= 9; p >= 0 && !piece_on(p); p -= 9) { }
-            if (p >= 0 && opposite(p)) {
-                ret.emplace_back(pos, p);
-            }
-            break;
         }
-    }
-    for (int p = pos + 9; p < 90; p += 9) {
-        if (!piece_on(p)) {
-            if constexpr (!GEN_CAPTURE) {
-                ret.emplace_back(pos, p);
+        for (int p = pos + 9; p < 90; p += 9) {
+            if (t == false && piece_on(p)) {
+                t = true;
+                continue;
+            } else if (t == true && piece_on(p)) {
+                if (opposite(p)) ret.emplace_back(pos, p);
             }
-        } else {
-            for (p += 9; p < 90 && !piece_on(p); p += 9) { }
-            if (p < 90 && opposite(p)) {
-                ret.emplace_back(pos, p);
-            }
-            break;
         }
-    }
-    for (int p = pos + 1; p / 9 == pos / 9; p += 1) {
-        if (!piece_on(p)) {
-            if constexpr (!GEN_CAPTURE) {
-                ret.emplace_back(pos, p);
+        for (int p = pos + 1; p / 9 == pos / 9; p += 1) {
+            if (t == false && piece_on(p)) {
+                t = true;
+                continue;
+            } else if (t == true && piece_on(p)) {
+                if (opposite(p)) ret.emplace_back(pos, p);
             }
-        } else {
-            for (p += 1; p / 9 == pos / 9 && !piece_on(p); p += 1) { }
-            if (p / 9 == pos / 9 && opposite(p)) {
-                ret.emplace_back(pos, p);
-            }
-            break;
         }
-    }
-    for (int p = pos - 1; p / 9 == pos / 9; p -= 1) {
-        if (!piece_on(p)) {
-            if constexpr (!GEN_CAPTURE) {
-                ret.emplace_back(pos, p);
+        for (int p = pos - 1; p / 9 == pos / 9; p -= 1) {
+            if (t == false && piece_on(p)) {
+                t = true;
+                continue;
+            } else if (t == true && piece_on(p)) {
+                if (opposite(p)) ret.emplace_back(pos, p);
             }
-        } else {
-            for (p -= 1; p / 9 == pos / 9 && !piece_on(p); p -= 1) { }
-            if (p / 9 == pos / 9 && opposite(p)) {
-                ret.emplace_back(pos, p);
-            }
-            break;
         }
+        return ret;
+    } else {
+        return gen_rook_legacy_<false>(pos);
     }
-    return ret;
 }
 
 // rook moves (bit)
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_rook_bit_(POS pos)
 {
-    std::vector<Move> ret {};
+    std::vector<Move> ret { };
     ret.reserve(GEN_CAPTURE ? 4 : 17);
     const UINT16 bl9 = bl9_container[pos / 9];
     const UINT16 bl10 = bl10_container[pos % 9];
@@ -217,13 +202,13 @@ std::vector<Move> gen_rook_bit_(POS pos)
     const POS top = get_left_4bit(data10) * 9 + pos % 9;
     const POS bottom = get_right_4bit(data10) * 9 + pos % 9;
     if constexpr (GEN_CAPTURE) {
-        if (team_diff<GEN_CAPTURE>(left)) 
+        if (team_diff<GEN_CAPTURE>(left))
             ret.emplace_back(pos, left);
-        if (team_diff<GEN_CAPTURE>(right)) 
+        if (team_diff<GEN_CAPTURE>(right))
             ret.emplace_back(pos, right);
-        if (team_diff<GEN_CAPTURE>(top)) 
+        if (team_diff<GEN_CAPTURE>(top))
             ret.emplace_back(pos, top);
-        if (team_diff<GEN_CAPTURE>(bottom)) 
+        if (team_diff<GEN_CAPTURE>(bottom))
             ret.emplace_back(pos, bottom);
     } else {
         for (POS p = pos - 1; p > left; p--)
@@ -234,23 +219,53 @@ std::vector<Move> gen_rook_bit_(POS pos)
             ret.emplace_back(pos, p);
         for (POS p = pos + 9; p < bottom; p += 9)
             ret.emplace_back(pos, p);
-        if (piece_on(left) == 0)
-            ret.emplace_back(pos, left);
-        if (piece_on(right) == 0)
-            ret.emplace_back(pos, right);
         if (piece_on(top) == 0)
             ret.emplace_back(pos, top);
+        if (piece_on(right) == 0)
+            ret.emplace_back(pos, right);
+        if (piece_on(left) == 0)
+            ret.emplace_back(pos, left);
         if (piece_on(bottom) == 0)
             ret.emplace_back(pos, bottom);
     }
     return ret;
 }
 
+// cannon moves (bit)
+template <bool GEN_CAPTURE>
+std::vector<Move> gen_cannon_bit_(POS pos)
+{
+    if constexpr (GEN_CAPTURE) {
+        std::vector<Move> ret { };
+        ret.reserve(GEN_CAPTURE ? 4 : 17);
+        const UINT16 bl9 = bl9_container[pos / 9];
+        const UINT16 bl10 = bl10_container[pos % 9];
+        const PREGEN_DATA data9 = CANNON_PREGEN[pos % 9][bl9];
+        const PREGEN_DATA data10 = CANNON_PREGEN[pos / 9][bl10];
+        const POS right9 = get_right_4bit(data9) != 9 ? get_right_4bit(data9) : 8;
+        const POS left = pos / 9 * 9 + get_left_4bit(data9);
+        const POS right = pos / 9 * 9 + right9;
+        const POS top = get_left_4bit(data10) * 9 + pos % 9;
+        const POS bottom = get_right_4bit(data10) * 9 + pos % 9;
+        if (team_diff<GEN_CAPTURE>(left))
+            ret.emplace_back(pos, left);
+        if (team_diff<GEN_CAPTURE>(right))
+            ret.emplace_back(pos, right);
+        if (team_diff<GEN_CAPTURE>(top))
+            ret.emplace_back(pos, top);
+        if (team_diff<GEN_CAPTURE>(bottom))
+            ret.emplace_back(pos, bottom);
+        return ret;
+    } else {
+        return gen_rook_bit_<false>(pos);
+    }
+}
+
 // pawn moves
 template <bool GEN_CAPTURE>
 std::vector<Move> gen_pawn_(POS pos)
 {
-    std::vector<Move> ret {};
+    std::vector<Move> ret { };
     ret.reserve(3);
     const int target = pos - 9 * g_team;
     if (0 <= target && target < 90 && team_diff<GEN_CAPTURE>(target)) {
