@@ -104,22 +104,22 @@ std::pair<POS, POS> get_banner(UINT16 bl, POS p)
     }
 }
 
-std::pair<POS, POS> get_rook_9(UINT16 bl9, POS p)
+std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 {
     return get_banner<true, LINEAR_PREGEN>(bl9, p);
 }
 
-std::pair<POS, POS> get_rook_10(UINT16 bl10, POS p)
+std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
 {
     return get_banner<false, LINEAR_PREGEN>(bl10, p);
 }
 
-std::pair<POS, POS> get_cannon_9(UINT16 bl9, POS p)
+std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
 {
     return get_banner<true, CANNON_PREGEN>(bl9, p);
 }
 
-std::pair<POS, POS> get_cannon_10(UINT16 bl10, POS p)
+std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
 {
     return get_banner<false, CANNON_PREGEN>(bl10, p);
 }

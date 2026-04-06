@@ -59,7 +59,6 @@ constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
 
 // move
-
 struct Move {
     POS beg { 0 };
     POS end { 0 };
@@ -90,19 +89,15 @@ struct Move {
 };
 
 // tt entry
-
 struct TTEntry {
     HASH key { 0 };
     HASH_FLAG flag { 0 };
     VL vl { 0 };
     DEPTH depth { 0 };
     Move move { };
-
-    TTEntry() = default;
 };
 
 // timer
-
 struct Timer {
     std::chrono::steady_clock::time_point beg { };
     std::chrono::milliseconds limit { };
@@ -115,7 +110,6 @@ struct Timer {
         : beg(std::chrono::steady_clock::now())
         , limit(std::chrono::milliseconds(_limit))
     {
-        assert(_limit > 0);
     }
     bool time_up() const noexcept
     {

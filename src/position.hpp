@@ -183,7 +183,7 @@ void position_undo()
 bool pos_attacked_by_enemy(POS pos)
 {
     const TEAM enemy = -g_team;
-    
+
     return false;
 }
 
@@ -213,14 +213,38 @@ bool legal_move(Move move)
             if (piece_on(move.beg - 9)) return false;
         } else if (d == 10 || d == -6) {
             if (piece_on(move.beg + 1)) return false;
-        } else if (d == 6 || d == -10) {
-            if (piece_on(move.beg - 1)) return false;
+        } else if (piece_on(move.beg - 1)) {
+            return false;
         }
     } else if (abs(p) == R_CANNON) { // cannon moves
-        
+        const int d = move.end - move.beg;
+        if (move.beg % 9 != move.end % 9 && move.beg / 9 != move.end / 9)
+            return false;
+        if (-9 < d && d < 9) { // horizontal move
+            const auto [left, right] = cannon_9(get_bl9(move.beg), move.beg);
+            const auto [left2, right2] = rook_9(get_bl9(move.end), move.end);
+            if (!(left2 < move.end && move.end < right2)) {
+                if (move.end != left && move.end != right) return false;
+            }
+        } else { // vertical move
+            const auto [up, down] = cannon_10(get_bl10(move.beg), move.beg);
+            const auto [up2, down2] = rook_10(get_bl10(move.end), move.end);
+            if (!(up2 < move.end && move.end < down2)) {
+                if (move.end != up && move.end != down) return false;
+            }
+        }
     } else if (abs(p) == R_ROOK) { // rook moves
+        const int d = move.end - move.beg;
+        // not in the same col or same row
+        if (move.beg % 9 != move.end % 9 || move.beg / 9 != move.end / 9)
+            return false;
+        if (-9 < d && d < 9) { // horizontal move
+            const auto [left, right] = rook_9(get_bl9(move.beg), move.beg);
+            if (!(left < move.end && move.end < right)) return false;
+        } else { // vertical move
+            const auto [up, down] = rook_10(get_bl10(move.beg), move.beg);
+            if (!(up < move.end && move.end < down)) return false;
+        }
     }
-    // in check after this move
-    
     return true;
 }
