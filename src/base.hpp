@@ -1,7 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <array>
-#include <bitset>
+#include <bit>
 #include <cassert>
 #include <chrono>
 #include <cmath>
@@ -161,95 +161,3 @@ HASH hashkey_on(PTYPE ptype, POS pos)
     ptype += 7;
     return HASH_KEYS_[ptype][pos];
 }
-
-// some bit functions
-
-constexpr void set_left_4bit_(PREGEN_DATA& data, UINT32 number)
-{
-    data |= number << 4;
-}
-
-constexpr void set_right_4bit_(PREGEN_DATA& data, UINT32 number)
-{
-    data |= number;
-}
-
-constexpr void set_invalid_all(PREGEN_DATA& data)
-{
-    data = ~0;
-}
-
-constexpr int get_bit_on_(UINT32 data, UINT32 index_from_right)
-{
-    return (data >> index_from_right) & 1;
-}
-
-constexpr int get_left_4bit(PREGEN_DATA data)
-{
-    return data >> 4;
-}
-
-constexpr int get_right_4bit(PREGEN_DATA data)
-{
-    return data & 0xF;
-}
-
-// rook captures or cannon scaffolds
-
-constexpr PREGEN_TABLE LINEAR_PREGEN = []() {
-    PREGEN_TABLE ret {};
-    for (UINT32 pos = 0; pos < 10; pos++) {
-        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
-            PREGEN_DATA& entry = ret[pos][bitline];
-            for (UINT32 i = pos + 1; i < 10; i++) {
-                if (get_bit_on_(bitline, i) || i == 9) {
-                    set_right_4bit_(entry, i);
-                    break;
-                }
-            }
-            for (UINT32 i = pos - 1; 0 <= i && i < 100; i--) {
-                if (get_bit_on_(bitline, i)) {
-                    set_left_4bit_(entry, i);
-                    break;
-                }
-            }
-        }
-    }
-    return ret;
-}();
-
-// cannon captures
-
-constexpr PREGEN_TABLE CANNON_PREGEN = []() {
-    PREGEN_TABLE ret {};
-    for (UINT32 pos = 0; pos < 10; pos++) {
-        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
-            PREGEN_DATA& entry = ret[pos][bitline];
-            bool t = false;
-            for (UINT32 i = pos + 1; i < 10; i++) {
-                if (get_bit_on_(bitline, i)) {
-                    if (t == false) {
-                        t = true;
-                        continue;
-                    }
-                    set_right_4bit_(entry, i);
-                    break;
-                } else if (i == 9) {
-                    set_right_4bit_(entry, i);
-                }
-            }
-            t = false;
-            for (UINT32 i = pos; i-- > 0;) {
-                if (get_bit_on_(bitline, i)) {
-                    if (t == false) {
-                        t = true;
-                        continue;
-                    }
-                    set_left_4bit_(entry, i);
-                    break;
-                }
-            }
-        }
-    }
-    return ret;
-}();

@@ -11,6 +11,7 @@
     <ClInclude Include="test.hpp" />
     <ClInclude Include="ucci.hpp" />
     <ClInclude Include="utils.hpp" />
+    <ClInclude Include="pregen.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

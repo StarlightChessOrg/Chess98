@@ -155,6 +155,7 @@
     <ClInclude Include="movegen.hpp" />
     <ClInclude Include="movepicker.hpp" />
     <ClInclude Include="position.hpp" />
+    <ClInclude Include="pregen.hpp" />
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />
     <ClInclude Include="ucci.hpp" />

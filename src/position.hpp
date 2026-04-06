@@ -1,21 +1,73 @@
 #pragma once
-#include "base.hpp"
+#include "pregen.hpp"
 
 // global variables
-MATRIX g_board {};
-TEAM g_team {};
-HASH g_hashkey {};
+MATRIX g_board { };
+TEAM g_team { };
+HASH g_hashkey { };
 
 // history moves and maintaining all pieces on board
-std::vector<Move> history_moves_ {};
-std::vector<PTYPE> history_captures_ {};
-std::vector<HASH> history_hashkeys_ {};
-std::vector<POS> pos_list_r_ {};
-std::vector<POS> pos_list_b_ {};
-std::array<PID, 90> pos_pid_r_ {};
-std::array<PID, 90> pos_pid_b_ {};
-std::array<UINT16, 9> bl10_container {};
-std::array<UINT16, 10> bl9_container {};
+std::vector<Move> history_moves_ { };
+std::vector<PTYPE> history_captures_ { };
+std::vector<HASH> history_hashkeys_ { };
+std::vector<POS> pos_list_r_ { };
+std::vector<POS> pos_list_b_ { };
+std::array<PID, 90> pos_pid_r_ { };
+std::array<PID, 90> pos_pid_b_ { };
+std::array<UINT16, 9> bl10_container { };
+std::array<UINT16, 10> bl9_container { };
+
+// position util opposite
+bool opposite(POS p)
+{
+    return g_team * g_board[p] < 0;
+}
+
+// position util team_diff
+template <bool GEN_CAPTURE>
+bool team_diff(POS p)
+{
+    return GEN_CAPTURE ? opposite(p) : !g_board[p];
+}
+
+// position util piece_on
+PTYPE piece_on(POS p)
+{
+    return g_board[p];
+}
+
+// position util get_bl10 from bitlines
+UINT16 get_bl10(POS pos)
+{
+    return bl10_container[pos % 9];
+}
+
+// position util get_bl9
+UINT16 get_bl9(POS pos)
+{
+    return bl9_container[pos / 9];
+}
+
+// position util judge face-kings
+bool face_king()
+{
+    if (pos_list_r_[0] % 9 == pos_list_b_[0] % 9) {
+        UINT16 bitline = get_bl10(pos_list_r_[0]);
+        switch (bitline) {
+        case 0b1000000001:
+        case 0b1000000010:
+        case 0b1000000100:
+        case 0b0100000001:
+        case 0b0100000010:
+        case 0b0100000100:
+        case 0b0010000001:
+        case 0b0010000010:
+        case 0b0010000100:
+            return true;
+        }
+    }
+    return false;
+}
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -127,41 +179,12 @@ void position_undo()
     g_team = -g_team;
 }
 
-// position util not_same_team
-bool not_same_team(POS p)
+// judge whether a position is attacked by enemy
+bool pos_attacked_by_enemy(POS pos)
 {
-    return g_team * g_board[p] <= 0;
-}
-
-// position util opposite
-bool opposite(POS p)
-{
-    return g_team * g_board[p] < 0;
-}
-
-// position util team_diff
-template <bool GEN_CAPTURE>
-bool team_diff(POS p)
-{
-    return GEN_CAPTURE ? opposite(p) : !g_board[p];
-}
-
-// position util piece_on
-PTYPE piece_on(POS p)
-{
-    return g_board[p];
-}
-
-// position util get_bl10 from bitlines
-UINT16 get_bl10(POS pos)
-{
-    return bl10_container[pos % 9];
-}
-
-// position util get_bl9
-UINT16 get_bl9(POS pos)
-{
-    return bl9_container[pos / 9];
+    const TEAM enemy = -g_team;
+    
+    return false;
 }
 
 // judge whether a move is valid or not in situation
@@ -194,16 +217,10 @@ bool legal_move(Move move)
             if (piece_on(move.beg - 1)) return false;
         }
     } else if (abs(p) == R_CANNON) { // cannon moves
-
+        
     } else if (abs(p) == R_ROOK) { // rook moves
     }
     // in check after this move
-
+    
     return true;
-}
-
-// judge whether a position is attacked by enemy
-bool pos_attacked_by_enemy(POS pos)
-{
-    return false;
 }

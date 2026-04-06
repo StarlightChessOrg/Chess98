@@ -6,12 +6,12 @@ std::vector<Move> gen_king_(POS pos)
 {
     std::vector<Move> ret { };
     ret.reserve(4);
-    const bool condition1 = (2 < pos && pos < 15) || (65 < pos && pos < 78);
-    if (condition1 && not_same_team(pos + 9)) ret.emplace_back(pos, pos + 9);
-    const bool condition2 = (11 < pos && pos < 24) || (74 < pos && pos < 87);
-    if (condition2 && not_same_team(pos - 9)) ret.emplace_back(pos, pos - 9);
-    if (pos % 9 == 4 && not_same_team(pos - 1)) ret.emplace_back(pos, pos - 1);
-    if (pos % 9 == 4 && not_same_team(pos + 1)) ret.emplace_back(pos, pos + 1);
+    if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && !opposite(pos + 9))
+        ret.emplace_back(pos, pos + 9);
+    if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && !opposite(pos - 9))
+        ret.emplace_back(pos, pos - 9);
+    if (pos % 9 == 4 && !opposite(pos - 1)) ret.emplace_back(pos, pos - 1);
+    if (pos % 9 == 4 && !opposite(pos + 1)) ret.emplace_back(pos, pos + 1);
     return ret;
 }
 
@@ -21,14 +21,14 @@ std::vector<Move> gen_advisor_(POS pos)
     if (pos == 13 || pos == 76) { // black center
         std::vector<Move> ret { };
         ret.reserve(4);
-        if (not_same_team(pos - 10)) ret.emplace_back(pos, pos - 10);
-        if (not_same_team(pos - 8)) ret.emplace_back(pos, pos - 8);
-        if (not_same_team(pos + 10)) ret.emplace_back(pos, pos + 10);
-        if (not_same_team(pos + 8)) ret.emplace_back(pos, pos + 8);
+        if (!opposite(pos - 10)) ret.emplace_back(pos, pos - 10);
+        if (!opposite(pos - 8)) ret.emplace_back(pos, pos - 8);
+        if (!opposite(pos + 10)) ret.emplace_back(pos, pos + 10);
+        if (!opposite(pos + 8)) ret.emplace_back(pos, pos + 8);
         return ret;
-    } else if (pos < 24 && not_same_team(13)) { // black corner
+    } else if (pos < 24 && !opposite(13)) { // black corner
         return { Move(pos, 13) };
-    } else if (not_same_team(76)) { // red corner
+    } else if (!opposite(76)) { // red corner
         return { Move(pos, 76) };
     }
     return { };
@@ -40,18 +40,18 @@ std::vector<Move> gen_bishop_(POS pos)
     std::vector<Move> ret { };
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos + 10) && not_same_team(pos + 16)) {
+        if (!piece_on(pos + 10) && !opposite(pos + 16)) {
             ret.emplace_back(pos, pos + 16);
         }
-        if (!piece_on(pos + 12) && not_same_team(pos + 20)) {
+        if (!piece_on(pos + 12) && !opposite(pos + 20)) {
             ret.emplace_back(pos, pos + 20);
         }
     }
     if (pos / 9 == 4 || pos / 9 == 9 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos - 10) && not_same_team(pos - 16)) {
+        if (!piece_on(pos - 10) && !opposite(pos - 16)) {
             ret.emplace_back(pos, pos - 16);
         }
-        if (!piece_on(pos - 12) && not_same_team(pos - 20)) {
+        if (!piece_on(pos - 12) && !opposite(pos - 20)) {
             ret.emplace_back(pos, pos - 20);
         }
     }
@@ -192,15 +192,9 @@ std::vector<Move> gen_rook_bit_(POS pos)
 {
     std::vector<Move> ret { };
     ret.reserve(GEN_CAPTURE ? 4 : 17);
-    const UINT16 bl9 = bl9_container[pos / 9];
-    const UINT16 bl10 = bl10_container[pos % 9];
-    const PREGEN_DATA data9 = LINEAR_PREGEN[pos % 9][bl9];
-    const PREGEN_DATA data10 = LINEAR_PREGEN[pos / 9][bl10];
-    const POS right9 = get_right_4bit(data9) != 9 ? get_right_4bit(data9) : 8;
-    const POS left = pos / 9 * 9 + get_left_4bit(data9);
-    const POS right = pos / 9 * 9 + right9;
-    const POS top = get_left_4bit(data10) * 9 + pos % 9;
-    const POS bottom = get_right_4bit(data10) * 9 + pos % 9;
+    const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
+    const auto [left, right] = get_banner<true, LINEAR_PREGEN>(bl9, pos);
+    const auto [top, bottom] = get_banner<false, LINEAR_PREGEN>(bl10, pos);
     if constexpr (GEN_CAPTURE) {
         if (team_diff<GEN_CAPTURE>(left))
             ret.emplace_back(pos, left);
