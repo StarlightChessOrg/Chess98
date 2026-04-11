@@ -191,18 +191,18 @@ template <bool GEN_CAPTURE>
 std::vector<Move> gen_rook_bit_(POS pos)
 {
     std::vector<Move> ret { };
-    ret.reserve(GEN_CAPTURE ? 4 : 17);
+    ret.reserve(4);
     const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
-    const auto [left, right] = get_banner<true, LINEAR_PREGEN>(bl9, pos);
-    const auto [top, bottom] = get_banner<false, LINEAR_PREGEN>(bl10, pos);
+    const auto [left, right] = rook_9(bl9, pos);
+    const auto [top, bottom] = rook_10(bl10, pos);
     if constexpr (GEN_CAPTURE) {
-        if (team_diff<GEN_CAPTURE>(left))
+        if (opposite(left))
             ret.emplace_back(pos, left);
-        if (team_diff<GEN_CAPTURE>(right))
+        if (opposite(right))
             ret.emplace_back(pos, right);
-        if (team_diff<GEN_CAPTURE>(top))
+        if (opposite(top))
             ret.emplace_back(pos, top);
-        if (team_diff<GEN_CAPTURE>(bottom))
+        if (opposite(bottom))
             ret.emplace_back(pos, bottom);
     } else {
         for (POS p = pos - 1; p > left; p--)
@@ -213,13 +213,13 @@ std::vector<Move> gen_rook_bit_(POS pos)
             ret.emplace_back(pos, p);
         for (POS p = pos + 9; p < bottom; p += 9)
             ret.emplace_back(pos, p);
-        if (piece_on(top) == 0)
+        if (!piece_on(top))
             ret.emplace_back(pos, top);
-        if (piece_on(right) == 0)
+        if (!piece_on(right))
             ret.emplace_back(pos, right);
-        if (piece_on(left) == 0)
+        if (!piece_on(left))
             ret.emplace_back(pos, left);
-        if (piece_on(bottom) == 0)
+        if (!piece_on(bottom))
             ret.emplace_back(pos, bottom);
     }
     return ret;
@@ -231,16 +231,10 @@ std::vector<Move> gen_cannon_bit_(POS pos)
 {
     if constexpr (GEN_CAPTURE) {
         std::vector<Move> ret { };
-        ret.reserve(GEN_CAPTURE ? 4 : 17);
-        const UINT16 bl9 = bl9_container[pos / 9];
-        const UINT16 bl10 = bl10_container[pos % 9];
-        const PREGEN_DATA data9 = CANNON_PREGEN[pos % 9][bl9];
-        const PREGEN_DATA data10 = CANNON_PREGEN[pos / 9][bl10];
-        const POS right9 = get_right_4bit(data9) != 9 ? get_right_4bit(data9) : 8;
-        const POS left = pos / 9 * 9 + get_left_4bit(data9);
-        const POS right = pos / 9 * 9 + right9;
-        const POS top = get_left_4bit(data10) * 9 + pos % 9;
-        const POS bottom = get_right_4bit(data10) * 9 + pos % 9;
+        ret.reserve(4);
+        const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
+        const auto [left, right] = cannon_9(bl9, pos);
+        const auto [top, bottom] = cannon_10(bl10, pos);
         if (team_diff<GEN_CAPTURE>(left))
             ret.emplace_back(pos, left);
         if (team_diff<GEN_CAPTURE>(right))

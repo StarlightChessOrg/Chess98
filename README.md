@@ -12,7 +12,7 @@ This project is being refactored now...
 - [x] gen moves
 - [x] bitboard
 - [ ] legal move and pos attack validation
-- [ ] fix bugs of cannon & rook move generator and improve
+- [x] fix bugs of cannon & rook move generator and improve
 - [ ] move picker
 - [ ] basic evaluation
 - [ ] search
