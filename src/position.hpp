@@ -18,42 +18,26 @@ std::array<UINT16, 9> bl10_container { };
 std::array<UINT16, 10> bl9_container { };
 
 // position util opposite
-bool opposite(POS p)
-{
-    return g_team * g_board[p] < 0;
-}
+bool opposite(POS p) { return g_team * g_board[p] < 0; }
 
-// position util team_diff
-template <bool GEN_CAPTURE>
-bool team_diff(POS p)
-{
-    return GEN_CAPTURE ? opposite(p) : !g_board[p];
-}
+// return team differences based on wheter you want to gen captures or not
+template <bool G>
+bool team_diff(POS p) { return G ? opposite(p) : !g_board[p]; }
 
-// position util piece_on
-PTYPE piece_on(POS p)
-{
-    return g_board[p];
-}
+// get piece on pos
+PTYPE piece_on(POS p) { return g_board[p]; }
 
-// position util get_bl10 from bitlines
-UINT16 get_bl10(POS pos)
-{
-    return bl10_container[pos % 9];
-}
+// get bl10 from the table
+UINT16 get_bl10(POS pos) { return bl10_container[pos % 9]; }
 
-// position util get_bl9
-UINT16 get_bl9(POS pos)
-{
-    return bl9_container[pos / 9];
-}
+// get_bl9 from the table
+UINT16 get_bl9(POS pos) { return bl9_container[pos / 9]; }
 
-// position util judge face-kings
+// judge face-kings
 bool face_king()
 {
     if (pos_list_r_[0] % 9 == pos_list_b_[0] % 9) {
-        UINT16 bitline = get_bl10(pos_list_r_[0]);
-        switch (bitline) {
+        switch (get_bl10(pos_list_r_[0])) {
         case 0b1000000001:
         case 0b1000000010:
         case 0b1000000100:
@@ -179,15 +163,24 @@ void position_undo()
     g_team = -g_team;
 }
 
-// judge whether a position is attacked by enemy
-bool pos_attacked_by_enemy(POS pos)
+// judge whether current position is in check (include face-kings)
+bool in_check()
 {
-    const TEAM enemy = -g_team;
-
-    return false;
+    // get king pos
+    const POS king_pos = g_team == R ? pos_list_r_[0] : pos_list_b_[0];
+    // is attacked by a pawn (judging directly without validating team is ok)
+    if (abs(piece_on(king_pos - 9 * g_team)) == R_PAWN) return true;
+    if (abs(piece_on(king_pos - 1)) == R_PAWN) return true;
+    if (abs(piece_on(king_pos + 1)) == R_PAWN) return true;
+    // is attacked by a knight
+    // TODO
+    // is attacked by a rook or cannon
+    // TODO
+    // is faced by the opposite king
+    return face_king();
 }
 
-// judge whether a move is valid or not in situation
+// judge whether a move is valid or not in situation (include in-check)
 bool legal_move(Move move)
 {
     const PTYPE p = piece_on(move.beg);
@@ -219,7 +212,7 @@ bool legal_move(Move move)
     } else if (abs(p) == R_CANNON) { // cannon moves
         const int d = move.end - move.beg;
         if (move.beg % 9 != move.end % 9 && move.beg / 9 != move.end / 9)
-            return false;
+            return false; // not in the same col or same row
         if (-9 < d && d < 9) { // horizontal move
             const auto [left, right] = cannon_9(get_bl9(move.beg), move.beg);
             const auto [left2, right2] = rook_9(get_bl9(move.end), move.end);
@@ -235,9 +228,8 @@ bool legal_move(Move move)
         }
     } else if (abs(p) == R_ROOK) { // rook moves
         const int d = move.end - move.beg;
-        // not in the same col or same row
         if (move.beg % 9 != move.end % 9 || move.beg / 9 != move.end / 9)
-            return false;
+            return false; // not in the same col or same row
         if (-9 < d && d < 9) { // horizontal move
             const auto [left, right] = rook_9(get_bl9(move.beg), move.beg);
             if (!(left < move.end && move.end < right)) return false;
@@ -247,4 +239,20 @@ bool legal_move(Move move)
         }
     }
     return true;
+}
+
+// judge whether a pos has its own protector (dont pass a king pos to it)
+bool has_protector(POS pos)
+{
+    // pawn protector
+    // TODO
+    // knight protector
+    // TODO
+    // rook or cannon protector
+    // TODO
+    // bishop or advisor protector
+    // TODO
+    // king protector
+    // TODO
+    return false;
 }

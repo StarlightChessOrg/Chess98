@@ -11,7 +11,7 @@ This project is being refactored now...
 - [x] history tt and killer
 - [x] gen moves
 - [x] bitboard
-- [ ] legal move and pos attack validation
+- [ ] legal move and pos protector, in check validation
 - [x] fix bugs of cannon & rook move generator and improve
 - [ ] move picker
 - [ ] basic evaluation

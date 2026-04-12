@@ -1,3 +1,5 @@
 Language: Cpp
 BasedOnStyle: WebKit
 AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: All
