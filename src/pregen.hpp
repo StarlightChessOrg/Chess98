@@ -2,29 +2,17 @@
 #include "base.hpp"
 
 // some bit functions
-constexpr void set_left_4bit_(PREGEN_DATA& data, UINT32 number)
-{
-    data |= number << 4;
-}
+constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 
-constexpr void set_right_4bit_(PREGEN_DATA& data, UINT32 number)
-{
-    data |= number;
-}
+constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
 
-constexpr int get_left_4bit(PREGEN_DATA data)
-{
-    return data >> 4;
-}
+constexpr int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
 
-constexpr int get_right_4bit(PREGEN_DATA data)
-{
-    return data & 0xF;
-}
+constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
 
-constexpr int get_bit_on_(UINT32 data, UINT32 index_from_right)
+constexpr int get_bit_on_(UINT32 d, UINT32 index_from_right)
 {
-    return (data >> index_from_right) & 1;
+    return (d >> index_from_right) & 1;
 }
 
 // rook captures or cannon scaffolds pregen points
@@ -110,7 +98,6 @@ constexpr std::pair<POS, POS> get_banner(UINT16 bl, POS p)
     }
 }
 
-// 包装函数（对外接口不变）
 constexpr std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 {
     return get_banner<true, true>(bl9, p);

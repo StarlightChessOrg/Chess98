@@ -6,6 +6,8 @@ MATRIX g_board { };
 TEAM g_team { };
 HASH g_hashkey { };
 
+// some local variables and methods
+
 // history moves and maintaining all pieces on board
 std::vector<Move> history_moves_ { };
 std::vector<PTYPE> history_captures_ { };
@@ -17,24 +19,8 @@ std::array<PID, 90> pos_pid_b_ { };
 std::array<UINT16, 9> bl10_container { };
 std::array<UINT16, 10> bl9_container { };
 
-// position util opposite
-bool opposite(POS p) { return g_team * g_board[p] < 0; }
-
-// return team differences based on wheter you want to gen captures or not
-template <bool G>
-bool team_diff(POS p) { return G ? opposite(p) : !g_board[p]; }
-
-// get piece on pos
-PTYPE piece_on(POS p) { return g_board[p]; }
-
-// get bl10 from the table
-UINT16 get_bl10(POS pos) { return bl10_container[pos % 9]; }
-
-// get_bl9 from the table
-UINT16 get_bl9(POS pos) { return bl9_container[pos / 9]; }
-
 // judge face-kings
-bool face_king()
+bool face_king_()
 {
     if (pos_list_r_[0] % 9 == pos_list_b_[0] % 9) {
         switch (get_bl10(pos_list_r_[0])) {
@@ -52,6 +38,24 @@ bool face_king()
     }
     return false;
 }
+
+// public methods
+
+// position util opposite
+bool opposite(POS p) { return g_team * g_board[p] < 0; }
+
+// return team differences based on wheter you want to gen captures or not
+template <bool G>
+bool team_diff(POS p) { return G ? opposite(p) : !g_board[p]; }
+
+// get piece on pos
+PTYPE piece_on(POS p) { return g_board[p]; }
+
+// get bl10 from the table
+UINT16 get_bl10(POS pos) { return bl10_container[pos % 9]; }
+
+// get_bl9 from the table
+UINT16 get_bl9(POS pos) { return bl9_container[pos / 9]; }
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -163,21 +167,53 @@ void position_undo()
     g_team = -g_team;
 }
 
+//-//////////// BUGS: some serios array overflow problems are waiting to be fixed below:
+
 // judge whether current position is in check (include face-kings)
 bool in_check()
 {
     // get king pos
-    const POS king_pos = g_team == R ? pos_list_r_[0] : pos_list_b_[0];
+    const POS pos = g_team == R ? pos_list_r_[0] : pos_list_b_[0];
     // is attacked by a pawn (judging directly without validating team is ok)
-    if (abs(piece_on(king_pos - 9 * g_team)) == R_PAWN) return true;
-    if (abs(piece_on(king_pos - 1)) == R_PAWN) return true;
-    if (abs(piece_on(king_pos + 1)) == R_PAWN) return true;
+    if (abs(piece_on(pos - 9 * g_team)) == R_PAWN) return true;
+    if (abs(piece_on(pos - 1)) == R_PAWN) return true;
+    if (abs(piece_on(pos + 1)) == R_PAWN) return true;
     // is attacked by a knight
-    // TODO
+    if (!piece_on(pos - 10)) {
+        if (piece_on(pos - 19) * g_team == -R_KNIGHT) return true;
+        if (piece_on(pos - 11) * g_team == -R_KNIGHT) return true;
+    }
+    if (!piece_on(pos + 10)) {
+        if (piece_on(pos + 19) * g_team == -R_KNIGHT) return true;
+        if (piece_on(pos + 11) * g_team == -R_KNIGHT) return true;
+    }
+    if (!piece_on(pos + 8)) {
+        if (piece_on(pos + 17) * g_team == -R_KNIGHT) return true;
+        if (piece_on(pos + 7) * g_team == -R_KNIGHT) return true;
+    }
+    if (!piece_on(pos - 8)) {
+        if (piece_on(pos - 17) * g_team == -R_KNIGHT) return true;
+        if (piece_on(pos - 7) * g_team == -R_KNIGHT) return true;
+    }
     // is attacked by a rook or cannon
-    // TODO
+    const auto [left, right] = rook_9(get_bl9(pos), pos);
+    const auto [top, bottom] = rook_10(get_bl10(pos), pos);
+    if (piece_on(left) * g_team == -R_ROOK) return true;
+    if (piece_on(right) * g_team == -R_ROOK) return true;
+    if (piece_on(top) * g_team == -R_ROOK) return true;
+    if (piece_on(bottom) * g_team == -R_ROOK) return true;
+    const auto [left2, right2] = cannon_9(get_bl9(pos), pos);
+    const auto [top2, bottom2] = cannon_10(get_bl10(pos), pos);
+    if (left != INVALID_POS && piece_on(left) * g_team == -R_CANNON)
+        return true;
+    if (right2 != INVALID_POS && piece_on(right2) * g_team == -R_CANNON)
+        return true;
+    if (top2 != INVALID_POS && piece_on(top2) * g_team == -R_CANNON)
+        return true;
+    if (bottom2 != INVALID_POS && piece_on(bottom2) * g_team == -R_CANNON)
+        return true;
     // is faced by the opposite king
-    return face_king();
+    return face_king_();
 }
 
 // judge whether a move is valid or not in situation (include in-check)
@@ -245,14 +281,66 @@ bool legal_move(Move move)
 bool has_protector(POS pos)
 {
     // pawn protector
-    // TODO
+    if (piece_on(pos - 9 * g_team) * g_team == R_PAWN) return true;
+    if ((pos / 9 < 5 && g_team == R) || (pos / 9 > 4 && g_team == B)) {
+        if (piece_on(pos - 1) * g_team == R_PAWN) return true;
+        if (piece_on(pos + 1) * g_team == R_PAWN) return true;
+    }
     // knight protector
-    // TODO
+    if (!piece_on(pos - 10)) {
+        if (piece_on(pos - 19) * g_team == R_KNIGHT) return true;
+        if (piece_on(pos - 11) * g_team == R_KNIGHT) return true;
+    }
+    if (!piece_on(pos + 10)) {
+        if (piece_on(pos + 19) * g_team == R_KNIGHT) return true;
+        if (piece_on(pos + 11) * g_team == R_KNIGHT) return true;
+    }
+    if (!piece_on(pos + 8)) {
+        if (piece_on(pos + 17) * g_team == R_KNIGHT) return true;
+        if (piece_on(pos + 7) * g_team == R_KNIGHT) return true;
+    }
+    if (!piece_on(pos - 8)) {
+        if (piece_on(pos - 17) * g_team == R_KNIGHT) return true;
+        if (piece_on(pos - 7) * g_team == R_KNIGHT) return true;
+    }
     // rook or cannon protector
-    // TODO
-    // bishop or advisor protector
-    // TODO
-    // king protector
+    const auto [left, right] = rook_9(get_bl9(pos), pos);
+    const auto [top, bottom] = rook_10(get_bl10(pos), pos);
+    if (piece_on(left) * g_team == R_ROOK) return true;
+    if (piece_on(right) * g_team == R_ROOK) return true;
+    if (piece_on(top) * g_team == R_ROOK) return true;
+    if (piece_on(bottom) * g_team == R_ROOK) return true;
+    const auto [left2, right2] = cannon_9(get_bl9(pos), pos);
+    const auto [top2, bottom2] = cannon_10(get_bl10(pos), pos);
+    if (left != INVALID_POS && piece_on(left) * g_team == R_CANNON)
+        return true;
+    if (right2 != INVALID_POS && piece_on(right2) * g_team == R_CANNON)
+        return true;
+    if (top2 != INVALID_POS && piece_on(top2) * g_team == R_CANNON)
+        return true;
+    if (bottom2 != INVALID_POS && piece_on(bottom2) * g_team == R_CANNON)
+        return true;
+    // bishop protector
+    if (g_team == R && pos / 9 > 4 || g_team == B && pos / 9 < 5) {
+        if (!piece_on(pos - 10) && piece_on(pos - 20) * g_team == R_BISHOP)
+            return true;
+        if (!piece_on(pos - 8) && piece_on(pos - 16) * g_team == R_BISHOP) return true;
+        if (piece_on(pos + 20) * g_team == R_BISHOP) return true;
+        if (piece_on(pos + 16) * g_team == R_BISHOP) return true;
+    }
+    // king or advisor protector
+    const bool c1 = g_team == R && pos / 9 > 6 && pos % 9 > 2 && pos % 9 < 5;
+    const bool c2 = g_team == B && pos / 9 < 3 && pos % 9 > 2 && pos % 9 < 5;
+    if ((c1) || (c2)) {
+        if (piece_on(pos - 9) * g_team == R_KING) return true;
+        if (piece_on(pos + 9) * g_team == R_KING) return true;
+        if (piece_on(pos - 1) * g_team == R_KING) return true;
+        if (piece_on(pos + 1) * g_team == R_KING) return true;
+        if (piece_on(pos - 10) * g_team == R_ADVISOR) return true;
+        if (piece_on(pos - 8) * g_team == R_ADVISOR) return true;
+        if (piece_on(pos + 10) * g_team == R_ADVISOR) return true;
+        if (piece_on(pos + 8) * g_team == R_ADVISOR) return true;
+    }
     // TODO
     return false;
 }
