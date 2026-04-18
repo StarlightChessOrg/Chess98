@@ -19,16 +19,20 @@ std::array<PID, 90> pos_pid_b_ { };
 std::array<UINT16, 9> bl10_container { };
 std::array<UINT16, 10> bl9_container { };
 
-// position util opposite
-bool opposite(POS p) { return g_team * g_board[p] < 0; }
+// get all live pieces of current team
+std::vector<POS> get_pos_list()
+{
+    return g_team == R ? pos_list_r_ : pos_list_b_;
+}
 
 // return team differences based on wheter you want to gen captures or not
 template <bool G>
-bool team_diff(POS p) { return G ? opposite(p) : !g_board[p]; }
+bool team_diff(POS p) { return G ? g_team * g_board[p] < 0 : !g_board[p]; }
 
 // get piece on pos
 PTYPE piece_on(POS p) { return g_board[p]; }
 
+// get piece on pos with boundary check (return 0 if out of boundary)
 PTYPE p_on_(POS p) { return p < 90 ? g_board[p] : 0; }
 
 // get bl10 from the table

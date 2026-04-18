@@ -112,5 +112,12 @@ Move tt_get_move(HASH hashkey)
 
 bool see_ge(Move m, VL target_vl)
 {
+    // TODO
+    return false;
+}
+
+bool mvvlva(std::vector<Move>& move_list)
+{
+    // TODO
     return false;
 }

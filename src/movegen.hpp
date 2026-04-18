@@ -2,53 +2,56 @@
 #include "position.hpp"
 
 // king moves
+template <bool G>
 std::vector<Move> gen_king_(POS pos)
 {
     std::vector<Move> ret { };
     ret.reserve(4);
-    if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && !opposite(pos + 9))
+    if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && team_diff<G>(pos + 9))
         ret.emplace_back(pos, pos + 9);
-    if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && !opposite(pos - 9))
+    if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && team_diff<G>(pos - 9))
         ret.emplace_back(pos, pos - 9);
-    if (pos % 9 == 4 && !opposite(pos - 1)) ret.emplace_back(pos, pos - 1);
-    if (pos % 9 == 4 && !opposite(pos + 1)) ret.emplace_back(pos, pos + 1);
+    if (pos % 9 == 4 && team_diff<G>(pos - 1)) ret.emplace_back(pos, pos - 1);
+    if (pos % 9 == 4 && team_diff<G>(pos + 1)) ret.emplace_back(pos, pos + 1);
     return ret;
 }
 
 // advisor moves
+template <bool G>
 std::vector<Move> gen_advisor_(POS pos)
 {
     if (pos == 13 || pos == 76) { // black center
         std::vector<Move> ret { };
         ret.reserve(4);
-        if (!opposite(pos - 10)) ret.emplace_back(pos, pos - 10);
-        if (!opposite(pos - 8)) ret.emplace_back(pos, pos - 8);
-        if (!opposite(pos + 10)) ret.emplace_back(pos, pos + 10);
-        if (!opposite(pos + 8)) ret.emplace_back(pos, pos + 8);
+        if (team_diff<G>(pos - 10)) ret.emplace_back(pos, pos - 10);
+        if (team_diff<G>(pos - 8)) ret.emplace_back(pos, pos - 8);
+        if (team_diff<G>(pos + 10)) ret.emplace_back(pos, pos + 10);
+        if (team_diff<G>(pos + 8)) ret.emplace_back(pos, pos + 8);
         return ret;
-    } else if (pos < 24 && !opposite(13)) { // black corner
+    } else if (pos < 24 && team_diff<G>(13)) { // black corner
         return { Move(pos, 13) };
-    } else if (!opposite(76)) { // red corner
+    } else if (team_diff<G>(76)) { // red corner
         return { Move(pos, 76) };
     }
     return { };
 }
 
 // bishop moves
+template <bool G>
 std::vector<Move> gen_bishop_(POS pos)
 {
     std::vector<Move> ret { };
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos + 10) && !opposite(pos + 16))
+        if (!piece_on(pos + 10) && team_diff<G>(pos + 16))
             ret.emplace_back(pos, pos + 16);
-        if (!piece_on(pos + 12) && !opposite(pos + 20))
+        if (!piece_on(pos + 12) && team_diff<G>(pos + 20))
             ret.emplace_back(pos, pos + 20);
     }
     if (pos / 9 == 4 || pos / 9 == 9 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos - 10) && !opposite(pos - 16))
+        if (!piece_on(pos - 10) && team_diff<G>(pos - 16))
             ret.emplace_back(pos, pos - 16);
-        if (!piece_on(pos - 12) && !opposite(pos - 20))
+        if (!piece_on(pos - 12) && team_diff<G>(pos - 20))
             ret.emplace_back(pos, pos - 20);
     }
     return ret;
@@ -231,6 +234,70 @@ std::vector<Move> gen_pawn_(POS pos)
             ret.emplace_back(pos, pos - 1);
         if (pos % 9 != 8 && team_diff<G>(pos + 1))
             ret.emplace_back(pos, pos + 1);
+    }
+    return ret;
+}
+
+// generate all capture moves
+std::vector<Move> gen_all_capture_moves()
+{
+    std::vector<Move> ret { };
+    for (const POS p : get_pos_list()) {
+        const PTYPE t = abs(piece_on(p));
+        if (t == R_KING) {
+            const auto moves = gen_king_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_ADVISOR) {
+            const auto moves = gen_advisor_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_BISHOP) {
+            const auto moves = gen_bishop_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_KNIGHT) {
+            const auto moves = gen_knight_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_ROOK) {
+            const auto moves = gen_rook_bit_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_CANNON) {
+            const auto moves = gen_cannon_bit_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_PAWN) {
+            const auto moves = gen_pawn_<true>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        }
+    }
+    return ret;
+}
+
+// generate all quiet moves
+std::vector<Move> gen_all_quiet_moves()
+{
+    std::vector<Move> ret { };
+    for (const POS p : get_pos_list()) {
+        const PTYPE t = abs(piece_on(p));
+        if (t == R_KING) {
+            const auto moves = gen_king_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_ADVISOR) {
+            const auto moves = gen_advisor_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_BISHOP) {
+            const auto moves = gen_bishop_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_KNIGHT) {
+            const auto moves = gen_knight_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_ROOK) {
+            const auto moves = gen_rook_bit_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_CANNON) {
+            const auto moves = gen_cannon_bit_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        } else if (t == R_PAWN) {
+            const auto moves = gen_pawn_<false>(p);
+            ret.insert(ret.end(), moves.begin(), moves.end());
+        }
     }
     return ret;
 }

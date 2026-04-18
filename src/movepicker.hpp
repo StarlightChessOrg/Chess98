@@ -9,7 +9,10 @@ constexpr char STATUS_QUIET = 3;
 constexpr char STATUS_BAD_CAPTURES = 4;
 
 class MovePicker {
-    std::vector<Move> moves {};
+    std::vector<Move> quiet_moves { };
+    std::vector<Move> good_captures { };
+    std::vector<Move> bad_captures { };
+    std::array<bool, 8100> moves_picked { };
     char status { STATUS_TT };
     char i = -1;
 
@@ -18,10 +21,10 @@ public:
     {
         if (status == STATUS_TT) {
             status++;
-            Move ret = tt_get_move(g_hashkey);
-            return ret ? ret : next();
+            const Move m = tt_get_move(g_hashkey);
+            quiet_moves[int(m)] = m;
+            return m ? m : next();
         } else if (status == STATUS_GOOD_CAPTURES) {
-            status++;
             
         }
     }
