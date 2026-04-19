@@ -210,10 +210,14 @@ std::vector<Move> gen_cannon_bit_(POS pos)
         const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
         const auto [left, right] = cannon_9(bl9, pos);
         const auto [top, bottom] = cannon_10(bl10, pos);
-        if (left < INVALID_POS && team_diff<G>(left)) ret.emplace_back(pos, left);
-        if (right < INVALID_POS && team_diff<G>(right)) ret.emplace_back(pos, right);
-        if (top < INVALID_POS && team_diff<G>(top)) ret.emplace_back(pos, top);
-        if (bottom < INVALID_POS && team_diff<G>(bottom)) ret.emplace_back(pos, bottom);
+        if (left < INVALID_POS && team_diff<G>(left))
+            ret.emplace_back(pos, left);
+        if (right < INVALID_POS && team_diff<G>(right))
+            ret.emplace_back(pos, right);
+        if (top < INVALID_POS && team_diff<G>(top))
+            ret.emplace_back(pos, top);
+        if (bottom < INVALID_POS && team_diff<G>(bottom))
+            ret.emplace_back(pos, bottom);
         return ret;
     } else {
         return gen_rook_bit_<false>(pos);

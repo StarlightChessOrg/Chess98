@@ -3,8 +3,8 @@
 
 // history
 
-static std::array<std::array<UINT32, 90>, 90> history_table_r_ {};
-static std::array<std::array<UINT32, 90>, 90> history_table_b_ {};
+std::array<std::array<UINT32, 90>, 90> history_table_r_ {};
+std::array<std::array<UINT32, 90>, 90> history_table_b_ {};
 
 void history_init()
 {
@@ -31,7 +31,7 @@ void history_sort(std::vector<Move>& moves, TEAM team)
 
 // killer
 
-static std::array<std::array<Move, 2>, 128> killer_table_ {};
+std::array<std::array<Move, 2>, 128> killer_table_ {};
 
 void killer_init()
 {
@@ -51,21 +51,21 @@ std::array<Move, 2> killer_get(DEPTH d)
 
 // tt
 
-static std::vector<TTEntry> tt_table {};
-static int tt_size { 0 };
-static int tt_mask { 0 };
+std::vector<TTEntry> tt_table_ {};
+UINT8 tt_size_ { 0 };
+UINT8 tt_mask_ { 0 };
 
 void tt_init(int _size = 8)
 {
-    tt_table.clear();
-    tt_table.resize(1ll << _size);
-    tt_size = _size;
-    tt_mask = (1 << _size) - 1;
+    tt_table_.clear();
+    tt_table_.resize(1ll << _size);
+    tt_size_ = _size;
+    tt_mask_ = (1 << _size) - 1;
 }
 
 void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
 {
-    TTEntry& e = tt_table[hashkey & tt_mask];
+    TTEntry& e = tt_table_[hashkey & tt_mask_];
     if (e.key == 0) { // empty set
         e.key = hashkey;
         e.flag = flag;
@@ -90,7 +90,7 @@ void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
 
 VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 {
-    const TTEntry& e = tt_table[hashkey & tt_mask];
+    const TTEntry& e = tt_table_[hashkey & tt_mask_];
     if (e.key != hashkey || e.depth < depth) {
         return INVALID_VL;
     } else if (e.flag == EXACT) {
@@ -105,7 +105,7 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 
 Move tt_get_move(HASH hashkey)
 {
-    return tt_table[hashkey & tt_mask].move;
+    return tt_table_[hashkey & tt_mask_].move;
 }
 
 // capture

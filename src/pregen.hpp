@@ -1,7 +1,9 @@
 #pragma once
 #include "base.hpp"
 
-// some bit functions
+using PREGEN_DATA = UINT8;
+using PREGEN_TABLE = std::array<std::array<PREGEN_DATA, 1024>, 10>;
+
 constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 
 constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
@@ -77,7 +79,7 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
 
 // interface (invalid pos which is greater than 100 contained in cannon)
 template <bool IS_9, bool IS_ROOK>
-constexpr std::pair<POS, POS> get_banner(UINT16 bl, POS p)
+std::pair<POS, POS> get_banner(UINT16 bl, POS p)
 {
     const PREGEN_DATA v = [p, bl]() constexpr {
         if constexpr (IS_ROOK) {
@@ -98,22 +100,22 @@ constexpr std::pair<POS, POS> get_banner(UINT16 bl, POS p)
     }
 }
 
-constexpr std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
+std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 {
     return get_banner<true, true>(bl9, p);
 }
 
-constexpr std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
+std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
 {
     return get_banner<false, true>(bl10, p);
 }
 
-constexpr std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
+std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
 {
     return get_banner<true, false>(bl9, p);
 }
 
-constexpr std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
+std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
 {
     return get_banner<false, false>(bl10, p);
 }

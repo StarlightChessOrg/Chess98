@@ -13,8 +13,6 @@
 #include <utility>
 #include <vector>
 
-// defines
-
 struct Move;
 struct Timer;
 struct TTEntry;
@@ -32,8 +30,6 @@ using HASH_FLAG = std::int8_t;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
-using PREGEN_DATA = UINT8;
-using PREGEN_TABLE = std::array<std::array<PREGEN_DATA, 1024>, 10>;
 constexpr POS INVALID_POS = 100;
 constexpr HASH_FLAG EXACT = 0;
 constexpr HASH_FLAG ALPHA = 1;
