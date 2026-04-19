@@ -14,7 +14,7 @@ This project is being refactored now...
 - [x] legal move and pos protector, in check validation
 - [x] fix bugs of cannon & rook move generator and improve
 - [ ] mvv/lva and SEE
-- [ ] move picker
+- [x] move picker
 - [ ] basic evaluation
 - [ ] search
 - [ ] ucci
