@@ -12,16 +12,13 @@ enum {
 };
 
 class MovePicker {
-    std::vector<Move> moves {};
-    DEPTH depth {};
+    std::vector<Move> moves { };
+    DEPTH depth { 0 };
     char status { STATUS_TT };
     char i = -1;
 
 public:
-    MovePicker(DEPTH d)
-        : depth(d)
-    {
-    }
+    MovePicker(DEPTH d) : depth(d) { }
     Move next()
     {
         if (status == STATUS_TT) {
@@ -29,12 +26,13 @@ public:
             const Move m = tt_get_move(g_hashkey);
             return m ? m : next();
         }
-        if (status == STATUS_END) return Move {};
+        if (status == STATUS_END) return Move { };
         if (i == -1) {
             if (status == STATUS_GOOD_CAPTURES) {
                 moves = gen_all_capture_moves();
                 // TODO
             } else if (status == STATUS_KILLER) {
+                moves.clear();
                 for (const Move m : killer_get(depth)) {
                     if (legal_move(m)) moves.emplace_back(m);
                 }
@@ -42,7 +40,7 @@ public:
                 moves = gen_all_quiet_moves();
                 history_sort(moves, g_team);
             } else if (status == STATUS_BAD_CAPTURES) {
-                moves = {};
+                moves = { };
                 // TODO
             }
         }

@@ -3,3 +3,4 @@ BasedOnStyle: WebKit
 AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
+ConstructorInitializerAllOnOneLineOrOnePerLine: true

@@ -102,15 +102,10 @@ struct Timer {
     std::chrono::steady_clock::time_point beg { };
     std::chrono::milliseconds limit { };
 
-    Timer()
-        : beg(std::chrono::steady_clock::now())
-    {
-    }
+    Timer() : beg(std::chrono::steady_clock::now()) { }
     Timer(int _limit)
         : beg(std::chrono::steady_clock::now())
-        , limit(std::chrono::milliseconds(_limit))
-    {
-    }
+        , limit(std::chrono::milliseconds(_limit)) { }
     bool time_up() const noexcept
     {
         return std::chrono::steady_clock::now() - beg >= limit;
