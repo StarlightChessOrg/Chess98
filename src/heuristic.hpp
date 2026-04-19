@@ -44,7 +44,7 @@ void update(Move move, DEPTH d)
     killer_table_[d][0] = move;
 }
 
-std::array<Move, 2> get(DEPTH d)
+std::array<Move, 2> killer_get(DEPTH d)
 {
     return killer_table_[d];
 }
