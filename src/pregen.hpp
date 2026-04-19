@@ -76,14 +76,14 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
 }();
 
 // interface (invalid pos which is greater than 100 contained in cannon)
-template <bool IS_9, bool TYPE>
+template <bool IS_9, bool IS_ROOK>
 constexpr std::pair<POS, POS> get_banner(UINT16 bl, POS p)
 {
     const PREGEN_DATA v = [p, bl]() constexpr {
-        if constexpr (TYPE) {
-            return IS_9 ? CANNON_PREGEN[p % 9][bl] : CANNON_PREGEN[p / 9][bl];
-        } else {
+        if constexpr (IS_ROOK) {
             return IS_9 ? LINEAR_PREGEN[p % 9][bl] : LINEAR_PREGEN[p / 9][bl];
+        } else {
+            return IS_9 ? CANNON_PREGEN[p % 9][bl] : CANNON_PREGEN[p / 9][bl];
         }
     }();
     const POS v1 = get_left_4bit(v);

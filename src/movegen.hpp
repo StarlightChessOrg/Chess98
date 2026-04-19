@@ -136,7 +136,7 @@ std::vector<Move> gen_cannon_legacy_(POS pos)
                 t = true;
                 continue;
             } else if (t == true && piece_on(p)) {
-                if (opposite(p)) ret.emplace_back(pos, p);
+                if (team_diff<G>(p)) ret.emplace_back(pos, p);
                 break;
             }
         }
@@ -145,7 +145,7 @@ std::vector<Move> gen_cannon_legacy_(POS pos)
                 t = true;
                 continue;
             } else if (t == true && piece_on(p)) {
-                if (opposite(p)) ret.emplace_back(pos, p);
+                if (team_diff<G>(p)) ret.emplace_back(pos, p);
                 break;
             }
         }
@@ -154,7 +154,7 @@ std::vector<Move> gen_cannon_legacy_(POS pos)
                 t = true;
                 continue;
             } else if (t == true && piece_on(p)) {
-                if (opposite(p)) ret.emplace_back(pos, p);
+                if (team_diff<G>(p)) ret.emplace_back(pos, p);
                 break;
             }
         }
@@ -163,7 +163,7 @@ std::vector<Move> gen_cannon_legacy_(POS pos)
                 t = true;
                 continue;
             } else if (t == true && piece_on(p)) {
-                if (opposite(p)) ret.emplace_back(pos, p);
+                if (team_diff<G>(p)) ret.emplace_back(pos, p);
                 break;
             }
         }
