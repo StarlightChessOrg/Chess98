@@ -124,6 +124,6 @@ void mvvlva(std::vector<Move>& move_list)
         const VL a_end = WEIGHTS[abs(piece_on(a.end))];
         const VL b_beg = WEIGHTS[abs(piece_on(b.beg))];
         const VL b_end = WEIGHTS[abs(piece_on(b.end))];
-        return a_beg - a_end > b_beg - b_end;
+        return a_beg - a_end < b_beg - b_end;
     });
 }

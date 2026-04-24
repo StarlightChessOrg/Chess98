@@ -7,7 +7,7 @@ constexpr MATRIX test_matrix {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     R_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_ROOK, 0, 0, 0, 0, 0, 0, 0, 0,
+    R_ROOK, B_PAWN, B_CANNON, B_ROOK, B_PAWN, 0, 0, 0, 0,
     B_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -26,13 +26,7 @@ int main()
 {
     init_everything();
     // test code
-    MovePicker mp(0);
-    int i = 0;
-    for (Move m = mp.next(); m; m = mp.next()) {
-        i++;
-        std::cout << i << ": "
-                  << (int)m.beg << "->"
-                  << (int)m.end << std::endl;
-    }
+    std::vector<Move> a { { 45, 54 }, { 45, 46 }, { 45, 47 }, { 45, 48 } };
+    mvvlva(a);
     return 0;
 }
