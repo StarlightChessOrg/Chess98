@@ -168,9 +168,8 @@ std::vector<Move> gen_cannon_legacy_(POS pos)
             }
         }
         return ret;
-    } else {
-        return gen_rook_legacy_<false>(pos);
     }
+    return gen_rook_legacy_<false>(pos);
 }
 
 // rook moves (bit)
@@ -219,9 +218,8 @@ std::vector<Move> gen_cannon_bit_(POS pos)
         if (bottom < INVALID_POS && team_diff<G>(bottom))
             ret.emplace_back(pos, bottom);
         return ret;
-    } else {
-        return gen_rook_bit_<false>(pos);
     }
+    return gen_rook_bit_<false>(pos);
 }
 
 // pawn moves
