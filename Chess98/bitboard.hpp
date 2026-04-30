@@ -10,16 +10,15 @@ using REGION_CANNON = std::array<int, 4>;
 using TYPE_ROOK_CACHE = std::array<std::array<REGION_ROOK, 10>, 1024>;
 using TYPE_CANNON_CACHE = std::array<std::array<REGION_CANNON, 10>, 1024>;
 
-class Bitboard
-{
+class Bitboard {
 public:
     Bitboard(PIECEID_MAP pieceidMap);
 
 protected:
-    TYPE_ROOK_CACHE rookCache{};
-    TYPE_CANNON_CACHE cannonCache{};
-    BITARRAY_X xBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0};
-    BITARRAY_Y yBitBoard{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    TYPE_ROOK_CACHE rookCache { };
+    TYPE_CANNON_CACHE cannonCache { };
+    BITARRAY_X xBitBoard { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    BITARRAY_Y yBitBoard { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 public:
     REGION_ROOK getRookRegion(UINT32 bitline, int index, int endpos);
@@ -40,20 +39,16 @@ protected:
 Bitboard::Bitboard(PIECEID_MAP pieceidMap)
 {
     // 初始化棋盘
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
-            if (pieceidMap[x][y] != EMPTY_PIECEID) this->setBit(x, y);
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
+            if (pieceidMap[x][y] != EMPTY_PIECEID)
+                this->setBit(x, y);
         }
     }
     // 初始化车、炮的着法缓存
-    for (UINT32 bitline = 1; bitline <= pow(2, 10); bitline++)
-    {
-        for (int index = 0; index <= 9; index++)
-        {
-            if (this->getBit(bitline, index) == 1)
-            {
+    for (UINT32 bitline = 1; bitline <= pow(2, 10); bitline++) {
+        for (int index = 0; index <= 9; index++) {
+            if (this->getBit(bitline, index) == 1) {
                 this->rookCache[bitline][index] = this->generateRookRegion(bitline, index);
                 this->cannonCache[bitline][index] = this->generateCannonRegion(bitline, index);
             }
@@ -64,8 +59,7 @@ Bitboard::Bitboard(PIECEID_MAP pieceidMap)
 REGION_ROOK Bitboard::getRookRegion(UINT32 bitline, int index, int endpos)
 {
     REGION_ROOK result = this->rookCache[bitline][index];
-    if (endpos == 8 && result[1] == 9)
-    {
+    if (endpos == 8 && result[1] == 9) {
         result[1] = 8;
     }
     return result;
@@ -74,8 +68,7 @@ REGION_ROOK Bitboard::getRookRegion(UINT32 bitline, int index, int endpos)
 REGION_CANNON Bitboard::getCannonRegion(UINT32 bitline, int index, int endpos)
 {
     REGION_CANNON result = this->cannonCache[bitline][index];
-    if (endpos == 8 && result[3] == 9)
-    {
+    if (endpos == 8 && result[3] == 9) {
         result[2] = result[3] = 8;
     }
     return result;
@@ -91,8 +84,7 @@ void Bitboard::doMove(int x1, int y1, int x2, int y2)
 void Bitboard::undoMove(int x1, int y1, int x2, int y2, bool eaten)
 {
     this->setBit(x1, y1);
-    if (!eaten)
-    {
+    if (!eaten) {
         this->deleteBit(x2, y2);
     }
 }
@@ -113,24 +105,20 @@ REGION_ROOK Bitboard::generateRookRegion(UINT32 bitline, int index) const
 {
     int beg = 0;
     int end = 9;
-    for (int pos = index - 1; pos >= 0; pos--)
-    {
-        if (this->getBit(bitline, pos) != 0)
-        {
+    for (int pos = index - 1; pos >= 0; pos--) {
+        if (this->getBit(bitline, pos) != 0) {
             beg = pos;
             break;
         }
     }
-    for (int pos = index + 1; pos <= 9; pos++)
-    {
-        if (this->getBit(bitline, pos) != 0)
-        {
+    for (int pos = index + 1; pos <= 9; pos++) {
+        if (this->getBit(bitline, pos) != 0) {
             end = pos;
             break;
         }
     }
 
-    return REGION_ROOK{beg, end};
+    return REGION_ROOK { beg, end };
 }
 
 REGION_CANNON Bitboard::generateCannonRegion(UINT32 bitline, int index) const
@@ -139,16 +127,12 @@ REGION_CANNON Bitboard::generateCannonRegion(UINT32 bitline, int index) const
     int beg = 0;
     int end = 9;
     int eaten2 = 9;
-    for (int pos = index - 1; pos >= 0; pos--)
-    {
-        if (this->getBit(bitline, pos) != 0)
-        {
+    for (int pos = index - 1; pos >= 0; pos--) {
+        if (this->getBit(bitline, pos) != 0) {
             beg = pos + 1;
             eaten1 = pos + 1;
-            for (int pos2 = pos - 1; pos2 >= 0; pos2--)
-            {
-                if (this->getBit(bitline, pos2) != 0)
-                {
+            for (int pos2 = pos - 1; pos2 >= 0; pos2--) {
+                if (this->getBit(bitline, pos2) != 0) {
                     eaten1 = pos2;
                     break;
                 }
@@ -156,16 +140,12 @@ REGION_CANNON Bitboard::generateCannonRegion(UINT32 bitline, int index) const
             break;
         }
     }
-    for (int pos = index + 1; pos <= 9; pos++)
-    {
-        if (this->getBit(bitline, pos) != 0)
-        {
+    for (int pos = index + 1; pos <= 9; pos++) {
+        if (this->getBit(bitline, pos) != 0) {
             end = pos - 1;
             eaten2 = pos - 1;
-            for (int pos2 = pos + 1; pos2 <= 9; pos2++)
-            {
-                if (this->getBit(bitline, pos2) != 0)
-                {
+            for (int pos2 = pos + 1; pos2 <= 9; pos2++) {
+                if (this->getBit(bitline, pos2) != 0) {
                     eaten2 = pos2;
                     break;
                 }
@@ -174,5 +154,5 @@ REGION_CANNON Bitboard::generateCannonRegion(UINT32 bitline, int index) const
         }
     }
 
-    return REGION_CANNON{eaten1, beg, end, eaten2};
+    return REGION_CANNON { eaten1, beg, end, eaten2 };
 }

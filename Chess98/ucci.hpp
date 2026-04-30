@@ -1,7 +1,6 @@
 #include "search.hpp"
 
-class UCCI
-{
+class UCCI {
 public:
     UCCI()
     {
@@ -29,8 +28,8 @@ public:
     int maxDepth = 20;
     bool ready = false;
     bool searchCompleted = true;
-    Result searchResult{};
-    std::thread searchThread{};
+    Result searchResult { };
+    std::thread searchThread { };
 
 public:
     std::string fen() const { return pieceidmapToFen(search->board.pieceidMap, search->board.team); }
@@ -54,19 +53,16 @@ public:
     }
     MOVES parseMovesInput(std::string moves) const
     {
-        if (moves[moves.length() - 1] == ' ')
-        {
+        if (moves[moves.length() - 1] == ' ') {
             moves += " ";
         }
         // 按空格将moves切开
         MOVES moveList;
         size_t start = 0;
         size_t end = moves.find(' ');
-        while (end != std::string::npos)
-        {
+        while (end != std::string::npos) {
             std::string moveStr = moves.substr(start, end - start);
-            if (moveStr.length() == 4)
-            {
+            if (moveStr.length() == 4) {
                 moveList.emplace_back(convertToEngineMove(moveStr));
             }
             start = end + 1;
@@ -79,44 +75,33 @@ public:
 // cli
 void UCCI::cli()
 {
-    while (true)
-    {
+    while (true) {
         // 不断获取输入值
         std::string cmd;
         std::getline(std::cin, cmd);
 
         // 任何状态下都可以进行的指令
-        if (cmd == "ucci")
-        {
+        if (cmd == "ucci") {
             ucci();
-        }
-        else if (cmd == "isready")
-        {
+        } else if (cmd == "isready") {
             isready();
-        }
-        else if (cmd.substr(0, 9) == "setoption")
-        {
+        } else if (cmd.substr(0, 9) == "setoption") {
             size_t name_pos = cmd.find("name");
             size_t value_pos = cmd.find("value");
             std::string name = cmd.substr(name_pos + 5, value_pos - name_pos - 6);
             std::string value = cmd.substr(value_pos + 6);
             setoption(name, value);
-        }
-        else if (cmd == "quit")
-        {
+        } else if (cmd == "quit") {
             quit();
         }
         if (!searchCompleted) // 搜索中才可以进行的指令
         {
-            if (cmd == "stop")
-            {
+            if (cmd == "stop") {
                 stop();
             }
-        }
-        else // 没有进入搜索状态才可以进行的指令
+        } else // 没有进入搜索状态才可以进行的指令
         {
-            if (cmd.substr(0, 2) == "go")
-            {
+            if (cmd.substr(0, 2) == "go") {
                 // AI 生成的一个movetime和depth解析的代码
                 int timeArg = maxTime;
                 int depthArg = maxDepth;
@@ -124,7 +109,8 @@ void UCCI::cli()
                 size_t pos = 2;
                 auto nextToken = [&](size_t& p) -> std::string {
                     p = cmd.find_first_not_of(' ', p);
-                    if (p == std::string::npos) return "";
+                    if (p == std::string::npos)
+                        return "";
                     size_t q = cmd.find(' ', p);
                     std::string tok = (q == std::string::npos) ? cmd.substr(p) : cmd.substr(p, q - p);
                     p = (q == std::string::npos) ? std::string::npos : q + 1;
@@ -132,21 +118,15 @@ void UCCI::cli()
                 };
 
                 std::string token = nextToken(pos);
-                while (!token.empty())
-                {
-                    if (token == "depth")
-                    {
+                while (!token.empty()) {
+                    if (token == "depth") {
                         std::string val = nextToken(pos);
-                        if (!val.empty())
-                        {
+                        if (!val.empty()) {
                             depthArg = std::stoi(val);
                         }
-                    }
-                    else if (token == "movetime")
-                    {
+                    } else if (token == "movetime") {
                         std::string val = nextToken(pos);
-                        if (!val.empty())
-                        {
+                        if (!val.empty()) {
                             timeArg = std::stoi(val);
                         }
                     }
@@ -154,9 +134,7 @@ void UCCI::cli()
                 }
 
                 go(timeArg, depthArg);
-            }
-            else if (cmd.substr(0, 12) == "position fen")
-            {
+            } else if (cmd.substr(0, 12) == "position fen") {
                 std::string fen = "";
                 std::string moves = "";
                 size_t moves_pos = cmd.find("moves");
@@ -165,9 +143,8 @@ void UCCI::cli()
                 if (moves_pos == std::string::npos) // 没有moves参数的情况
                 {
                     fen = cmd.substr(13);
-                    position(fen, MOVES{});
-                }
-                else // 有moves参数的情况
+                    position(fen, MOVES { });
+                } else // 有moves参数的情况
                 {
                     fen = cmd.substr(13, moves_pos - 10);
                     moves = cmd.substr(moves_pos + 6) + " ";
@@ -175,9 +152,7 @@ void UCCI::cli()
                     position(fen, moveList);
                 }
                 continue;
-            }
-            else if (cmd.substr(0, 8) == "banmoves")
-            {
+            } else if (cmd.substr(0, 8) == "banmoves") {
                 std::string moves = cmd.substr(9);
                 MOVES moveList = parseMovesInput(moves);
                 banmoves(moveList);
@@ -201,12 +176,9 @@ void UCCI::isready() const
 // setoption my_option_name my_option_value
 void UCCI::setoption(const std::string& name, const std::string& value)
 {
-    if (name == "usebook")
-    {
+    if (name == "usebook") {
         search->useBook = (value == "true" || value == "1");
-    }
-    else if (name == "usemillisec")
-    {
+    } else if (name == "usemillisec") {
         return;
     }
 }
@@ -217,8 +189,7 @@ void UCCI::position(const std::string& fenCode, const MOVES& moves)
     PIECEID_MAP pieceidMap = fenToPieceidmap(fenCode);
     TEAM team = (fenCode.find("w") != std::string::npos) ? RED : BLACK;
     search = std::make_unique<Search>(pieceidMap, team);
-    for (const Move& move : moves)
-    {
+    for (const Move& move : moves) {
         search->board.doMove(move);
     }
 }
@@ -226,8 +197,7 @@ void UCCI::position(const std::string& fenCode, const MOVES& moves)
 // banmove my_banned_moves
 void UCCI::banmoves(const MOVES& moves)
 {
-    for (const Move& move : moves)
-    {
+    for (const Move& move : moves) {
         search->bannedMoves[move.id] = 1;
     }
 }
@@ -241,8 +211,7 @@ void UCCI::go(int time, int depth)
         searchCompleted = false;
         Result result = search->searchMain(maxDepth, maxTime);
         // 如果search进程没有被强行终止
-        if (!searchCompleted)
-        {
+        if (!searchCompleted) {
             std::cout << "bestmove " << convertToUCCIMove(result.move) << std::endl;
             searchCompleted = true;
             searchResult = result;

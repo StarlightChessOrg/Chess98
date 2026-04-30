@@ -2,21 +2,21 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <ctime>
+#include <fstream>
+#include <functional>
+#include <future>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <random>
 #include <string>
-#include <vector>
-#include <functional>
-#include <chrono>
-#include <unordered_map>
-#include <memory>
-#include <fstream>
 #include <thread>
-#include <future>
+#include <unordered_map>
+#include <vector>
 #ifdef _WIN32
 #include <windows.h>
 #elif __unix__
@@ -82,7 +82,20 @@ const SEARCH_TYPE PV = 1;
 const SEARCH_TYPE CUT = 2;
 const SEARCH_TYPE QUIESC = 3;
 const std::vector<PIECEID> ALL_PIECEIDS = {
-    R_KING, R_GUARD, R_BISHOP, R_KNIGHT, R_ROOK, R_CANNON, R_PAWN, B_KING, B_GUARD, B_BISHOP, B_KNIGHT, B_ROOK, B_CANNON, B_PAWN,
+    R_KING,
+    R_GUARD,
+    R_BISHOP,
+    R_KNIGHT,
+    R_ROOK,
+    R_CANNON,
+    R_PAWN,
+    B_KING,
+    B_GUARD,
+    B_BISHOP,
+    B_KNIGHT,
+    B_ROOK,
+    B_CANNON,
+    B_PAWN,
 };
 void wait(int ms);
 void command(std::string str);
@@ -92,27 +105,26 @@ PIECEID_MAP fenToPieceidmap(std::string fenCode);
 std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team);
 TEAM fenToTeam(std::string fenCode);
 
-class Piece
-{
+class Piece {
 public:
     Piece() = default;
-    Piece(PIECEID pieceid) : pieceid(pieceid) {}
-    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex) : pieceid(pieceid), x(x), y(y), pieceIndex(pieceIndex)
+    Piece(PIECEID pieceid)
+        : pieceid(pieceid)
     {
-        if (this->pieceid == EMPTY_PIECEID)
-        {
+    }
+    Piece(PIECEID pieceid, int x, int y, PIECE_INDEX pieceIndex)
+        : pieceid(pieceid)
+        , x(x)
+        , y(y)
+        , pieceIndex(pieceIndex)
+    {
+        if (this->pieceid == EMPTY_PIECEID) {
             this->team = EMPTY_TEAM;
-        }
-        else if (this->pieceid == OVERFLOW_PIECEID)
-        {
+        } else if (this->pieceid == OVERFLOW_PIECEID) {
             this->team = OVERFLOW_TEAM;
-        }
-        else if (this->pieceid > 0)
-        {
+        } else if (this->pieceid > 0) {
             this->team = RED;
-        }
-        else
-        {
+        } else {
             this->team = BLACK;
         }
         this->isLive = true;
@@ -127,12 +139,16 @@ public:
     bool isLive = false;
 };
 
-class Move
-{
+class Move {
 public:
     Move() = default;
     Move(int x1, int y1, int x2, int y2, int val = 0, MOVE_TYPE moveType = NORMAL)
-        : x1(x1), y1(y1), x2(x2), y2(y2), val(val), moveType(moveType)
+        : x1(x1)
+        , y1(y1)
+        , x2(x2)
+        , y2(y2)
+        , val(val)
+        , moveType(moveType)
     {
         this->id = x1 * 1000 + y1 * 100 + x2 * 10 + y2;
         this->startpos = x1 * 10 + y1;
@@ -154,34 +170,39 @@ public:
     int val = 0;
     MOVE_TYPE moveType = NORMAL;
     bool isCheckingMove = false;
-    Piece attacker{};
-    Piece captured{};
+    Piece attacker { };
+    Piece captured { };
 };
 
-class Result
-{
+class Result {
 public:
     Result() = default;
-    Result(Move move, int vl) : move(move), vl(vl) {}
+    Result(Move move, int vl)
+        : move(move)
+        , vl(vl)
+    {
+    }
 
 public:
-    Move move{};
+    Move move { };
     int vl = 0;
 };
 
-class Trick
-{
+class Trick {
 public:
     Trick() = default;
-    Trick(int result) : success(true), data(result) {}
+    Trick(int result)
+        : success(true)
+        , data(result)
+    {
+    }
 
 public:
     bool success = false;
     int data = 0;
 };
 
-class TransItem
-{
+class TransItem {
 public:
     TransItem() = default;
 
@@ -193,13 +214,12 @@ public:
     int32 exactDepth = 0;
     int32 betaDepth = 0;
     int32 alphaDepth = 0;
-    Move exactMove{};
-    Move betaMove{};
-    Move alphaMove{};
+    Move exactMove { };
+    Move betaMove { };
+    Move alphaMove { };
 };
 
-class Information
-{
+class Information {
 public:
     Information() = default;
     void clear()
@@ -210,16 +230,16 @@ public:
         situation = "";
         durationMs.fill(0);
         vlSearched.fill(0);
-        moveSearched.fill(Move{});
+        moveSearched.fill(Move { });
     }
 
 public:
     bool isBookmove = false;
     int depth = 0;
     std::string situation = "";
-    std::array<int, ENGINE_MAX_DEPTH> durationMs{};
-    std::array<int, ENGINE_MAX_DEPTH> vlSearched{};
-    std::array<Move, ENGINE_MAX_DEPTH> moveSearched{};
+    std::array<int, ENGINE_MAX_DEPTH> durationMs { };
+    std::array<int, ENGINE_MAX_DEPTH> vlSearched { };
+    std::array<Move, ENGINE_MAX_DEPTH> moveSearched { };
 
 protected:
     int printedDepth = 0;
@@ -235,8 +255,7 @@ public:
 
     void setInfo(int vl, Move move, int duration)
     {
-        if (depth < ENGINE_MAX_DEPTH)
-        {
+        if (depth < ENGINE_MAX_DEPTH) {
             this->vlSearched[depth] = vl;
             this->moveSearched[depth] = move;
             this->durationMs[depth] = duration;
@@ -247,27 +266,23 @@ public:
 
     Result getBestResult() const
     {
-        if (depth == 0)
-        {
-            return Result{};
+        if (depth == 0) {
+            return Result { };
         }
         // 直接返回最深的搜索结果
-        return Result{moveSearched[depth - 1], vlSearched[depth - 1]};
+        return Result { moveSearched[depth - 1], vlSearched[depth - 1] };
     }
 
     void print()
     {
-        if (printedDepth == 0)
-        {
+        if (printedDepth == 0) {
             std::cout << "situation: " << situation << " ";
-            if (isBookmove)
-            {
+            if (isBookmove) {
                 std::cout << "(openbook move)";
             }
             std::cout << std::endl;
         }
-        while (printedDepth < depth)
-        {
+        while (printedDepth < depth) {
             std::cout << "info depth " << (printedDepth + 1);
             std::cout << " score cp " << vlSearched[printedDepth];
             std::cout << " time " << durationMs[printedDepth];
@@ -290,19 +305,19 @@ void command(std::string str)
 void readFile(std::string filename, std::string& content)
 {
     std::ifstream file(filename, std::ios::in | std::ios::binary);
-    if (!file)
-    {
+    if (!file) {
         content = "";
     }
-    std::string result((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::string result {
+        std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()
+    };
     content = result;
 }
 
 void writeFile(std::string filename, std::string content)
 {
     std::ofstream file(filename, std::ios::out | std::ios::binary);
-    if (!file)
-    {
+    if (!file) {
         std::cerr << "Failed to open file for writing: " << filename << std::endl;
         return;
     }
@@ -311,68 +326,61 @@ void writeFile(std::string filename, std::string content)
 
 PIECEID_MAP fenToPieceidmap(std::string fenCode)
 {
-    PIECEID_MAP pieceidMap = PIECEID_MAP{};
+    const std::map<char, PIECEID> pairs {
+        { 'R', R_ROOK }, { 'N', R_KNIGHT }, { 'H', R_KNIGHT },
+        { 'B', R_BISHOP }, { 'E', R_BISHOP }, { 'G', R_GUARD },
+        { 'A', R_GUARD }, { 'K', R_KING }, { 'C', R_CANNON },
+        { 'P', R_PAWN }, { 'r', B_ROOK }, { 'n', B_KNIGHT },
+        { 'h', B_KNIGHT }, { 'b', B_BISHOP }, { 'e', B_BISHOP },
+        { 'g', B_GUARD }, { 'a', B_GUARD }, { 'k', B_KING },
+        { 'c', B_CANNON }, { 'p', B_PAWN }
+    };
+    PIECEID_MAP pieceidMap = PIECEID_MAP { };
     int colNum = 9;
     int rowNum = 0;
-    std::map<char, PIECEID> pairs{{'R', R_ROOK},  {'N', R_KNIGHT}, {'H', R_KNIGHT}, {'B', R_BISHOP}, {'E', R_BISHOP},
-                                  {'G', R_GUARD}, {'A', R_GUARD},  {'K', R_KING},   {'C', R_CANNON}, {'P', R_PAWN},
-                                  {'r', B_ROOK},  {'n', B_KNIGHT}, {'h', B_KNIGHT}, {'b', B_BISHOP}, {'e', B_BISHOP},
-                                  {'g', B_GUARD}, {'a', B_GUARD},  {'k', B_KING},   {'c', B_CANNON}, {'p', B_PAWN}};
-    for (int i = 0; i < fenCode.size(); i++)
-    {
-        if (fenCode[i] >= '1' && fenCode[i] <= '9')
-        {
+    for (int i = 0; i < fenCode.size(); i++) {
+        if (fenCode[i] >= '1' && fenCode[i] <= '9') {
             rowNum += fenCode[i] - '0';
             continue;
-        }
-        else if (fenCode[i] == '/')
-        {
+        } else if (fenCode[i] == '/') {
             rowNum = 0;
             colNum--;
             continue;
-        }
-        else if (fenCode[i] == ' ')
-        {
+        } else if (fenCode[i] == ' ') {
             break;
-        }
-        else
-        {
+        } else {
             pieceidMap[rowNum][colNum] = pairs.at(fenCode[i]);
         }
         rowNum++;
     }
-
     return pieceidMap;
 }
 
 std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
 {
+    const std::map<PIECEID, char> pairs {
+        { R_KING, 'K' }, { R_GUARD, 'A' }, { R_BISHOP, 'B' },
+        { R_KNIGHT, 'N' }, { R_ROOK, 'R' }, { R_CANNON, 'C' },
+        { R_PAWN, 'P' }, { B_KING, 'k' }, { B_GUARD, 'a' },
+        { B_BISHOP, 'b' }, { B_KNIGHT, 'n' }, { B_ROOK, 'r' },
+        { B_CANNON, 'c' }, { B_PAWN, 'p' }
+    };
     std::string result = "";
     int spaceCount = 0;
-    std::map<PIECEID, char> pairs{{R_KING, 'K'},   {R_GUARD, 'A'}, {R_BISHOP, 'B'}, {R_KNIGHT, 'N'}, {R_ROOK, 'R'},
-                                  {R_CANNON, 'C'}, {R_PAWN, 'P'},  {B_KING, 'k'},   {B_GUARD, 'a'},  {B_BISHOP, 'b'},
-                                  {B_KNIGHT, 'n'}, {B_ROOK, 'r'},  {B_CANNON, 'c'}, {B_PAWN, 'p'}};
-    for (int x = 9; x >= 0; x--)
-    {
-        for (int y = 0; y < 9; y++)
-        {
+    for (int x = 9; x >= 0; x--) {
+        for (int y = 0; y < 9; y++) {
             PIECEID pieceid = pieceidMap[y][x];
-            if (pieceid == EMPTY_PIECEID)
-            {
+            if (pieceid == EMPTY_PIECEID) {
                 spaceCount++;
-            }
-            else
-            {
-                if (spaceCount > 0)
-                {
+            } else {
+                if (spaceCount > 0) {
                     result += std::to_string(spaceCount);
                     spaceCount = 0;
                 }
                 result += pairs.at(pieceid);
             }
         }
-        if (spaceCount > 0)
-        {
+        if (spaceCount > 0) {
             result += std::to_string(spaceCount);
             spaceCount = 0;
         }
@@ -381,7 +389,6 @@ std::string pieceidmapToFen(PIECEID_MAP pieceidMap, TEAM team)
     result.pop_back();
     result += team == RED ? " w" : " b";
     result += " - - 0 1";
-
     return result;
 }
 

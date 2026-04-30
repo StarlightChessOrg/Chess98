@@ -3,8 +3,7 @@
 #include "movesgen.hpp"
 
 // 历史启发
-class HistoryTable
-{
+class HistoryTable {
 public:
     HistoryTable() = default;
     void reset() { this->historyTable = std::make_unique<HISTORY_TABLE>(); }
@@ -24,8 +23,7 @@ public:
 
     void sort(MOVES& moves) const
     {
-        for (Move& move : moves)
-        {
+        for (Move& move : moves) {
             const int pos1 = 10 * move.x1 + move.y1;
             const int pos2 = 10 * move.x2 + move.y2;
             const int team = move.attacker.team == RED ? 0 : 1;
@@ -37,8 +35,7 @@ public:
 };
 
 // 杀手启发
-class KillerTable
-{
+class KillerTable {
 public:
     KillerTable() = default;
     void reset() { this->killerMoves = std::make_unique<KILLER_MOVES>(); }
@@ -57,11 +54,9 @@ public:
 
     MOVES get(Board& board) const
     {
-        MOVES results{};
-        for (const Move& move : this->killerMoves->at(board.distance))
-        {
-            if (board.isValidMoveInSituation(move))
-            {
+        MOVES results { };
+        for (const Move& move : this->killerMoves->at(board.distance)) {
+            if (board.isValidMoveInSituation(move)) {
                 results.emplace_back(move);
             }
         }
@@ -70,8 +65,7 @@ public:
 };
 
 // 置换表启发
-class Tt
-{
+class Tt {
 public:
     Tt(uint64 hashLevel = 16)
     {
@@ -81,15 +75,14 @@ public:
     }
     void reset()
     {
-        for (TransItem& item : this->items)
-        {
-            item = TransItem{};
+        for (TransItem& item : this->items) {
+            item = TransItem { };
         }
     }
 
 protected:
     using HASH_ITEMS = std::vector<TransItem>;
-    HASH_ITEMS items{};
+    HASH_ITEMS items { };
     int hashMask = 0;
     int hashSize = 0;
 
@@ -101,44 +94,31 @@ public:
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
         TransItem& t = this->items[pos];
-        if (t.hashLock == 0)
-        {
+        if (t.hashLock == 0) {
             t.hashLock = board.hashLock;
-            if (type == EXACT_TYPE)
-            {
+            if (type == EXACT_TYPE) {
                 t.exactDepth = depth;
                 t.vlExact = vl;
                 t.exactMove = goodMove;
-            }
-            else if (type == BETA_TYPE)
-            {
+            } else if (type == BETA_TYPE) {
                 t.betaDepth = depth;
                 t.vlBeta = vl;
                 t.betaMove = goodMove;
-            }
-            else if (type == ALPHA_TYPE)
-            {
+            } else if (type == ALPHA_TYPE) {
                 t.alphaDepth = depth;
                 t.vlAlpha = vl;
                 t.alphaMove = goodMove;
             }
-        }
-        else if (t.hashLock == board.hashLock)
-        {
-            if (type == EXACT_TYPE && depth > t.exactDepth)
-            {
+        } else if (t.hashLock == board.hashLock) {
+            if (type == EXACT_TYPE && depth > t.exactDepth) {
                 t.exactDepth = depth;
                 t.vlExact = vl;
                 t.exactMove = goodMove;
-            }
-            else if (type == BETA_TYPE && ((depth > t.betaDepth) || (depth == t.betaDepth && vl > t.vlBeta)))
-            {
+            } else if (type == BETA_TYPE && ((depth > t.betaDepth) || (depth == t.betaDepth && vl > t.vlBeta))) {
                 t.betaDepth = depth;
                 t.vlBeta = vl;
                 t.betaMove = goodMove;
-            }
-            else if (type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha)))
-            {
+            } else if (type == ALPHA_TYPE && ((depth > t.alphaDepth) || (depth == t.alphaDepth && vl < t.vlAlpha))) {
                 t.alphaDepth = depth;
                 t.vlAlpha = vl;
                 t.alphaMove = goodMove;
@@ -150,18 +130,12 @@ public:
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
         const TransItem& t = this->items[pos];
-        if (t.hashLock == board.hashLock)
-        {
-            if (t.exactDepth >= depth)
-            {
+        if (t.hashLock == board.hashLock) {
+            if (t.exactDepth >= depth) {
                 return vlAdjust(t.vlExact, board.distance);
-            }
-            else if (t.betaDepth >= depth && t.vlBeta >= vlBeta)
-            {
+            } else if (t.betaDepth >= depth && t.vlBeta >= vlBeta) {
                 return t.vlBeta;
-            }
-            else if (t.alphaDepth >= depth && t.vlAlpha <= vlApha)
-            {
+            } else if (t.alphaDepth >= depth && t.vlAlpha <= vlApha) {
                 return t.vlAlpha;
             }
         }
@@ -172,21 +146,15 @@ public:
     {
         const int pos = static_cast<uint32_t>(board.hashKey) & static_cast<uint32_t>(this->hashMask);
         const TransItem& t = this->items[pos];
-        if (t.hashLock == board.hashLock)
-        {
-            if (board.isValidMoveInSituation(t.exactMove))
-            {
+        if (t.hashLock == board.hashLock) {
+            if (board.isValidMoveInSituation(t.exactMove)) {
                 return t.exactMove;
-            }
-            else if (board.isValidMoveInSituation(t.betaMove))
-            {
+            } else if (board.isValidMoveInSituation(t.betaMove)) {
                 return t.betaMove;
-            }
-            else if (board.isValidMoveInSituation(t.alphaMove))
-            {
+            } else if (board.isValidMoveInSituation(t.alphaMove)) {
                 return t.alphaMove;
             }
         }
-        return Move{};
+        return Move { };
     }
 };

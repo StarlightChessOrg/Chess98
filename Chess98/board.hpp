@@ -1,10 +1,9 @@
 ﻿#pragma once
+#include "bitboard.hpp"
 #include "evaluate.hpp"
 #include "hash.hpp"
-#include "bitboard.hpp"
 
-class Board
-{
+class Board {
 public:
     Board() = default;
     Board(PIECEID_MAP pieceidMap, TEAM initTeam);
@@ -15,19 +14,19 @@ public:
     int vlBlack = 0;
     int32 hashKey = 0;
     int32 hashLock = 0;
-    std::vector<int32> hashKeyList{};
-    std::vector<int32> hashLockList{};
+    std::vector<int32> hashKeyList { };
+    std::vector<int32> hashLockList { };
 
 public:
-    PIECEID_MAP pieceidMap{};
-    MOVES historyMoves{};
-    TEAM team{};
-    std::unique_ptr<Bitboard> bitboard{};
-    PIECES pieces{};
-    std::vector<PIECE_INDEX> redPieces{};
-    std::vector<PIECE_INDEX> blackPieces{};
-    std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap{};
-    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceTypes{};
+    PIECEID_MAP pieceidMap { };
+    MOVES historyMoves { };
+    TEAM team { };
+    std::unique_ptr<Bitboard> bitboard { };
+    PIECES pieces { };
+    std::vector<PIECE_INDEX> redPieces { };
+    std::vector<PIECE_INDEX> blackPieces { };
+    std::array<std::array<PIECE_INDEX, 10>, 9> pieceIndexMap { };
+    std::map<PIECEID, std::vector<PIECE_INDEX>> pieceTypes { };
 
 public:
     bool isKingLive(TEAM team) const { return team == RED ? getPieceByType(R_KING).isLive : getPieceByType(B_KING).isLive; }
@@ -88,8 +87,7 @@ protected:
         this->pieceIndexMap[x1][y1] = -1;
         this->pieces[attacker.pieceIndex].x = x2;
         this->pieces[attacker.pieceIndex].y = y2;
-        if (captured.pieceIndex != -1)
-        {
+        if (captured.pieceIndex != -1) {
             this->pieces[captured.pieceIndex].isLive = false;
         }
     }
@@ -103,31 +101,25 @@ protected:
         this->pieceIndexMap[x2][y2] = captured.pieceIndex;
         this->pieces[attacker.pieceIndex].x = x1;
         this->pieces[attacker.pieceIndex].y = y1;
-        if (captured.pieceIndex != -1)
-        {
+        if (captured.pieceIndex != -1) {
             this->pieces[captured.pieceIndex].isLive = true;
         }
     }
     void doEvaluationUpdate(const Piece& attacker, const Piece& captured, int x1, int y1, int x2, int y2)
     {
         // 更新评估分
-        if (attacker.team == RED)
-        {
+        if (attacker.team == RED) {
             int valNewPos = pieceWeights[attacker.pieceid][x2][y2];
             int valOldPos = pieceWeights[attacker.pieceid][x1][y1];
             this->vlRed += (valNewPos - valOldPos);
-            if (captured.pieceid != EMPTY_PIECEID)
-            {
+            if (captured.pieceid != EMPTY_PIECEID) {
                 this->vlBlack -= pieceWeights[captured.pieceid][x2][size_t(9) - y2];
             }
-        }
-        else
-        {
+        } else {
             int valNewPos = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
             int valOldPos = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
             this->vlBlack += (valNewPos - valOldPos);
-            if (captured.pieceid != EMPTY_PIECEID)
-            {
+            if (captured.pieceid != EMPTY_PIECEID) {
                 this->vlRed -= pieceWeights[captured.pieceid][x2][y2];
             }
         }
@@ -135,23 +127,18 @@ protected:
     void undoEvaluationUpdate(const Piece& attacker, const Piece& captured, int x1, int y1, int x2, int y2)
     {
         // 更新评估分
-        if (attacker.team == RED)
-        {
+        if (attacker.team == RED) {
             int valPos1 = pieceWeights[attacker.pieceid][x1][y1];
             int valPos2 = pieceWeights[attacker.pieceid][x2][y2];
             this->vlRed -= (valPos2 - valPos1);
-            if (captured.pieceid != EMPTY_PIECEID)
-            {
+            if (captured.pieceid != EMPTY_PIECEID) {
                 this->vlBlack += pieceWeights[captured.pieceid][x2][size_t(9) - y2];
             }
-        }
-        else
-        {
+        } else {
             int valPos1 = pieceWeights[attacker.pieceid][x1][size_t(9) - y1];
             int valPos2 = pieceWeights[attacker.pieceid][x2][size_t(9) - y2];
             this->vlBlack -= (valPos2 - valPos1);
-            if (captured.pieceid != EMPTY_PIECEID)
-            {
+            if (captured.pieceid != EMPTY_PIECEID) {
                 this->vlRed += pieceWeights[captured.pieceid][x2][y2];
             }
         }
@@ -166,8 +153,7 @@ protected:
         this->hashKey ^= HASHKEYS[attacker.pieceid][x2][y2];
         this->hashLock ^= HASHLOCKS[attacker.pieceid][x1][y1];
         this->hashLock ^= HASHLOCKS[attacker.pieceid][x2][y2];
-        if (captured.pieceid != EMPTY_PIECEID)
-        {
+        if (captured.pieceid != EMPTY_PIECEID) {
             this->hashKey ^= HASHKEYS[captured.pieceid][x1][y1];
             this->hashLock ^= HASHLOCKS[captured.pieceid][x2][y2];
         }
@@ -188,35 +174,26 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
     this->pieceidMap = pieceidMap;
     this->team = team;
     this->bitboard = std::make_unique<Bitboard>(pieceidMap);
-    for (const PIECEID& id : ALL_PIECEIDS)
-    {
-        this->pieceTypes[id] = std::vector<PIECE_INDEX>{};
+    for (const PIECEID& id : ALL_PIECEIDS) {
+        this->pieceTypes[id] = std::vector<PIECE_INDEX> { };
     }
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             PIECEID& pieceid = pieceidMap[x][y];
-            if (pieceid != 0)
-            {
+            if (pieceid != 0) {
                 int size = int(this->pieces.size());
-                Piece piece{pieceidMap[x][y], x, y, size};
+                Piece piece { pieceidMap[x][y], x, y, size };
                 PIECE_INDEX index = size;
 
                 this->pieces.emplace_back(piece);
                 this->pieceIndexMap[x][y] = index;
                 this->pieceTypes[pieceid].emplace_back(this->pieces.back().pieceIndex);
-                if (pieceid > 0)
-                {
+                if (pieceid > 0) {
                     this->redPieces.emplace_back(index);
-                }
-                else
-                {
+                } else {
                     this->blackPieces.emplace_back(index);
                 }
-            }
-            else
-            {
+            } else {
                 this->pieceIndexMap[x][y] = -1;
             }
         }
@@ -227,25 +204,19 @@ Board::Board(PIECEID_MAP pieceidMap, TEAM team)
 
 PIECEID Board::pieceidOn(int x, int y) const
 {
-    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
-    {
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
         return this->pieceidMap[x][y];
-    }
-    else
-    {
+    } else {
         return OVERFLOW_PIECEID;
     }
 }
 
 TEAM Board::teamOn(int x, int y) const
 {
-    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
-    {
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
         const PIECEID pieceid = this->pieceidMap[x][y];
         return pieceid > 0 ? RED : (pieceid < 0 ? BLACK : EMPTY_TEAM);
-    }
-    else
-    {
+    } else {
         return OVERFLOW_TEAM;
     }
 }
@@ -257,30 +228,22 @@ Piece Board::pieceIndex(int i) const
 
 Piece Board::piecePosition(int x, int y) const
 {
-    if (x >= 0 && x <= 8 && y >= 0 && y <= 9)
-    {
-        if (this->pieceidMap[x][y] != 0)
-        {
+    if (x >= 0 && x <= 8 && y >= 0 && y <= 9) {
+        if (this->pieceidMap[x][y] != 0) {
             return this->pieceIndex(this->pieceIndexMap[x][y]);
+        } else {
+            return Piece { EMPTY_PIECEID, -1, -1, EMPTY_INDEX };
         }
-        else
-        {
-            return Piece{EMPTY_PIECEID, -1, -1, EMPTY_INDEX};
-        }
-    }
-    else
-    {
-        return Piece{OVERFLOW_PIECEID, -1, -1, EMPTY_INDEX};
+    } else {
+        return Piece { OVERFLOW_PIECEID, -1, -1, EMPTY_INDEX };
     }
 }
 
 PIECES Board::getAllLivePieces() const
 {
-    PIECES result{};
-    for (Piece piece : this->pieces)
-    {
-        if (piece.isLive)
-        {
+    PIECES result { };
+    for (Piece piece : this->pieces) {
+        if (piece.isLive) {
             result.emplace_back(piece);
         }
     }
@@ -289,12 +252,10 @@ PIECES Board::getAllLivePieces() const
 
 PIECES Board::getPiecesByTeam(TEAM team) const
 {
-    PIECES result{};
+    PIECES result { };
     PIECES allPieces = this->getAllLivePieces();
-    for (Piece piece : allPieces)
-    {
-        if (piece.team == team)
-        {
+    for (Piece piece : allPieces) {
+        if (piece.team == team) {
             result.emplace_back(piece);
         }
     }
@@ -308,12 +269,10 @@ Piece Board::getPieceByType(PIECEID pieceid) const
 
 PIECES Board::getPiecesPyType(PIECEID pieceid) const
 {
-    PIECES result{};
-    for (PIECE_INDEX pieceindex : this->pieceTypes.at(pieceid))
-    {
+    PIECES result { };
+    for (PIECE_INDEX pieceindex : this->pieceTypes.at(pieceid)) {
         const Piece& piece = this->pieceIndex(pieceindex);
-        if (piece.isLive)
-        {
+        if (piece.isLive) {
             result.emplace_back(piece);
         }
     }
@@ -324,8 +283,7 @@ bool Board::isRepeated() const
 {
     const MOVES& history = this->historyMoves;
     const size_t& size = history.size();
-    if (size >= 5)
-    {
+    if (size >= 5) {
         const Move& ply1 = history[size_t(size - 1)];
         const Move& ply2 = history[size_t(size - 2)];
         const Move& ply3 = history[size_t(size - 3)];
@@ -334,10 +292,8 @@ bool Board::isRepeated() const
         // 判断是否出现重复局面, 没有则直接false
         // 试想如下重复局面：（格式：plyX: x1y1x2y2）
         // ply1: 0001, ply2: 0908, ply3: 0100, ply4: 0809, ply5: 0001
-        const bool isRepeat = (ply1 == ply5 && ply1.startpos == ply3.endpos && ply1.endpos == ply3.startpos &&
-                               ply2.startpos == ply4.endpos && ply2.endpos == ply4.startpos);
-        if (!isRepeat)
-        {
+        const bool isRepeat = (ply1 == ply5 && ply1.startpos == ply3.endpos && ply1.endpos == ply3.startpos && ply2.startpos == ply4.endpos && ply2.endpos == ply4.startpos);
+        if (!isRepeat) {
             return false;
         }
 
@@ -345,77 +301,50 @@ bool Board::isRepeated() const
         // 由于性能原因, isCheckingMove是被延迟设置的, ply1可能还没有被设成checkingMove
         // 但是若判定了循环局面, ply1必然等于ply5
         // 若ply5和ply3都是将军着法, 且出现循环局面, 则直接判定违规
-        if (ply5.isCheckingMove == true && ply3.isCheckingMove == true)
-        {
+        if (ply5.isCheckingMove == true && ply3.isCheckingMove == true) {
             return true;
         }
         // 长捉情况比较特殊
         // 只有车、马、炮能作为长捉的发起者
         // 发起者不断捉同一个子, 判负
-        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT || abs(ply1.attacker.pieceid) == R_CANNON)
-        {
+        if (abs(ply1.attacker.pieceid) == R_ROOK || abs(ply1.attacker.pieceid) == R_KNIGHT || abs(ply1.attacker.pieceid) == R_CANNON) {
             const Piece& attacker = ply1.attacker;
             const Piece& captured = ply2.attacker;
             // 车
-            if (abs(attacker.pieceid) == R_ROOK)
-            {
-                if (ply5.x2 == ply4.x1)
-                {
+            if (abs(attacker.pieceid) == R_ROOK) {
+                if (ply5.x2 == ply4.x1) {
                     UINT32 bitlineX = this->getBitLineX(ply5.x2);
                     REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, attacker.y, 9);
-                    if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
-                        this->piecePosition(ply5.x2, regionX[0]).pieceIndex == captured.pieceIndex)
-                    {
+                    if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex || this->piecePosition(ply5.x2, regionX[0]).pieceIndex == captured.pieceIndex) {
                         return true;
                     }
-                }
-                else if (ply5.y2 == ply4.y1)
-                {
+                } else if (ply5.y2 == ply4.y1) {
                     UINT32 bitlineY = this->getBitLineY(ply5.y2);
                     REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, attacker.x, 8);
-                    if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
-                        this->piecePosition(regionY[1], ply5.y2).pieceIndex == captured.pieceIndex)
-                    {
+                    if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex || this->piecePosition(regionY[1], ply5.y2).pieceIndex == captured.pieceIndex) {
                         return true;
                     }
                 }
             }
             // 炮
-            else if (abs(attacker.pieceid) == R_CANNON)
-            {
-                if (ply5.x2 == ply4.x1)
-                {
+            else if (abs(attacker.pieceid) == R_CANNON) {
+                if (ply5.x2 == ply4.x1) {
                     UINT32 bitlineX = this->getBitLineX(ply5.x2);
                     REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, attacker.y, 9);
-                    if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex ||
-                        this->piecePosition(ply5.x2, regionX[3]).pieceIndex == captured.pieceIndex)
-                    {
+                    if (this->piecePosition(ply5.x2, regionX[1]).pieceIndex == captured.pieceIndex || this->piecePosition(ply5.x2, regionX[3]).pieceIndex == captured.pieceIndex) {
                         return true;
                     }
-                }
-                else if (ply5.y2 == ply4.y1)
-                {
+                } else if (ply5.y2 == ply4.y1) {
                     UINT32 bitlineY = this->getBitLineY(ply5.y2);
                     REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, attacker.x, 8);
-                    if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex ||
-                        this->piecePosition(regionY[3], ply5.y2).pieceIndex == captured.pieceIndex)
-                    {
+                    if (this->piecePosition(regionY[0], ply5.y2).pieceIndex == captured.pieceIndex || this->piecePosition(regionY[3], ply5.y2).pieceIndex == captured.pieceIndex) {
                         return true;
                     }
                 }
             }
             // 马
-            else if (abs(attacker.pieceid) == R_KNIGHT)
-            {
-                if ((attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) ||
-                    (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) ||
-                    (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) ||
-                    (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) ||
-                    (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) ||
-                    (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) ||
-                    (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) ||
-                    (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y))
-                {
+            else if (abs(attacker.pieceid) == R_KNIGHT) {
+                if ((attacker.x + 1 == captured.x && attacker.y + 2 == captured.y) || (attacker.x - 1 == captured.x && attacker.y + 2 == captured.y) || (attacker.x + 1 == captured.x && attacker.y - 2 == captured.y) || (attacker.x - 1 == captured.x && attacker.y - 2 == captured.y) || (attacker.x + 2 == captured.x && attacker.y + 1 == captured.y) || (attacker.x - 2 == captured.x && attacker.y + 1 == captured.y) || (attacker.x + 2 == captured.x && attacker.y - 1 == captured.y) || (attacker.x - 2 == captured.x && attacker.y - 1 == captured.y)) {
                     return true;
                 }
             }
@@ -427,12 +356,9 @@ bool Board::isRepeated() const
 bool Board::hasCrossedRiver(int x, int y) const
 {
     TEAM team = this->teamOn(x, y);
-    if (team == RED)
-    {
+    if (team == RED) {
         return y >= 5 && y <= 9;
-    }
-    else if (team == BLACK)
-    {
+    } else if (team == BLACK) {
         return y >= 0 && y <= 4;
     }
     return false;
@@ -441,12 +367,9 @@ bool Board::hasCrossedRiver(int x, int y) const
 bool Board::isInPalace(int x, int y) const
 {
     TEAM team = this->teamOn(x, y);
-    if (team == RED)
-    {
+    if (team == RED) {
         return x >= 3 && x <= 5 && y >= 7 && y <= 9;
-    }
-    else if (team == BLACK)
-    {
+    } else if (team == BLACK) {
         return x >= 3 && x <= 5 && y >= 0 && y <= 2;
     }
     return false;
@@ -461,62 +384,47 @@ bool Board::inCheck(TEAM judgeTeam) const
 
     // 兵
     const PIECEID ENEMY_PAWN = R_PAWN * -team;
-    if (this->pieceidOn(x + 1, y) == ENEMY_PAWN)
-    {
+    if (this->pieceidOn(x + 1, y) == ENEMY_PAWN) {
         return true;
     }
-    if (this->pieceidOn(x - 1, y) == ENEMY_PAWN)
-    {
+    if (this->pieceidOn(x - 1, y) == ENEMY_PAWN) {
         return true;
     }
-    if (this->pieceidOn(x, (team == RED ? y - 1 : y + 1)) == ENEMY_PAWN)
-    {
+    if (this->pieceidOn(x, (team == RED ? y - 1 : y + 1)) == ENEMY_PAWN) {
         return true;
     }
 
     // 马
     const PIECEID ENEMY_KNIGHT = R_KNIGHT * -team;
-    if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x + 2, y + 1) == ENEMY_KNIGHT)
-        {
+    if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x + 2, y + 1) == ENEMY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x + 1, y + 2) == ENEMY_KNIGHT)
-        {
+        if (this->pieceidOn(x + 1, y + 2) == ENEMY_KNIGHT) {
             return true;
         }
     }
-    if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x - 2, y + 1) == ENEMY_KNIGHT)
-        {
+    if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x - 2, y + 1) == ENEMY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x - 1, y + 2) == ENEMY_KNIGHT)
-        {
+        if (this->pieceidOn(x - 1, y + 2) == ENEMY_KNIGHT) {
             return true;
         }
     }
-    if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x + 2, y - 1) == ENEMY_KNIGHT)
-        {
+    if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x + 2, y - 1) == ENEMY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x + 1, y - 2) == ENEMY_KNIGHT)
-        {
+        if (this->pieceidOn(x + 1, y - 2) == ENEMY_KNIGHT) {
             return true;
         }
     }
-    if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x - 2, y - 1) == ENEMY_KNIGHT)
-        {
+    if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x - 2, y - 1) == ENEMY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x - 1, y - 2) == ENEMY_KNIGHT)
-        {
+        if (this->pieceidOn(x - 1, y - 2) == ENEMY_KNIGHT) {
             return true;
         }
     }
@@ -528,41 +436,33 @@ bool Board::inCheck(TEAM judgeTeam) const
 
     UINT32 bitlineY = this->getBitLineY(y);
     REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, x, 8);
-    if (this->pieceidOn(regionY[1] - 1, y) == ENEMY_ROOK)
-    {
+    if (this->pieceidOn(regionY[1] - 1, y) == ENEMY_ROOK) {
         return true;
     }
-    if (this->pieceidOn(regionY[2] + 1, y) == ENEMY_ROOK)
-    {
+    if (this->pieceidOn(regionY[2] + 1, y) == ENEMY_ROOK) {
         return true;
     }
-    if (this->pieceidOn(regionY[0], y) == ENEMY_CANNON)
-    {
+    if (this->pieceidOn(regionY[0], y) == ENEMY_CANNON) {
         return true;
     }
-    if (this->pieceidOn(regionY[3], y) == ENEMY_CANNON)
-    {
+    if (this->pieceidOn(regionY[3], y) == ENEMY_CANNON) {
         return true;
     }
 
     UINT32 bitlineX = this->getBitLineX(x);
     REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, y, 9);
     const PIECEID& p1 = this->pieceidOn(x, regionX[1] - 1);
-    if (p1 == ENEMY_ROOK || p1 == ENEMY_KING)
-    {
+    if (p1 == ENEMY_ROOK || p1 == ENEMY_KING) {
         return true;
     }
     const PIECEID& p2 = this->pieceidOn(x, regionX[2] + 1);
-    if (p2 == ENEMY_ROOK || p2 == ENEMY_KING)
-    {
+    if (p2 == ENEMY_ROOK || p2 == ENEMY_KING) {
         return true;
     }
-    if (this->pieceidOn(x, regionX[0]) == ENEMY_CANNON)
-    {
+    if (this->pieceidOn(x, regionX[0]) == ENEMY_CANNON) {
         return true;
     }
-    if (this->pieceidOn(x, regionX[3]) == ENEMY_CANNON)
-    {
+    if (this->pieceidOn(x, regionX[3]) == ENEMY_CANNON) {
         return true;
     }
 
@@ -576,62 +476,47 @@ bool Board::hasProtector(int x, int y) const
 
     // 兵
     const PIECEID MY_PAWN = R_PAWN * team;
-    if (this->hasCrossedRiver(x + 1, y) && this->pieceidOn(x + 1, y) == MY_PAWN)
-    {
+    if (this->hasCrossedRiver(x + 1, y) && this->pieceidOn(x + 1, y) == MY_PAWN) {
         return true;
     }
-    if (this->hasCrossedRiver(x - 1, y) && this->pieceidOn(x - 1, y) == MY_PAWN)
-    {
+    if (this->hasCrossedRiver(x - 1, y) && this->pieceidOn(x - 1, y) == MY_PAWN) {
         return true;
     }
-    if (this->pieceidOn(x, team == RED ? y - 1 : y + 1) == MY_PAWN)
-    {
+    if (this->pieceidOn(x, team == RED ? y - 1 : y + 1) == MY_PAWN) {
         return true;
     }
 
     // 马
     const PIECEID MY_KNIGHT = R_KNIGHT * team;
-    if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x + 2, y + 1) == MY_KNIGHT)
-        {
+    if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x + 2, y + 1) == MY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x + 1, y + 2) == MY_KNIGHT)
-        {
+        if (this->pieceidOn(x + 1, y + 2) == MY_KNIGHT) {
             return true;
         }
     }
-    if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x - 2, y + 1) == MY_KNIGHT)
-        {
+    if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x - 2, y + 1) == MY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x - 1, y + 2) == MY_KNIGHT)
-        {
+        if (this->pieceidOn(x - 1, y + 2) == MY_KNIGHT) {
             return true;
         }
     }
-    if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x + 2, y - 1) == MY_KNIGHT)
-        {
+    if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x + 2, y - 1) == MY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x + 1, y - 2) == MY_KNIGHT)
-        {
+        if (this->pieceidOn(x + 1, y - 2) == MY_KNIGHT) {
             return true;
         }
     }
-    if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
-    {
-        if (this->pieceidOn(x - 2, y - 1) == MY_KNIGHT)
-        {
+    if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID) {
+        if (this->pieceidOn(x - 2, y - 1) == MY_KNIGHT) {
             return true;
         }
-        if (this->pieceidOn(x - 1, y - 2) == MY_KNIGHT)
-        {
+        if (this->pieceidOn(x - 1, y - 2) == MY_KNIGHT) {
             return true;
         }
     }
@@ -640,68 +525,50 @@ bool Board::hasProtector(int x, int y) const
     const PIECEID MY_BISHOP = R_BISHOP * team;
     const PIECEID MY_GUARD = R_GUARD * team;
     const PIECEID MY_KING = R_KING * team;
-    if (hasCrossedRiver(x, y) == false)
-    {
-        if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID)
-        {
-            if (this->pieceidOn(x + 2, y + 2) == MY_BISHOP)
-            {
+    if (hasCrossedRiver(x, y) == false) {
+        if (this->pieceidOn(x + 1, y + 1) == EMPTY_PIECEID) {
+            if (this->pieceidOn(x + 2, y + 2) == MY_BISHOP) {
                 return true;
             }
         }
-        if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID)
-        {
-            if (this->pieceidOn(x - 2, y + 2) == MY_BISHOP)
-            {
+        if (this->pieceidOn(x - 1, y + 1) == EMPTY_PIECEID) {
+            if (this->pieceidOn(x - 2, y + 2) == MY_BISHOP) {
                 return true;
             }
         }
-        if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID)
-        {
-            if (this->pieceidOn(x + 2, y - 2) == MY_BISHOP)
-            {
+        if (this->pieceidOn(x + 1, y - 1) == EMPTY_PIECEID) {
+            if (this->pieceidOn(x + 2, y - 2) == MY_BISHOP) {
                 return true;
             }
         }
-        if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID)
-        {
-            if (this->pieceidOn(x - 2, y - 2) == MY_BISHOP)
-            {
+        if (this->pieceidOn(x - 1, y - 1) == EMPTY_PIECEID) {
+            if (this->pieceidOn(x - 2, y - 2) == MY_BISHOP) {
                 return true;
             }
         }
-        if (isInPalace(x, y))
-        {
-            if (this->pieceidOn(x + 1, y) == MY_GUARD)
-            {
+        if (isInPalace(x, y)) {
+            if (this->pieceidOn(x + 1, y) == MY_GUARD) {
                 return true;
             }
-            if (this->pieceidOn(x - 1, y) == MY_GUARD)
-            {
+            if (this->pieceidOn(x - 1, y) == MY_GUARD) {
                 return true;
             }
-            if (this->pieceidOn(x, y + 1) == MY_GUARD)
-            {
+            if (this->pieceidOn(x, y + 1) == MY_GUARD) {
                 return true;
             }
-            if (this->pieceidOn(x, y - 1) == MY_GUARD)
-            {
+            if (this->pieceidOn(x, y - 1) == MY_GUARD) {
                 return true;
             }
-            if (this->pieceidOn(x + 1, y) == MY_KING)
-            {
+            if (this->pieceidOn(x + 1, y) == MY_KING) {
                 return true;
             }
-            if (this->pieceidOn(x - 1, y) == MY_KING)
-            {
+            if (this->pieceidOn(x - 1, y) == MY_KING) {
                 return true;
             }
-            if (this->pieceidOn(x, y + 1) == MY_KING)
-            {
+            if (this->pieceidOn(x, y + 1) == MY_KING) {
                 return true;
             }
-            if (this->pieceidOn(x, y - 1) == MY_KING)
-            {
+            if (this->pieceidOn(x, y - 1) == MY_KING) {
                 return true;
             }
         }
@@ -713,38 +580,30 @@ bool Board::hasProtector(int x, int y) const
 
     UINT32 bitlineY = this->getBitLineY(y);
     REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, x, 8);
-    if (this->pieceidOn(regionY[1] - 1, y) == MY_ROOK)
-    {
+    if (this->pieceidOn(regionY[1] - 1, y) == MY_ROOK) {
         return true;
     }
-    if (this->pieceidOn(regionY[2] + 1, y) == MY_ROOK)
-    {
+    if (this->pieceidOn(regionY[2] + 1, y) == MY_ROOK) {
         return true;
     }
-    if (this->pieceidOn(regionY[0], y) == MY_CANNON)
-    {
+    if (this->pieceidOn(regionY[0], y) == MY_CANNON) {
         return true;
     }
-    if (this->pieceidOn(regionY[3], y) == MY_CANNON)
-    {
+    if (this->pieceidOn(regionY[3], y) == MY_CANNON) {
         return true;
     }
     UINT32 bitlineX = this->getBitLineX(x);
     REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, y, 9);
-    if (this->pieceidOn(x, regionX[1] - 1) == MY_ROOK)
-    {
+    if (this->pieceidOn(x, regionX[1] - 1) == MY_ROOK) {
         return true;
     }
-    if (this->pieceidOn(x, regionX[2] + 1) == MY_ROOK)
-    {
+    if (this->pieceidOn(x, regionX[2] + 1) == MY_ROOK) {
         return true;
     }
-    if (this->pieceidOn(x, regionX[0]) == MY_CANNON)
-    {
+    if (this->pieceidOn(x, regionX[0]) == MY_CANNON) {
         return true;
     }
-    if (this->pieceidOn(x, regionX[3]) == MY_CANNON)
-    {
+    if (this->pieceidOn(x, regionX[3]) == MY_CANNON) {
         return true;
     }
     return false;
@@ -798,12 +657,11 @@ void Board::doMoveSimple(Move move)
     this->pieces[attacker.pieceIndex].x = x2;
     this->pieces[attacker.pieceIndex].y = y2;
     this->team = -this->team;
-    this->historyMoves.emplace_back(Move{x1, y1, x2, y2});
+    this->historyMoves.emplace_back(Move { x1, y1, x2, y2 });
     this->historyMoves.back().attacker = attacker;
     this->historyMoves.back().captured = captured;
     this->bitboard->doMove(x1, y1, x2, y2);
-    if (captured.pieceIndex != -1)
-    {
+    if (captured.pieceIndex != -1) {
         this->pieces[captured.pieceIndex].isLive = false;
     }
 }
@@ -824,8 +682,7 @@ void Board::undoMoveSimple()
     this->team = -this->team;
     this->historyMoves.pop_back();
     this->bitboard->undoMove(x1, y1, x2, y2, captured.pieceid != 0);
-    if (captured.pieceIndex != -1)
-    {
+    if (captured.pieceIndex != -1) {
         this->pieces[captured.pieceIndex].isLive = true;
     }
 }
@@ -848,17 +705,12 @@ void Board::initEvaluate()
     this->vlBlack = ADVISOR_BISHOP_ATTACKLESS_VALUE * (TOTAL_ATTACK_VALUE - vlRedAttack) / TOTAL_ATTACK_VALUE;
 
     // 进一步重新计算分数
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             PIECEID pid = this->pieceidMap[x][y];
-            if (pid > 0)
-            {
+            if (pid > 0) {
                 this->vlRed += pieceWeights[pid][x][y];
-            }
-            else if (pid < 0)
-            {
+            } else if (pid < 0) {
                 this->vlBlack += pieceWeights[pid][x][size_t(9) - y];
             }
         }
@@ -871,19 +723,13 @@ void Board::calculateVlOpen(int& vlOpen) const
     int rookLiveSum = 0;
     int knightCannonLiveSum = 0;
     int otherLiveSum = 0;
-    for (const Piece& piece : this->getAllLivePieces())
-    {
+    for (const Piece& piece : this->getAllLivePieces()) {
         PIECEID pid = std::abs(piece.pieceid);
-        if (pid == R_ROOK)
-        {
+        if (pid == R_ROOK) {
             rookLiveSum++;
-        }
-        else if (pid == R_KNIGHT || pid == R_CANNON)
-        {
+        } else if (pid == R_KNIGHT || pid == R_CANNON) {
             knightCannonLiveSum++;
-        }
-        else if (pid != R_KING)
-        {
+        } else if (pid != R_KING) {
             otherLiveSum++;
         }
     }
@@ -904,49 +750,29 @@ void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const
     int blackAttackLiveCannonSum = 0;
     int redAttackLivePawnSum = 0;
     int blackAttackLivePawnSum = 0;
-    for (const Piece& piece : this->getAllLivePieces())
-    {
+    for (const Piece& piece : this->getAllLivePieces()) {
         PIECEID pid = std::abs(piece.pieceid);
-        if (piece.team == RED)
-        {
-            if (piece.y >= 5)
-            {
-                if (pid == R_ROOK)
-                {
+        if (piece.team == RED) {
+            if (piece.y >= 5) {
+                if (pid == R_ROOK) {
                     redAttackLiveRookSum++;
-                }
-                else if (pid == R_CANNON)
-                {
+                } else if (pid == R_CANNON) {
                     redAttackLiveCannonSum++;
-                }
-                else if (pid == R_KNIGHT)
-                {
+                } else if (pid == R_KNIGHT) {
                     redAttackLiveKnightSum++;
-                }
-                else if (pid == R_PAWN)
-                {
+                } else if (pid == R_PAWN) {
                     redAttackLivePawnSum++;
                 }
             }
-        }
-        else if (piece.team == BLACK)
-        {
-            if (piece.y <= 4)
-            {
-                if (pid == R_ROOK)
-                {
+        } else if (piece.team == BLACK) {
+            if (piece.y <= 4) {
+                if (pid == R_ROOK) {
                     blackAttackLiveRookSum++;
-                }
-                else if (pid == R_CANNON)
-                {
+                } else if (pid == R_CANNON) {
                     blackAttackLiveCannonSum++;
-                }
-                else if (pid == R_KNIGHT)
-                {
+                } else if (pid == R_KNIGHT) {
                     blackAttackLiveKnightSum++;
-                }
-                else if (pid == R_PAWN)
-                {
+                } else if (pid == R_PAWN) {
                     blackAttackLivePawnSum++;
                 }
             }
@@ -976,12 +802,9 @@ void Board::vlAttackCalculator(int& vlRedAttack, int& vlBlackAttack) const
     blackSimpleValues += blackAttackLiveCannonSum;
     blackSimpleValues += blackAttackLivePawnSum;
     // 设置
-    if (redSimpleValues > blackSimpleValues)
-    {
+    if (redSimpleValues > blackSimpleValues) {
         vlRedAttack += (redSimpleValues - blackSimpleValues) * 2;
-    }
-    else if (redSimpleValues < blackSimpleValues)
-    {
+    } else if (redSimpleValues < blackSimpleValues) {
         vlBlackAttack += (blackSimpleValues - redSimpleValues) * 2;
     }
     vlRedAttack = std::min<int>(vlRedAttack, TOTAL_ATTACK_VALUE);
@@ -992,20 +815,16 @@ void Board::initHashInfo()
 {
     this->hashKey = 0;
     this->hashLock = 0;
-    for (int x = 0; x < 9; x++)
-    {
-        for (int y = 0; y < 10; y++)
-        {
+    for (int x = 0; x < 9; x++) {
+        for (int y = 0; y < 10; y++) {
             const PIECEID& pid = this->pieceidMap[x][y];
-            if (pid != EMPTY_PIECEID)
-            {
+            if (pid != EMPTY_PIECEID) {
                 this->hashKey ^= HASHKEYS[pid][x][y];
                 this->hashLock ^= HASHLOCKS[pid][x][y];
             }
         }
     }
-    if (this->team == BLACK)
-    {
+    if (this->team == BLACK) {
         this->hashKey ^= PLAYER_KEY;
         this->hashLock ^= PLAYER_LOCK;
     }
@@ -1025,52 +844,50 @@ bool Board::isValidMoveInSituation(Move move)
         return false;
 
     // 分类
-    if (abs(attacker) == R_ROOK)
-    {
+    if (abs(attacker) == R_ROOK) {
         if (move.x1 != move.x2 && move.y1 != move.y2) // 车走法, 若横纵坐标都不相同, 则一定不合理
             return false;
         // 生成车的着法范围, 看是否有障碍物
         UINT32 bitlineX = this->getBitLineX(move.x1);
         REGION_ROOK regionX = this->bitboard->getRookRegion(bitlineX, move.y1, 9);
-        if (move.y2 < regionX[0] || move.y2 > regionX[1]) return false;
+        if (move.y2 < regionX[0] || move.y2 > regionX[1])
+            return false;
         // 横向
         UINT32 bitlineY = this->getBitLineY(move.y1);
         REGION_ROOK regionY = this->bitboard->getRookRegion(bitlineY, move.x1, 8);
-        if (move.x2 < regionY[0] || move.x2 > regionY[1]) return false;
-    }
-    else if (abs(attacker) == R_KNIGHT)
-    {
+        if (move.x2 < regionY[0] || move.x2 > regionY[1])
+            return false;
+    } else if (abs(attacker) == R_KNIGHT) {
         if (move.x1 - 1 == move.x2 || move.x1 + 1 == move.x2) // 向哪一边走就判断那一边有没有障碍物
         {
             if (move.y1 - 2 == move.y2 && this->pieceidOn(move.x1, move.y1 - 1) != 0) // 若有障碍物则不合理
                 return false;
-            if (move.y1 + 2 == move.y2 && this->pieceidOn(move.x1, move.y1 + 1) != 0) return false;
-        }
-        else
-        {
+            if (move.y1 + 2 == move.y2 && this->pieceidOn(move.x1, move.y1 + 1) != 0)
+                return false;
+        } else {
             if (move.x1 - 2 == move.x2 && this->pieceidOn(move.x1 - 1, move.y1) != 0) // 若有障碍物则不合理
                 return false;
-            if (move.x1 + 2 == move.x2 && this->pieceidOn(move.x1 + 1, move.y1) != 0) return false;
+            if (move.x1 + 2 == move.x2 && this->pieceidOn(move.x1 + 1, move.y1) != 0)
+                return false;
         }
         return true;
-    }
-    else if (abs(attacker) == R_BISHOP)
-    {
+    } else if (abs(attacker) == R_BISHOP) {
         // 象走法, 不能有障碍物
-        if (this->pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0) return false;
-    }
-    else if (abs(attacker) == R_CANNON)
-    {
+        if (this->pieceidOn((move.x1 + move.x2) / 2, (move.y1 + move.y2) / 2) != 0)
+            return false;
+    } else if (abs(attacker) == R_CANNON) {
         if (move.x1 != move.x2 && move.y1 != move.y2) // 炮走法, 若横纵坐标都不同, 则一定不合理
             return false;
         // 生成炮的着法范围
         UINT32 bitlineX = this->getBitLineX(move.x1);
         REGION_CANNON regionX = this->bitboard->getCannonRegion(bitlineX, move.y1, 9);
-        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3]) return false;
+        if ((move.y2 <= regionX[1] || move.y2 >= regionX[2] + 1) && move.y2 != regionX[0] && move.y2 != regionX[3])
+            return false;
         // 横向
         UINT32 bitlineY = this->getBitLineY(move.y1);
         REGION_CANNON regionY = this->bitboard->getCannonRegion(bitlineY, move.x1, 8);
-        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3]) return false;
+        if ((move.x2 <= regionY[1] || move.x2 >= regionY[2]) && move.x2 != regionY[0] && move.x2 != regionY[3])
+            return false;
     }
 
     this->doMoveSimple(move);

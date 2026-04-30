@@ -81,16 +81,15 @@ server.listen(9494)\n\
 
 BOARD_CODE generateCode(Board& board)
 {
-    const std::map<PIECEID, std::string> PIECE_NAME_PAIRS{
-        {R_KING, "RK"},   {R_GUARD, "RG"},  {R_BISHOP, "RB"},      {R_KNIGHT, "RN"},
-        {R_ROOK, "RR"},   {R_CANNON, "RC"}, {R_PAWN, "RP"},        {B_KING, "BK"},
-        {B_GUARD, "BG"},  {B_BISHOP, "BB"}, {B_KNIGHT, "BN"},      {B_ROOK, "BR"},
-        {B_CANNON, "BC"}, {B_PAWN, "BP"},   {EMPTY_PIECEID, "__"}, {OVERFLOW_PIECEID, "  "}};
+    const std::map<PIECEID, std::string> PIECE_NAME_PAIRS {
+        { R_KING, "RK" }, { R_GUARD, "RG" }, { R_BISHOP, "RB" }, { R_KNIGHT, "RN" },
+        { R_ROOK, "RR" }, { R_CANNON, "RC" }, { R_PAWN, "RP" }, { B_KING, "BK" },
+        { B_GUARD, "BG" }, { B_BISHOP, "BB" }, { B_KNIGHT, "BN" }, { B_ROOK, "BR" },
+        { B_CANNON, "BC" }, { B_PAWN, "BP" }, { EMPTY_PIECEID, "__" }, { OVERFLOW_PIECEID, "  " }
+    };
     BOARD_CODE code = "";
-    for (int i = 0; i < 9; i++)
-    {
-        for (int j = 0; j < 10; j++)
-        {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 10; j++) {
             PIECEID pieceid = board.pieceidOn(i, j);
             std::string name = PIECE_NAME_PAIRS.at(pieceid);
             code += name;
@@ -101,19 +100,19 @@ BOARD_CODE generateCode(Board& board)
 
 PIECEID_MAP decode(BOARD_CODE code)
 {
-    const std::map<std::string, PIECEID> NAME_PIECE_PAIRS{
-        {"RK", R_KING},   {"RG", R_GUARD},  {"RB", R_BISHOP},      {"RN", R_KNIGHT},
-        {"RR", R_ROOK},   {"RC", R_CANNON}, {"RP", R_PAWN},        {"BK", B_KING},
-        {"BG", B_GUARD},  {"BB", B_BISHOP}, {"BN", B_KNIGHT},      {"BR", B_ROOK},
-        {"BC", B_CANNON}, {"BP", B_PAWN},   {"__", EMPTY_PIECEID}, {"  ", OVERFLOW_PIECEID}};
-    PIECEID_MAP result{};
-    for (int i = 0; i < 90; i++)
-    {
+    const std::map<std::string, PIECEID> NAME_PIECE_PAIRS {
+        { "RK", R_KING }, { "RG", R_GUARD }, { "RB", R_BISHOP }, { "RN", R_KNIGHT },
+        { "RR", R_ROOK }, { "RC", R_CANNON }, { "RP", R_PAWN }, { "BK", B_KING },
+        { "BG", B_GUARD }, { "BB", B_BISHOP }, { "BN", B_KNIGHT }, { "BR", B_ROOK },
+        { "BC", B_CANNON }, { "BP", B_PAWN }, { "__", EMPTY_PIECEID }, { "  ", OVERFLOW_PIECEID }
+    };
+    PIECEID_MAP result { };
+    for (int i = 0; i < 90; i++) {
         size_t x = i / 10;
         size_t y = i % 10;
         char c1 = code[i * size_t(2) - size_t(1)];
         char c2 = code[i * size_t(2)];
-        std::string pieceName{c1, c2};
+        std::string pieceName { c1, c2 };
         result[x][y] = NAME_PIECE_PAIRS.at(pieceName);
     }
     return result;
@@ -122,22 +121,21 @@ PIECEID_MAP decode(BOARD_CODE code)
 void setBoardCode(Board& board)
 {
     const BOARD_CODE code = generateCode(board);
-    const std::string historyMovesBack =
-        board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
+    const std::string historyMovesBack = board.historyMoves.size() > 0 ? std::to_string(board.historyMoves.back().id) : "null";
     const std::string jsPutCode = "\
         const http = require('http')\n\
         const options = {\n\
             hostname: '127.0.0.1',\n\
-            path: '/?boardcode=" + code +
-                                  "',\n\
+            path: '/?boardcode="
+        + code + "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\
         http.request(options).end();\n\
         const options2 = {\n\
             hostname: '127.0.0.1',\n\
-            path: '/?move=" + historyMovesBack +
-                                  "',\n\
+            path: '/?move="
+        + historyMovesBack + "',\n\
             port: 9494,\n\
             method : 'PUT'\n\
         }\n\
@@ -166,27 +164,23 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
     setBoardCode(board);
     std::string moveFileContent = "____";
 
-    while (true)
-    {
-        if (board.team == (aiFirst ? team : -team))
-        {
+    while (true) {
+        if (board.team == (aiFirst ? team : -team)) {
             // 人机做出决策
             Result node = s.searchMain(maxDepth, maxTime);
             board.doMove(node.move);
-            if (board.inCheck(board.team)) board.historyMoves.back().isCheckingMove = true;
+            if (board.inCheck(board.team))
+                board.historyMoves.back().isCheckingMove = true;
 
             setBoardCode(board);
             readFile("./_move_.txt", moveFileContent);
-        }
-        else
-        {
+        } else {
             // 读取文件
             std::string content;
             readFile("./_move_.txt", content);
 
             // 悔棋
-            if (content == "undo" && board.historyMoves.size() > 1)
-            {
+            if (content == "undo" && board.historyMoves.size() > 1) {
                 board.undoMove();
                 board.undoMove();
 
@@ -196,20 +190,16 @@ void ui(TEAM team, bool aiFirst, int maxDepth, int maxTime, std::string fenCode)
             }
 
             // 如果内容和上次内容不一致, 则执行步进
-            if (content != "wait" && content != "undo" && content != moveFileContent)
-            {
-                try
-                {
+            if (content != "wait" && content != "undo" && content != moveFileContent) {
+                try {
                     moveFileContent = content;
                     int x1 = std::stoi(content.substr(0, 1));
                     int y1 = std::stoi(content.substr(1, 1));
                     int x2 = std::stoi(content.substr(2, 1));
                     int y2 = std::stoi(content.substr(3, 1));
-                    Move move{x1, y1, x2, y2};
+                    Move move { x1, y1, x2, y2 };
                     board.doMove(move);
-                }
-                catch (std::exception& e)
-                {
+                } catch (std::exception& e) {
                     // 避免转换失败导致崩溃
                     std::cerr << "Invalid move: " << moveFileContent << std::endl;
                     command("pause");

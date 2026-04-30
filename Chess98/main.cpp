@@ -7,14 +7,13 @@ static inline void setRealtimePriority()
 #endif
 }
 
-std::atomic<bool> ucciValidate{false};
+std::atomic<bool> ucciValidate { false };
 
 void validateUCCI()
 {
     std::string tmp = "";
     std::getline(std::cin, tmp);
-    if (tmp == "ucci")
-    {
+    if (tmp == "ucci") {
         ucciValidate = true;
     }
 }
@@ -26,26 +25,20 @@ int main()
     v.detach();
     auto start = std::chrono::high_resolution_clock::now();
     std::cout << "input ucci to enable ucci mode (within 1 second)" << std::endl;
-    while (true)
-    {
+    while (true) {
         auto end = std::chrono::high_resolution_clock::now();
         int duration = int(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
-        if (ucciValidate == true)
-        {
+        if (ucciValidate == true) {
             break;
         }
-        if (duration > 1000)
-        {
+        if (duration > 1000) {
             break;
         }
     }
-    if (ucciValidate)
-    {
+    if (ucciValidate) {
         std::cout << "ucciok" << std::endl;
         testByUCCI();
-    }
-    else
-    {
+    } else {
         testByUI();
     }
     return 0;
