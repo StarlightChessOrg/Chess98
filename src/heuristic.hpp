@@ -33,10 +33,7 @@ void history_sort(std::vector<Move>& moves, TEAM team)
 
 std::array<std::array<Move, 2>, 128> killer_table_ { };
 
-void killer_init()
-{
-    killer_table_.fill({ });
-}
+void killer_init() { killer_table_.fill({ }); }
 
 void update(Move move, DEPTH d)
 {
@@ -44,10 +41,7 @@ void update(Move move, DEPTH d)
     killer_table_[d][0] = move;
 }
 
-std::array<Move, 2> killer_get(DEPTH d)
-{
-    return killer_table_[d];
-}
+std::array<Move, 2> killer_get(DEPTH d) { return killer_table_[d]; }
 
 // tt
 
@@ -103,22 +97,20 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
     return INVALID_VL;
 }
 
-Move tt_get_move(HASH hashkey)
-{
-    return tt_table_[hashkey & tt_mask_].move;
-}
+Move tt_get_move(HASH hashkey) { return tt_table_[hashkey & tt_mask_].move; }
 
 // capture
 
-bool see_ge(Move m, VL target_vl)
+constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
+
+bool see_ge(Move move, VL threshold)
 {
     // TODO
-    return false;
+    return true;
 }
 
-void mvvlva(std::vector<Move>& move_list)
+void mvv_lva(std::vector<Move>& move_list)
 {
-    constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
     std::sort(move_list.begin(), move_list.end(), [](Move a, Move b) {
         const VL a_beg = WEIGHTS[abs(piece_on(a.beg))];
         const VL a_end = WEIGHTS[abs(piece_on(a.end))];

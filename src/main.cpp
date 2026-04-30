@@ -7,26 +7,29 @@ constexpr MATRIX test_matrix {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     R_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_ROOK, B_PAWN, B_CANNON, B_ROOK, B_PAWN, 0, 0, 0, 0,
+    R_ROOK, B_PAWN, B_CANNON, R_CANNON, B_PAWN, 0, 0, 0, 0,
     B_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, R_KING, 0, 0, 0, 0, 0
 };
 
-void init_everything()
+int main()
 {
     position_init(test_matrix, R);
     history_init();
     killer_init();
     tt_init();
-}
-
-int main()
-{
-    init_everything();
     // test code
-    std::vector<Move> a { { 45, 54 }, { 45, 46 }, { 45, 47 }, { 45, 48 } };
-    mvvlva(a);
+    MovePicker mp(0);
+    for (int i = 0; i < 100; i++) {
+        const Move m = mp.next();
+        if (m) {
+            std::cout << "Move: " << (int)m.beg << " -> " << (int)m.end << "\n";
+        } else {
+            std::cout << "No more moves\n";
+            break;
+        }
+    }
     return 0;
 }

@@ -13,6 +13,10 @@ enum {
 
 class MovePicker {
     std::vector<Move> moves { };
+    std::vector<Move> bad_captures { };
+    Move tt_move { };
+    Move killer_move_1 { };
+    Move killer_move_2 { };
     DEPTH depth { 0 };
     char status { STATUS_TT };
     char i = -1;
@@ -30,7 +34,7 @@ public:
         if (i == -1) {
             if (status == STATUS_GOOD_CAPTURES) {
                 moves = gen_all_capture_moves();
-                // TODO
+                mvv_lva(moves);
             } else if (status == STATUS_KILLER) {
                 moves.clear();
                 for (const Move m : killer_get(depth)) {
@@ -39,14 +43,17 @@ public:
             } else if (status == STATUS_QUIET) {
                 moves = gen_all_quiet_moves();
                 history_sort(moves, g_team);
-            } else if (status == STATUS_BAD_CAPTURES) {
-                moves = { };
-                // TODO
             }
         }
         i++;
         if (i < moves.size()) {
-            return moves[i];
+            const bool exp = moves[i] != killer_move_1;
+            const bool exp2 = moves[i] != killer_move_2;
+            const bool exp3 = moves[i] != tt_move;
+            if (exp && exp2 && exp3)
+                return moves[i];
+            else
+                return next();
         } else {
             i = -1;
             status++;
