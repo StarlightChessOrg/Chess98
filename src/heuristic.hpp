@@ -109,13 +109,13 @@ bool see_ge(Move move, VL threshold)
     return true;
 }
 
-void mvv_lva(std::vector<Move>& move_list)
+void mvv_lva(std::vector<Move>& move_list, const MATRIX& board)
 {
-    std::sort(move_list.begin(), move_list.end(), [](Move a, Move b) {
-        const VL a_beg = WEIGHTS[abs(piece_on(a.beg))];
-        const VL a_end = WEIGHTS[abs(piece_on(a.end))];
-        const VL b_beg = WEIGHTS[abs(piece_on(b.beg))];
-        const VL b_end = WEIGHTS[abs(piece_on(b.end))];
+    std::sort(move_list.begin(), move_list.end(), [board](Move a, Move b) {
+        const VL a_beg = WEIGHTS[abs(board[a.beg])];
+        const VL a_end = WEIGHTS[abs(board[a.end])];
+        const VL b_beg = WEIGHTS[abs(board[b.beg])];
+        const VL b_end = WEIGHTS[abs(board[b.end])];
         return a_beg - a_end < b_beg - b_end;
     });
 }
