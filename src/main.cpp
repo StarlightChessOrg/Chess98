@@ -7,7 +7,7 @@ constexpr MATRIX test_matrix {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     R_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_ROOK, B_PAWN, B_CANNON, B_CANNON, B_PAWN, 0, 0, 0, 0,
+    R_ROOK, B_PAWN, R_KNIGHT, B_CANNON, B_PAWN, 0, 0, 0, 0,
     B_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,

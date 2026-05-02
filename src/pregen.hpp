@@ -18,7 +18,7 @@ constexpr int get_bit_on_(UINT32 d, UINT32 index_from_right)
 }
 
 // rook captures or cannon scaffolds pregen points
-constexpr PREGEN_TABLE LINEAR_PREGEN = []() {
+constexpr PREGEN_TABLE ROOK_PREGEN = []() {
     PREGEN_TABLE ret { };
     for (UINT32 pos = 0; pos < 10; pos++) {
         for (UINT32 bitline = 0; bitline < 1024; bitline++) {
@@ -69,7 +69,7 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
                         break;
                     }
                 } else if (i == 0) {
-                    set_right_4bit_(entry, 0b1111);
+                    set_left_4bit_(entry, 0b1111);
                 }
             }
         }
@@ -83,7 +83,7 @@ std::pair<POS, POS> get_banner(UINT16 bl, POS p)
 {
     const PREGEN_DATA v = [p, bl]() constexpr {
         if constexpr (IS_ROOK) {
-            return IS_9 ? LINEAR_PREGEN[p % 9][bl] : LINEAR_PREGEN[p / 9][bl];
+            return IS_9 ? ROOK_PREGEN[p % 9][bl] : ROOK_PREGEN[p / 9][bl];
         } else {
             return IS_9 ? CANNON_PREGEN[p % 9][bl] : CANNON_PREGEN[p / 9][bl];
         }
