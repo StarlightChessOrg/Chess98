@@ -102,18 +102,19 @@ Move tt_get_move(HASH hashkey) { return tt_table_[hashkey & tt_mask_].move; }
 
 // capture
 
+// id order is empty, king, advisor, bishop, knight, rook, cannon, pawn
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
 
 VL see_ge(Move move, VL threshold)
 {
     VL vl = 0;
     int count = 0;
+    vl += WEIGHTS[abs(piece_on(move.end))];
     position_move(move);
     count++;
-    vl += WEIGHTS[abs(piece_on(move.end))] - WEIGHTS[abs(piece_on(move.beg))];
     for (POS p = get_protector(move.end); p < 90; p = get_protector(p)) {
+        vl += WEIGHTS[abs(piece_on(p))] * ((count % 2) ? 1 : -1);
         position_move(Move(p, move.end));
-        vl += WEIGHTS[abs(piece_on(move.end))] - WEIGHTS[abs(piece_on(p))];
         count++;
     }
     for (int i = 0; i < count; i++) position_undo();

@@ -109,6 +109,7 @@ void position_move(Move move)
         std::swap(pos_pid_r_[move.end], pos_pid_r_[move.beg]);
         if (g_board[move.end]) {
             pos_list_b_[pos_pid_b_[move.end]] = pos_list_b_.back();
+            pos_pid_b_[pos_list_b_.back()] = pos_pid_b_[move.end];
             pos_list_b_.pop_back();
             pos_pid_b_[move.end] = 0;
         }
@@ -117,6 +118,7 @@ void position_move(Move move)
         std::swap(pos_pid_b_[move.end], pos_pid_b_[move.beg]);
         if (g_board[move.end]) {
             pos_list_r_[pos_pid_r_[move.end]] = pos_list_r_.back();
+            pos_pid_r_[pos_list_r_.back()] = pos_pid_r_[move.end];
             pos_list_r_.pop_back();
             pos_pid_r_[move.end] = 0;
         }
