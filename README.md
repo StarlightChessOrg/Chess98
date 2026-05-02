@@ -13,7 +13,7 @@ This project is being refactored now...
 - [x] bitboard
 - [x] legal move and pos protector, in check validation
 - [x] fix bugs of cannon & rook move generator and improvements
-- [ ] MVV/LVA and SEE
+- [x] MVV/LVA and SEE
 - [x] move picker
 - [ ] basic evaluation
 - [ ] search
