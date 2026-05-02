@@ -104,7 +104,7 @@ Move tt_get_move(HASH hashkey) { return tt_table_[hashkey & tt_mask_].move; }
 
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
 
-VL see_ge(const MATRIX& board, Move move, VL threshold)
+VL see_ge(Move move, VL threshold)
 {
     VL vl = 0;
     int count = 0;

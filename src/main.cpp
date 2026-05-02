@@ -7,7 +7,7 @@ constexpr MATRIX test_matrix {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     R_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_ROOK, B_PAWN, B_CANNON, R_CANNON, B_PAWN, 0, 0, 0, 0,
+    R_ROOK, B_PAWN, B_CANNON, B_CANNON, B_PAWN, 0, 0, 0, 0,
     B_CANNON, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -22,14 +22,6 @@ int main()
     tt_init();
     // test code
     MovePicker mp(0);
-    for (int i = 0; i < 100; i++) {
-        const Move m = mp.next();
-        if (m) {
-            std::cout << "Move: " << (int)m.beg << " -> " << (int)m.end << "\n";
-        } else {
-            std::cout << "No more moves\n";
-            break;
-        }
-    }
+    std::cout << see_ge(Move(45, 46), 0);
     return 0;
 }

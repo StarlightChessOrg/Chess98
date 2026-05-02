@@ -34,7 +34,7 @@ public:
         if (i == -1) {
             if (status == STATUS_GOOD_CAPTURES) {
                 moves = gen_all_capture_moves();
-                mvv_lva(moves, g_board);
+                mvv_lva(moves);
             } else if (status == STATUS_KILLER) {
                 moves.clear();
                 for (const Move m : killer_get(depth)) {
