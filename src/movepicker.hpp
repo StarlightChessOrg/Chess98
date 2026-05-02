@@ -47,13 +47,11 @@ public:
         }
         i++;
         if (i < moves.size()) {
+            
             const bool exp = moves[i] != killer_move_1;
             const bool exp2 = moves[i] != killer_move_2;
             const bool exp3 = moves[i] != tt_move;
-            if (exp && exp2 && exp3)
-                return moves[i];
-            else
-                return next();
+            return (exp && exp2 && exp3) ? moves[i] : next();
         } else {
             i = -1;
             status++;
