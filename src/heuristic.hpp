@@ -1,5 +1,6 @@
 #pragma once
 #include "base.hpp"
+#include "position.hpp"
 
 // history
 
@@ -103,19 +104,29 @@ Move tt_get_move(HASH hashkey) { return tt_table_[hashkey & tt_mask_].move; }
 
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
 
-bool see_ge(Move move, VL threshold)
+VL see_ge(const MATRIX& board, Move move, VL threshold)
 {
-    // TODO
-    return true;
+    VL vl = 0;
+    int count = 0;
+    position_move(move);
+    count++;
+    vl += WEIGHTS[abs(piece_on(move.end))] - WEIGHTS[abs(piece_on(move.beg))];
+    for (POS p = get_protector(move.end); p < 90; p = get_protector(p)) {
+        position_move(Move(p, move.end));
+        vl += WEIGHTS[abs(piece_on(move.end))] - WEIGHTS[abs(piece_on(p))];
+        count++;
+    }
+    for (int i = 0; i < count; i++) position_undo();
+    return vl;
 }
 
-void mvv_lva(std::vector<Move>& move_list, const MATRIX& board)
+void mvv_lva(std::vector<Move>& move_list)
 {
-    std::sort(move_list.begin(), move_list.end(), [board](Move a, Move b) {
-        const VL a_beg = WEIGHTS[abs(board[a.beg])];
-        const VL a_end = WEIGHTS[abs(board[a.end])];
-        const VL b_beg = WEIGHTS[abs(board[b.beg])];
-        const VL b_end = WEIGHTS[abs(board[b.end])];
+    std::sort(move_list.begin(), move_list.end(), [](Move a, Move b) {
+        const VL a_beg = WEIGHTS[abs(piece_on(a.beg))];
+        const VL a_end = WEIGHTS[abs(piece_on(a.end))];
+        const VL b_beg = WEIGHTS[abs(piece_on(b.beg))];
+        const VL b_end = WEIGHTS[abs(piece_on(b.end))];
         return a_beg - a_end < b_beg - b_end;
     });
 }
