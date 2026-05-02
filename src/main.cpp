@@ -22,8 +22,6 @@ int main()
     tt_init();
     // test code
     MovePicker mp(0);
-    //std::cout << see_ge(Move(45, 46), 0);
-    position_move(Move(45, 46));
-    position_move(Move(47, 46));
+    std::cout << see_ge(Move(45, 46), 0);
     return 0;
 }

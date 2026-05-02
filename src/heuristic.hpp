@@ -113,7 +113,7 @@ VL see_ge(Move move, VL threshold)
     position_move(move);
     count++;
     for (POS p = get_protector(move.end); p < 90; p = get_protector(p)) {
-        vl += WEIGHTS[abs(piece_on(p))] * ((count % 2) ? 1 : -1);
+        vl += WEIGHTS[abs(piece_on(move.end))] * ((count % 2) ? -1 : 1);
         position_move(Move(p, move.end));
         count++;
     }
