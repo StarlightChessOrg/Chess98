@@ -1,27 +1,26 @@
 #include "test.hpp"
 #include "ucci.hpp"
 
-constexpr MATRIX test_matrix {
-    0, 0, 0, 0, B_KING, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_ROOK, B_PAWN, R_ROOK, B_CANNON, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, R_KING, 0, 0, 0, 0, 0
-};
-
 int main()
 {
-    position_init(test_matrix, R);
+    auto fen = "rnakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNAKABNR w";
+    const MATRIX matrix = utils_fen_to_matrix(fen);
+    position_init(matrix, R);
     history_init();
     killer_init();
     tt_init();
     // test code
-    MovePicker mp(0);
-    std::cout << see_ge(Move(45, 46), 0);
+    Timer t {};
+    int k = 0;
+    int i = 0;
+    for (; t.duration() < 1000; i++) {
+        MovePicker mp {0};
+        for (Move m = mp.next(); m; m = mp.next()) {
+            k += m.end;    
+        }
+        
+    }
+    std::cout << t.duration() << "ms, " << i << " iterations, " << k << std::endl;
+    
     return 0;
 }

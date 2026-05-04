@@ -5,14 +5,16 @@
 template <bool G>
 std::vector<Move> gen_king_(POS pos)
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     ret.reserve(4);
     if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && team_diff<G>(pos + 9))
         ret.emplace_back(pos, pos + 9);
     if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && team_diff<G>(pos - 9))
         ret.emplace_back(pos, pos - 9);
-    if (pos % 9 == 4 && team_diff<G>(pos - 1)) ret.emplace_back(pos, pos - 1);
-    if (pos % 9 == 4 && team_diff<G>(pos + 1)) ret.emplace_back(pos, pos + 1);
+    if ((pos % 9 == 4 || pos % 9 == 5) && team_diff<G>(pos - 1))
+        ret.emplace_back(pos, pos - 1);
+    if ((pos % 9 == 4 || pos % 9 == 3) && team_diff<G>(pos + 1))
+        ret.emplace_back(pos, pos + 1);
     return ret;
 }
 
@@ -21,7 +23,7 @@ template <bool G>
 std::vector<Move> gen_advisor_(POS pos)
 {
     if (pos == 13 || pos == 76) { // black center
-        std::vector<Move> ret { };
+        std::vector<Move> ret {};
         ret.reserve(4);
         if (team_diff<G>(pos - 10)) ret.emplace_back(pos, pos - 10);
         if (team_diff<G>(pos - 8)) ret.emplace_back(pos, pos - 8);
@@ -33,14 +35,14 @@ std::vector<Move> gen_advisor_(POS pos)
     } else if (team_diff<G>(76)) { // red corner
         return { Move(pos, 76) };
     }
-    return { };
+    return {};
 }
 
 // bishop moves
 template <bool G>
 std::vector<Move> gen_bishop_(POS pos)
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
         if (!piece_on(pos + 10) && team_diff<G>(pos + 16))
@@ -61,7 +63,7 @@ std::vector<Move> gen_bishop_(POS pos)
 template <bool G>
 std::vector<Move> gen_knight_(POS pos)
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     ret.reserve(8);
     if (pos > 17 && !piece_on(pos - 9)) {
         if (pos % 9 != 0 && team_diff<G>(pos - 19)) {
@@ -102,7 +104,7 @@ std::vector<Move> gen_knight_(POS pos)
 template <bool G>
 std::vector<Move> gen_rook_legacy_(POS pos)
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     ret.reserve(G ? 4 : 17);
     for (int p = pos - 9; p >= 0; p -= 9) {
         if (team_diff<G>(p)) ret.emplace_back(pos, p);
@@ -128,7 +130,7 @@ template <bool G>
 std::vector<Move> gen_cannon_legacy_(POS pos)
 {
     if constexpr (G) {
-        std::vector<Move> ret { };
+        std::vector<Move> ret {};
         ret.reserve(G ? 4 : 17);
         bool t = false;
         for (int p = pos - 9; p >= 0; p -= 9) {
@@ -176,7 +178,7 @@ std::vector<Move> gen_cannon_legacy_(POS pos)
 template <bool G>
 std::vector<Move> gen_rook_bit_(POS pos)
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     ret.reserve(4);
     const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
     const auto [left, right] = rook_9(bl9, pos);
@@ -204,7 +206,7 @@ template <bool G>
 std::vector<Move> gen_cannon_bit_(POS pos)
 {
     if constexpr (G) {
-        std::vector<Move> ret { };
+        std::vector<Move> ret {};
         ret.reserve(4);
         const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
         const auto [left, right] = cannon_9(bl9, pos);
@@ -226,7 +228,7 @@ std::vector<Move> gen_cannon_bit_(POS pos)
 template <bool G>
 std::vector<Move> gen_pawn_(POS pos)
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     ret.reserve(3);
     const int target = pos - 9 * g_team;
     if (0 <= target && target < 90 && team_diff<G>(target))
@@ -243,7 +245,7 @@ std::vector<Move> gen_pawn_(POS pos)
 // generate all capture moves
 std::vector<Move> gen_all_capture_moves()
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     for (const POS p : get_pos_list()) {
         const PTYPE t = abs(piece_on(p));
         if (t == R_KING) {
@@ -275,7 +277,7 @@ std::vector<Move> gen_all_capture_moves()
 // generate all quiet moves
 std::vector<Move> gen_all_quiet_moves()
 {
-    std::vector<Move> ret { };
+    std::vector<Move> ret {};
     for (const POS p : get_pos_list()) {
         const PTYPE t = abs(piece_on(p));
         if (t == R_KING) {
