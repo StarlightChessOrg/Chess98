@@ -46,6 +46,7 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
     for (UINT32 pos = 0; pos < 10; pos++) {
         for (UINT32 bitline = 0; bitline < 1024; bitline++) {
             PREGEN_DATA& entry = ret[pos][bitline];
+            // bl=645&&p==7
             bool t = false;
             for (UINT8 i = pos + 1; i < 10; i++) {
                 if (get_bit_on_(bitline, i)) {
@@ -55,12 +56,13 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
                         set_right_4bit_(entry, i);
                         break;
                     }
-                } else if (i == 9) {
+                } 
+                if (i == 9) {
                     set_right_4bit_(entry, 0b1111);
                 }
             }
             t = false;
-            for (UINT8 i = pos; i != 0xFF; i--) {
+            for (UINT8 i = pos - 1; i != 0xFF; i--) {
                 if (get_bit_on_(bitline, i)) {
                     if (t == false) {
                         t = true;
@@ -68,7 +70,8 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
                         set_left_4bit_(entry, i);
                         break;
                     }
-                } else if (i == 0) {
+                } 
+                if (i == 0) {
                     set_left_4bit_(entry, 0b1111);
                 }
             }
