@@ -4,34 +4,31 @@
 using PREGEN_DATA = UINT8;
 using PREGEN_TABLE = std::array<std::array<PREGEN_DATA, 1024>, 10>;
 
-constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
+void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 
-constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
+void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
 
-constexpr int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
+int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
 
-constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
+int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
 
-constexpr int get_bit_on_(UINT32 d, UINT32 index_from_right)
-{
-    return (d >> index_from_right) & 1;
-}
+int get_bit_on_(PREGEN_DATA d, UINT32 i) { return (d >> i) & 1; }
 
-// rook captures or cannon scaffolds pregen points
-constexpr PREGEN_TABLE ROOK_PREGEN = []() {
-    PREGEN_TABLE ret { };
+// rook captures & cannon scaffolds pregen points
+const PREGEN_TABLE ROOK_PREGEN = []() {
+    PREGEN_TABLE ret {};
     for (UINT32 pos = 0; pos < 10; pos++) {
         for (UINT32 bitline = 0; bitline < 1024; bitline++) {
             PREGEN_DATA& entry = ret[pos][bitline];
-            for (UINT32 i = pos + 1; i < 10; i++) {
-                if (get_bit_on_(bitline, i) || i == 9) {
-                    set_right_4bit_(entry, i);
+            for (UINT8 i = pos + 1;; i++) {
+                if (i >= 9 || get_bit_on_(bitline, i)) {
+                    set_right_4bit_(entry, (i <= 9 ? i : 9));
                     break;
                 }
             }
-            for (UINT8 i = pos - 1; i != 0xFF; i--) {
-                if (get_bit_on_(bitline, i) || i == 9) {
-                    set_left_4bit_(entry, i);
+            for (UINT8 i = pos - 1;; i--) {
+                if (i == 0 || i > 90 || get_bit_on_(bitline, i)) {
+                    set_left_4bit_(entry, (i != 0xFF ? i : 0));
                     break;
                 }
             }
@@ -41,38 +38,37 @@ constexpr PREGEN_TABLE ROOK_PREGEN = []() {
 }();
 
 // cannon captures pregen points
-constexpr PREGEN_TABLE CANNON_PREGEN = []() {
-    PREGEN_TABLE ret { };
+const PREGEN_TABLE CANNON_PREGEN = []() {
+    PREGEN_TABLE ret {};
     for (UINT32 pos = 0; pos < 10; pos++) {
         for (UINT32 bitline = 0; bitline < 1024; bitline++) {
             PREGEN_DATA& entry = ret[pos][bitline];
-            // bl=645&&p==7
-            bool t = false;
-            for (UINT8 i = pos + 1; i < 10; i++) {
+            for (UINT8 i = pos + 1, t = 0;; i++) {
+                if (i > 9) {
+                    set_right_4bit_(entry, 0b1111);
+                    break;
+                }
                 if (get_bit_on_(bitline, i)) {
-                    if (t == false) {
-                        t = true;
-                    } else {
+                    if (t == 0) {
+                        t = 1;
+                    } else if (i < 10) {
                         set_right_4bit_(entry, i);
                         break;
                     }
-                } 
-                if (i == 9) {
-                    set_right_4bit_(entry, 0b1111);
                 }
             }
-            t = false;
-            for (UINT8 i = pos - 1; i != 0xFF; i--) {
+            for (UINT8 i = pos - 1, t = 0;; i--) {
+                if (i == 0xFF) {
+                    set_left_4bit_(entry, 0b1111);
+                    break;
+                }
                 if (get_bit_on_(bitline, i)) {
-                    if (t == false) {
-                        t = true;
-                    } else {
+                    if (t == 0) {
+                        t = 1;
+                    } else if (i >= 0) {
                         set_left_4bit_(entry, i);
                         break;
                     }
-                } 
-                if (i == 0) {
-                    set_left_4bit_(entry, 0b1111);
                 }
             }
         }

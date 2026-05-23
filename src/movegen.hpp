@@ -74,10 +74,10 @@ std::vector<Move> gen_knight_(POS pos)
         }
     }
     if (pos < 72 && !piece_on(pos + 9)) {
-        if (pos % 9 != 0 && team_diff<G>(pos + 19)) {
+        if (pos % 9 != 8 && team_diff<G>(pos + 19)) {
             ret.emplace_back(pos, pos + 19);
         }
-        if (pos % 9 != 8 && team_diff<G>(pos + 17)) {
+        if (pos % 9 != 0 && team_diff<G>(pos + 17)) {
             ret.emplace_back(pos, pos + 17);
         }
     }
@@ -90,10 +90,10 @@ std::vector<Move> gen_knight_(POS pos)
         }
     }
     if (pos % 9 < 7 && !piece_on(pos + 1)) {
-        if (pos / 9 != 0 && team_diff<G>(pos + 11)) {
+        if (pos / 9 != 9 && team_diff<G>(pos + 11)) {
             ret.emplace_back(pos, pos + 11);
         }
-        if (pos / 9 != 9 && team_diff<G>(pos - 7)) {
+        if (pos / 9 != 0 && team_diff<G>(pos - 7)) {
             ret.emplace_back(pos, pos - 7);
         }
     }
