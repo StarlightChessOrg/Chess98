@@ -32,16 +32,16 @@ int main()
     killer_init();
     tt_init();
     // test code
+    Timer t {};
+    int k = 0;
     int i = 0;
-    for (Move m : gen_all_capture_moves()) {
-        i++;
-        std::cout << (int)m.beg << " " << (int)m.end << "\n";
-    }
-    for (Move m : gen_all_quiet_moves()) {
-        i++;
-        std::cout << (int)m.beg << " " << (int)m.end << "\n";
-    }
-    std::cout << i;
-
+    // for (; t.duration() < 1000; i++) {
+    //     MovePicker mp {0};
+    //     for (Move m = mp.next(); m; m = mp.next()) {
+    //         k += m.end;    
+    //     }
+    // }
+    // std::cout << t.duration() << "ms, " << i << " iterations, " << k << std::endl;
+    system("pause");
     return 0;
 }
