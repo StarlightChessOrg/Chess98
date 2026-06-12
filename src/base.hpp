@@ -13,9 +13,17 @@
 #include <utility>
 #include <vector>
 
-struct Move;
-struct Timer;
-struct TTEntry;
+struct Move {
+    std::uint8_t beg { 0 };
+    std::uint8_t end { 0 };
+    Move() = default;
+    Move(int beg, int end) : beg(beg), end(end) { }
+    bool operator==(Move m) { return beg == m.beg && end == m.end; }
+    bool operator!=(Move m) { return beg != m.beg || end != m.end; }
+    operator bool() { return beg != end; }
+    operator int() { return beg * 100 + end; }
+};
+
 using UINT32 = std::uint32_t;
 using UINT16 = std::uint16_t;
 using UINT8 = std::uint8_t;
@@ -54,46 +62,6 @@ constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
 
-// move
-struct Move {
-    POS beg { 0 };
-    POS end { 0 };
-
-    Move() = default;
-    Move(int beg, int end)
-        : beg(static_cast<POS>(beg))
-        , end(static_cast<POS>(end))
-    {
-        assert(beg != end && beg < 90 && end < 90);
-    }
-    bool operator==(Move m) const noexcept
-    {
-        return beg == m.beg && end == m.end;
-    }
-    bool operator!=(Move m) const noexcept
-    {
-        return beg != m.beg || end != m.end;
-    }
-    operator bool() const noexcept
-    {
-        return beg != end;
-    }
-    operator int() const noexcept
-    {
-        return beg * 100 + end;
-    }
-};
-
-// tt entry
-struct TTEntry {
-    HASH key { 0 };
-    HASH_FLAG flag { 0 };
-    VL vl { 0 };
-    DEPTH depth { 0 };
-    Move move { };
-};
-
-// timer
 struct Timer {
     std::chrono::steady_clock::time_point beg { };
     std::chrono::milliseconds limit { };
@@ -115,9 +83,7 @@ struct Timer {
     }
 };
 
-// hash
-
-long long gen_random_()
+std::uint64_t gen_random_()
 {
     static std::mt19937_64 rand_engine(2820795095);
     static std::uniform_int_distribution<long long> gen_rand {

@@ -46,6 +46,15 @@ std::array<Move, 2> killer_get(DEPTH d) { return killer_table_[d]; }
 
 // tt
 
+// tt entry
+struct TTEntry {
+    HASH key { 0 };
+    HASH_FLAG flag { 0 };
+    VL vl { 0 };
+    DEPTH depth { 0 };
+    Move move { };
+};
+
 std::vector<TTEntry> tt_table_ { };
 UINT8 tt_size_ { 0 };
 UINT8 tt_mask_ { 0 };

@@ -22,17 +22,20 @@ void movegen_1sec_count()
     killer_init();
     tt_init();
     Timer t { 1000 };
-    uint64_t iterations = 0, num = 0;
+    uint64_t iterations = 0, id = 0, num = 0;
     while (!t.time_up()) {
         for (auto move : gen_all_capture_moves()) {
-            num += move.beg;
+            id += move.beg;
+            num++;
         }
         for (auto move : gen_all_quiet_moves()) {
-            num += move.end;
+            id += move.end;
+            num++;
         }
         iterations++;
     }
     std::cout << "[Move Generation 1 second] iterations: " << iterations;
     std::cout << " num: " << num;
+    std::cout << " id: " << id;
     std::cout << std::endl;
 }
