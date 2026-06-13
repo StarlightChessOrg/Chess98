@@ -12,6 +12,7 @@ public:
     void reset()
     {
         this->rootMoves = { };
+        this->nodecount = 0;
         board.distance = 0;
         board.initEvaluate();
         this->history->reset();
@@ -25,6 +26,7 @@ public:
 public:
     Board board { };
     MOVES rootMoves { };
+    int nodecount = 0;
     std::unique_ptr<HistoryTable> history = std::make_unique<HistoryTable>();
     std::unique_ptr<KillerTable> killer = std::make_unique<KillerTable>();
     std::unique_ptr<Tt> tt = std::make_unique<Tt>();
@@ -162,6 +164,7 @@ Result Search::searchMain(int maxDepth, int maxTimeMs = 3)
             break;
         }
     }
+    std::cout << "nps: " << nodecount / maxTimeMs * 1000 << std::endl;
 
     // info clear
     info.clear();
@@ -373,6 +376,7 @@ Result Search::searchOpenBook() const
 
 Result Search::searchRoot(int depth)
 {
+    nodecount++;
     Move bestMove { };
     int vl = -INF;
     int vlBest = -INF;
@@ -412,6 +416,7 @@ Result Search::searchRoot(int depth)
 
 int Search::searchPV(int depth, int alpha, int beta)
 {
+    nodecount++;
     if (!board.isKingLive(board.team)) {
         return -INF + board.distance;
     }
@@ -549,6 +554,7 @@ int Search::searchPV(int depth, int alpha, int beta)
 
 int Search::searchCut(int depth, int beta, bool banNullMove)
 {
+    nodecount++;
     if (!board.isKingLive(board.team)) {
         return -INF + board.distance;
     }
@@ -678,6 +684,7 @@ int Search::searchCut(int depth, int beta, bool banNullMove)
 
 int Search::searchQ(int alpha, int beta, int leftDistance)
 {
+    nodecount++;
     if (!board.isKingLive(board.team)) {
         return -INF + board.distance;
     }
