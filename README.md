@@ -1,3 +1,5 @@
+# We're now refactoring this project in the `refactor` branch. Maybe this version will never be maintained again.
+
 # Chess98
 
 Chess98是一个C++实现的中国象棋AI项目，适用于Windows和Linux。
