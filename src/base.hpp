@@ -24,6 +24,26 @@ struct Move {
     operator int() { return beg * 100 + end; }
 };
 
+struct Timer {
+    std::chrono::steady_clock::time_point beg { };
+    std::chrono::milliseconds limit { };
+    Timer() : beg(std::chrono::steady_clock::now()) { }
+    Timer(int _limit)
+        : beg(std::chrono::steady_clock::now())
+        , limit(std::chrono::milliseconds(_limit)) { }
+    bool time_up() const
+    {
+        return std::chrono::steady_clock::now() - beg >= limit;
+    }
+    int duration() const
+    {
+        using namespace std::chrono;
+        const auto duration = steady_clock::now() - beg;
+        const auto ms = duration_cast<milliseconds>(duration).count();
+        return static_cast<int>(ms);
+    }
+};
+
 using UINT32 = std::uint32_t;
 using UINT16 = std::uint16_t;
 using UINT8 = std::uint8_t;
@@ -61,27 +81,6 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
-
-struct Timer {
-    std::chrono::steady_clock::time_point beg { };
-    std::chrono::milliseconds limit { };
-
-    Timer() : beg(std::chrono::steady_clock::now()) { }
-    Timer(int _limit)
-        : beg(std::chrono::steady_clock::now())
-        , limit(std::chrono::milliseconds(_limit)) { }
-    bool time_up() const noexcept
-    {
-        return std::chrono::steady_clock::now() - beg >= limit;
-    }
-    int duration() const noexcept
-    {
-        using namespace std::chrono;
-        const auto duration = steady_clock::now() - beg;
-        const auto ms = duration_cast<milliseconds>(duration).count();
-        return static_cast<int>(ms);
-    }
-};
 
 std::uint64_t gen_random_()
 {

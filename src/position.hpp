@@ -6,8 +6,6 @@ MATRIX g_board { };
 TEAM g_team { };
 HASH g_hashkey { };
 
-// some local variables and methods
-
 // history moves and maintaining all pieces on board
 std::vector<Move> history_moves_ { };
 std::vector<PTYPE> history_captures_ { };
@@ -20,14 +18,11 @@ std::array<UINT16, 9> bl10_container { };
 std::array<UINT16, 10> bl9_container { };
 
 // get all live pieces of current team
-std::vector<POS> get_pos_list()
-{
-    return g_team == R ? pos_list_r_ : pos_list_b_;
-}
+std::vector<POS> pos_list() { return g_team == R ? pos_list_r_ : pos_list_b_; }
 
 // return team differences based on wheter you want to gen captures or not
 template <bool G>
-bool team_diff(POS p) { return G ? g_team * g_board[p] < 0 : !g_board[p]; }
+bool teamcheck(POS p) { return G ? g_team * g_board[p] < 0 : !g_board[p]; }
 
 // get piece on pos
 PTYPE piece_on(POS p) { return p < 90 ? g_board[p] : 0; }
