@@ -18,3 +18,9 @@ This project is being refactored now...
 - [ ] basic evaluation
 - [ ] search
 - [ ] ucci
+
+## Progress
+
+- move generation: 238618 -> 321312
+- move picker ok
+

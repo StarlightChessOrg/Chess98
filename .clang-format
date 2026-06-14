@@ -1,6 +1,6 @@
 Language: Cpp
 BasedOnStyle: WebKit
-AllowShortIfStatementsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: Always
 AllowShortLoopsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
