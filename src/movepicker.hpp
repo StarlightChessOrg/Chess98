@@ -36,10 +36,10 @@ public:
             if (!(generated++)) moves = gen_all_capture_moves();
             if (i < moves.size()) {
                 if (moves[i] == tt_move) return next();
-                if (see_ge(moves[i++], 0)) {
-                    return moves[i - 1];
+                if (see_ge(moves[i], 0)) {
+                    return moves[i++];
                 } else {
-                    bad_captures.emplace_back(moves[i - 1]);
+                    bad_captures.emplace_back(moves[i++]);
                     return next();
                 }
             } else {
@@ -53,7 +53,12 @@ public:
         else if (status == STATUS_KILLER) {
             if (!(generated++)) killers = killer_get(depth);
             if (i < killers.size()) {
-                return legal_move(killers[i++]) ? killers[i - 1] : next();
+                if (legal_move(killers[i])) {
+                    return killers[i++];
+                } else {
+                    i++;
+                    return next();
+                }
             } else {
                 generated = i = 0;
                 status = STATUS_QUIET;

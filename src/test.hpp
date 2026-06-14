@@ -26,7 +26,8 @@ void movegen_1sec_count()
     while (!t.time_up()) {
         MovePicker a(1, R);
         for (Move m = a.next(); m; m = a.next()) {
-            id += m.beg + m.end;
+            id += m.beg;
+            id += m.end;
             num++;
         }
         iterations++;
