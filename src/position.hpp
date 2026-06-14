@@ -17,6 +17,52 @@ std::array<PID, 90> pos_pid_b_ { };
 std::array<UINT16, 9> bl10_container { };
 std::array<UINT16, 10> bl9_container { };
 
+// init global position
+void position_init(const MATRIX& board, TEAM team)
+{
+    // variables init
+    history_moves_.clear();
+    history_captures_.clear();
+    history_hashkeys_.clear();
+    pos_list_r_ = pos_list_b_ = {};
+    pos_pid_r_ =pos_pid_b_= {};
+    bl10_container = {};
+    bl9_container = {};
+    g_hashkey = 0;
+    g_board = board;
+    g_team = team;
+    // init king pos first in order to keep it in the 1st position
+    for (int i = 0; i < 90; i++) {
+        if (board[i] == R_KING) {
+            pos_pid_r_[i] = 0;
+            pos_list_r_.emplace_back(i);
+        } else if (board[i] == B_KING) {
+            pos_pid_b_[i] = 0;
+            pos_list_b_.emplace_back(i);
+        }
+    }
+    // init pos list and hash
+    for (int i = 0; i < 90; i++) {
+        g_hashkey ^= hashkey_on(board[i], i);
+        if (board[i] != 0) {
+            bl10_container[i % 9] |= 1 << (i / 9);
+            bl9_container[i / 9] |= 1 << (i % 9);
+        }
+        if (board[i] > 0 && board[i] != R_KING) {
+            pos_pid_r_[i] = static_cast<PID>(pos_list_r_.size());
+            pos_list_r_.emplace_back(i);
+        }
+        if (board[i] < 0 && board[i] != B_KING) {
+            pos_pid_b_[i] = static_cast<PID>(pos_list_b_.size());
+            pos_list_b_.emplace_back(i);
+        }
+    }
+    // vector reservations
+    history_moves_.reserve(96);
+    history_captures_.reserve(96);
+    history_hashkeys_.reserve(96);
+}
+
 // get all live pieces of current team
 std::vector<POS> pos_list() { return g_team == R ? pos_list_r_ : pos_list_b_; }
 
@@ -51,44 +97,6 @@ bool face_king_()
         }
     }
     return false;
-}
-
-// init global position
-void position_init(const MATRIX& board, TEAM team)
-{
-    // variables init
-    g_board = board;
-    g_team = team;
-    // init king pos first in order to keep it in the 1st position
-    for (int i = 0; i < 90; i++) {
-        if (board[i] == R_KING) {
-            pos_pid_r_[i] = 0;
-            pos_list_r_.emplace_back(i);
-        } else if (board[i] == B_KING) {
-            pos_pid_b_[i] = 0;
-            pos_list_b_.emplace_back(i);
-        }
-    }
-    // init pos list and hash
-    for (int i = 0; i < 90; i++) {
-        g_hashkey ^= hashkey_on(board[i], i);
-        if (board[i] != 0) {
-            bl10_container[i % 9] |= 1 << (i / 9);
-            bl9_container[i / 9] |= 1 << (i % 9);
-        }
-        if (board[i] > 0 && board[i] != R_KING) {
-            pos_pid_r_[i] = static_cast<PID>(pos_list_r_.size());
-            pos_list_r_.emplace_back(i);
-        }
-        if (board[i] < 0 && board[i] != B_KING) {
-            pos_pid_b_[i] = static_cast<PID>(pos_list_b_.size());
-            pos_list_b_.emplace_back(i);
-        }
-    }
-    // vector reservations
-    history_moves_.reserve(96);
-    history_captures_.reserve(96);
-    history_hashkeys_.reserve(96);
 }
 
 // do move

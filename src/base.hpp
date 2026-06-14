@@ -35,6 +35,10 @@ struct Timer {
     {
         return std::chrono::steady_clock::now() - beg >= limit;
     }
+    bool time_up_3xlesser() const
+    {
+        return std::chrono::steady_clock::now() - beg >= limit / 3;
+    }
     int duration() const
     {
         using namespace std::chrono;
@@ -44,6 +48,7 @@ struct Timer {
     }
 };
 
+using STATE = std::uint8_t;
 using UINT32 = std::uint32_t;
 using UINT16 = std::uint16_t;
 using UINT8 = std::uint8_t;

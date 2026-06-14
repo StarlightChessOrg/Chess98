@@ -24,7 +24,7 @@ public:
 
     Move next()
     {
-        static std::uint8_t generated = 0; // 0 is false, 1 is true
+        static STATE generated = 0; // 0 is false, others are true
         static std::uint8_t i { 0 }; // the index
         // tt move
         if (status == STATUS_TT) {
