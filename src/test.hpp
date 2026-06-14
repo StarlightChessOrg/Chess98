@@ -2,7 +2,7 @@
 #include "search.hpp"
 #include "utils.hpp"
 
-const MATRIX matrix {
+constexpr MATRIX matrix {
     B_ROOK, B_KNIGHT, B_BISHOP, B_ADVISOR, B_KING, B_ADVISOR, B_BISHOP, B_KNIGHT, B_ROOK,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, B_CANNON, 0, 0, 0, 0, 0, B_CANNON, 0,

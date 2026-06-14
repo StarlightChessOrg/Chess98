@@ -14,13 +14,14 @@ class MovePicker {
     DEPTH depth { 0 };
     TEAM team { 0 };
     MPStatus status = STATUS_TT;
-    Move tt_move { };
-    std::array<Move, 2> killers { };
+    Move tt_move { }; // regester tt move
+    std::array<Move, 2> killers { }; // and killer moves
     std::vector<Move> moves { };
     std::vector<Move> bad_captures { };
 
 public:
-    MovePicker(DEPTH depth, TEAM team) : depth(depth), team(team) { }
+    MovePicker(DEPTH depth, TEAM team) : depth(depth), team(team){}
+
     Move next()
     {
         static std::uint8_t generated = 0; // 0 is false, 1 is true
@@ -35,16 +36,18 @@ public:
         else if (status == STATUS_GOOD_CAPTURES) {
             if (!(generated++)) moves = gen_all_capture_moves();
             if (i < moves.size()) {
+                // move repetition filter
                 if (moves[i] == tt_move) return next();
+                // validate "good" moves using SEE > 0
                 if (see_ge(moves[i], 0)) {
                     return moves[i++];
                 } else {
+                    // push bad captures
                     bad_captures.emplace_back(moves[i++]);
                     return next();
                 }
             } else {
                 generated = i = 0;
-                moves.clear();
                 status = STATUS_KILLER;
                 return next();
             }
@@ -77,7 +80,6 @@ public:
                 return c ? next() : m;
             } else {
                 generated = i = 0;
-                moves.clear();
                 status = STATUS_BAD_CAPTURES;
                 return next();
             }
