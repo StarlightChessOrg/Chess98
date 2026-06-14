@@ -21,6 +21,9 @@ This project is being refactored now...
 
 ## Progress
 
-- move generation: 238618 -> 321312
-- move picker ok
+The progress is measured under MSVC Release Compilation:
 
+- position: from shit to excellence
+- heuristic: the simplified styles
+- movegen: 238618 -> 636702 2.8x faster
+- movepicker: from nothing to the optimized movepicker

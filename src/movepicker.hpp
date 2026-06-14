@@ -20,7 +20,7 @@ class MovePicker {
     std::vector<Move> bad_captures { };
 
 public:
-    MovePicker(DEPTH depth) : depth(depth), team(team) { }
+    MovePicker(DEPTH depth, TEAM team) : depth(depth), team(team) { }
     Move next()
     {
         static std::uint8_t generated = 0; // 0 is false, 1 is true
@@ -67,11 +67,12 @@ public:
                 history_sort(moves, team);
             }
             if (i < moves.size()) {
-                Move m = moves[i];
+                Move m = moves[i++];
                 bool c = m == tt_move && m == killers[0] && m == killers[1];
                 return c ? next() : m;
             } else {
                 generated = i = 0;
+                moves.clear();
                 status = STATUS_BAD_CAPTURES;
                 return next();
             }

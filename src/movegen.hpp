@@ -172,6 +172,7 @@ std::vector<Move> gen_pawn_(POS pos)
 std::vector<Move> gen_all_capture_moves()
 {
     std::vector<Move> ret {};
+    ret.reserve(16);
     for (const POS p : pos_list()) {
         const PTYPE t = abs(piece_on(p));
         if (t == R_KING) {
@@ -204,6 +205,7 @@ std::vector<Move> gen_all_capture_moves()
 std::vector<Move> gen_all_quiet_moves()
 {
     std::vector<Move> ret {};
+    ret.reserve(64);
     for (const POS p : pos_list()) {
         const PTYPE t = abs(piece_on(p));
         if (t == R_KING) {

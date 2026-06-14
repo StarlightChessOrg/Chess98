@@ -16,10 +16,6 @@ int main()
     //    0, 0, 0, 0, R_ADVISOR, 0, 0, 0, 0,
     //    0, R_KNIGHT, 0, 0, R_KING, 0, 0, 0, 0,
     //};
-    position_init(matrix, R);
-    history_init();
-    killer_init();
-    tt_init();
     // test code
     movegen_1sec_count();
     system("pause");
