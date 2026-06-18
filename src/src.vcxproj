@@ -155,8 +155,7 @@
     <ClInclude Include="base.hpp" />
     <ClInclude Include="evaluate.hpp" />
     <ClInclude Include="heuristic.hpp" />
-    <ClInclude Include="movegen.hpp" />
-    <ClInclude Include="movepicker.hpp" />
+    <ClInclude Include="moves.hpp" />
     <ClInclude Include="position.hpp" />
     <ClInclude Include="pregen.hpp" />
     <ClInclude Include="search.hpp" />

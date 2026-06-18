@@ -1,7 +1,6 @@
 #include "test.hpp"
 #include "ucci.hpp"
 
-
 int main()
 {
     // test code

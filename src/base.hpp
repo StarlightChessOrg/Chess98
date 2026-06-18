@@ -63,6 +63,7 @@ using HASH_FLAG = std::int8_t;
 using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
+using MovePickerStatus = std::uint8_t;
 constexpr POS INVALID_POS = 100;
 constexpr HASH_FLAG EXACT = 0;
 constexpr HASH_FLAG ALPHA = 1;
@@ -86,6 +87,11 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
+constexpr MovePickerStatus STATUS_TT = 0;
+constexpr MovePickerStatus STATUS_GOOD_CAPTURES = 1;
+constexpr MovePickerStatus STATUS_KILLER = 2;
+constexpr MovePickerStatus STATUS_QUIET = 3;
+constexpr MovePickerStatus STATUS_BAD_CAPTURES = 4;
 
 std::uint64_t gen_random_()
 {
