@@ -39,7 +39,7 @@ VL search_q_(VL a, VL b, DEPTH depth)
     for (const Move m : moves) {
         position_move(m), distance_++;
         const VL vl = -search_q_(-b, -a, depth - 1);
-        position_undo(), distance_--;
+        position_undo(), distance_--, history_checkings.pop_back();
         if (vl > vlbest) {
             if (vl > b) return vl;
             vlbest = vl;
@@ -53,8 +53,25 @@ template <bool CUT>
 VL search_vl_(DEPTH depth, VL a, VL b)
 {
     if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE);
-    VL vl { -INF };
-
+    const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
+    if (vlhash > b) return vlhash;
+    // mdp todo
+    const bool checking = in_check();
+    if (checking) {
+        history_checkings.emplace_back(checking);
+    } else {
+        // fp todo
+        // nmp todo
+    }
+    // repeat status validation todo
+    // search
+    VL vlbest { -INF };
+    MovePicker mp{depth};
+    for (Move m = mp.next();m;m = mp.next()) {
+        position_move(m),distance_++;
+        
+    }
+    
     return vl;
 }
 

@@ -25,6 +25,7 @@ void position_init(const MATRIX& board, TEAM team)
     history_moves_.clear();
     history_captures_.clear();
     history_hashkeys_.clear();
+    history_checkings.clear();
     pos_list_r_ = pos_list_b_ = {};
     pos_pid_r_ =pos_pid_b_= {};
     bl10_container = {};
@@ -59,9 +60,10 @@ void position_init(const MATRIX& board, TEAM team)
         }
     }
     // vector reservations
-    history_moves_.reserve(96);
-    history_captures_.reserve(96);
-    history_hashkeys_.reserve(96);
+    history_moves_.reserve(256);
+    history_captures_.reserve(256);
+    history_hashkeys_.reserve(256);
+    history_checkings.reserve(256);
 }
 
 // get all live pieces of current team

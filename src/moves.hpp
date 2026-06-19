@@ -249,7 +249,6 @@ std::vector<Move> gen_all_quiet_moves()
 
 class MovePicker {
     DEPTH depth { 0 };
-    TEAM team { 0 };
     MovePickerStatus status = STATUS_TT;
     Move tt_move { }; // regester tt move
     std::array<Move, 2> killers { }; // and killer moves
@@ -259,7 +258,7 @@ class MovePicker {
     std::uint8_t i { 0 }; // the index
 
 public:
-    MovePicker(DEPTH depth, TEAM team) : depth(depth), team(team) { }
+    MovePicker(DEPTH depth) : depth(depth) { }
     Move next();
 };
 
@@ -302,7 +301,7 @@ Move MovePicker::next()
     } else if (status == STATUS_QUIET) {
         if (!generated) {
             moves = gen_all_quiet_moves(), generated = true;
-            history_sort(moves, team);
+            history_sort(moves, g_team);
         }
         if (i < moves.size()) {
             Move m = moves[i++];
