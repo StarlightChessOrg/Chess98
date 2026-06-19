@@ -14,7 +14,7 @@ DEPTH g_maxdepth = { 20 };
 DEPTH distance_ { 0 };
 
 // search
-VL search_q_(VL b, DEPTH depth)
+VL search_q_(VL a, VL b, DEPTH depth)
 {
     if (distance_ == Q_MAX_DISTANCE || depth == 0) return evaluate();
     // mdp todo
@@ -27,7 +27,7 @@ VL search_q_(VL b, DEPTH depth)
     }
     // repeat status validation todo
     // search
-    VL vl { -INF };
+    VL vlbest { -INF };
     std::vector<Move> moves { };
     if (checking) {
         moves = gen_all_quiet_moves();
@@ -36,18 +36,27 @@ VL search_q_(VL b, DEPTH depth)
         moves = gen_all_capture_moves();
         mvvlva_sort(moves);
     }
-    return vl;
+    for (const Move m : moves) {
+        position_move(m), distance_++;
+        const VL vl = -search_q_(-b, -a, depth - 1);
+        position_undo(), distance_--;
+        if (vl > vlbest) {
+            if (vl > b) return vl;
+            vlbest = vl;
+            a = std::max(a, vl);
+        }
+    }
+    return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
 template <bool CUT>
 VL search_vl_(DEPTH depth, VL a, VL b)
 {
-    if (depth == 0) return search_q_(b, Q_MAX_DISTANCE);
+    if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE);
     VL vl { -INF };
-    
+
     return vl;
 }
-
 
 SEARCH_RET search()
 {
