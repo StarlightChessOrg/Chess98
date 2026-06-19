@@ -1,3 +1,4 @@
+#pragma once
 #include "base.hpp"
 
 MATRIX utils_fen_to_matrix(const std::string& fen)
