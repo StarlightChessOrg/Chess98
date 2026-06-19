@@ -35,7 +35,7 @@ struct Timer {
     {
         return std::chrono::steady_clock::now() - beg >= limit;
     }
-    bool time_up_3xlesser() const
+    bool time_up_3xless() const
     {
         return std::chrono::steady_clock::now() - beg >= limit / 3;
     }
