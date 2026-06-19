@@ -66,13 +66,31 @@ VL search_vl_(DEPTH depth, VL a, VL b)
     // repeat status validation todo
     // search
     VL vlbest { -INF };
-    MovePicker mp{depth};
-    for (Move m = mp.next();m;m = mp.next()) {
-        position_move(m),distance_++;
-        
+    HASH_FLAG movetype { EXACT };
+    MovePicker mp { depth };
+    for (Move m = mp.next(); m; m = mp.next()) {
+        position_move(m), distance_++;
+        VL vl { -INF };
+        if constexpr (CUT) {
+            if (vlbest == -INF) {
+                vl = -search_vl_<false>(depth - 1, -b, -a);
+            } else {
+                vl = -search_vl_<true>(depth - 1, -INF, -a);
+                if (a < vl && vl < b) {
+                    vl = -search_vl_<false>(depth - 1, -b, -a);
+                }
+            }
+        } else {
+            vl = -search_vl_<true>(depth - 1, -INF, -a);
+        }
+        position_undo(), distance_--, history_captures_.pop_back();
+        if (vl > vlbest) {
+            if (vl > b) break;
+            a = std::max(a, vl);
+        }
     }
-    
-    return vl;
+
+    return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
 SEARCH_RET search()
