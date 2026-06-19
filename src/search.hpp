@@ -2,24 +2,60 @@
 #include "evaluate.hpp"
 #include "moves.hpp"
 
-VL search_vl_(DEPTH depth, VL a, VL b)
+// const defines
+constexpr DEPTH Q_MAX_DISTANCE { 64 };
+constexpr DEPTH Q_CHECKING_DEPTH { 8 };
+
+// global variables
+STATE g_searchstop { 0 };
+DEPTH g_maxdepth = { 20 };
+
+// local variables
+DEPTH distance_ { 0 };
+
+// search
+VL search_q_(VL b, DEPTH depth)
 {
+    if (distance_ == Q_MAX_DISTANCE || depth == 0) return evaluate();
+    // mdp todo
+    const bool checking = in_check();
+    if (checking) {
+        history_checkings.emplace_back(true);
+        depth = std::min(depth, Q_CHECKING_DEPTH);
+    } else {
+        // ndp todo
+    }
+    // repeat status validation todo
+    // search
     VL vl { -INF };
+    std::vector<Move> moves { };
+    if (checking) {
+        moves = gen_all_quiet_moves();
+        history_sort(moves, g_team);
+    } else {
+        moves = gen_all_capture_moves();
+        mvvlva_sort(moves);
+    }
     return vl;
 }
 
-VL search_q_(VL b)
+template <bool CUT>
+VL search_vl_(DEPTH depth, VL a, VL b)
 {
+    if (depth == 0) return search_q_(b, Q_MAX_DISTANCE);
     VL vl { -INF };
+    
     return vl;
 }
+
 
 SEARCH_RET search()
 {
     const Timer timer { 1000 };
     VL vl { -INF };
-    for (DEPTH depth = 0; !timer.time_up_3xlesser(); depth++) {
-        vl = search_vl_(depth, -INF, INF);
+    for (DEPTH depth = 0; !timer.time_up_3xless(); depth++) {
+        if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
+        vl = search_vl_<false>(depth, -INF, INF);
     }
     const Move move = tt_get_move(g_hashkey);
     return { move, vl };

@@ -5,6 +5,7 @@
 MATRIX g_board { };
 TEAM g_team { };
 HASH g_hashkey { };
+std::vector<bool> history_checkings { };
 
 // history moves and maintaining all pieces on board
 std::vector<Move> history_moves_ { };

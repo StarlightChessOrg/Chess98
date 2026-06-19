@@ -271,7 +271,7 @@ Move MovePicker::next()
     } else if (status == STATUS_GOOD_CAPTURES) {
         if (!generated) {
             moves = gen_all_capture_moves();
-            killers = killer_get(depth), generated = true;
+            mvvlva_sort(moves), generated = true;
         }
         if (i < moves.size()) {
             if (moves[i] == tt_move) return next();
@@ -286,6 +286,9 @@ Move MovePicker::next()
             return next();
         }
     } else if (status == STATUS_KILLER) {
+        if (!generated) {
+            killers = killer_get(depth), generated = true;
+        }
         if (i < killers.size()) {
             if (legal_move(killers[i++])) {
                 return killers[static_cast<size_t>(i - 1)];

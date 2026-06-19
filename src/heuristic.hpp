@@ -130,7 +130,7 @@ VL see_ge(Move move, VL threshold)
     return vl;
 }
 
-void mvv_lva(std::vector<Move>& move_list)
+void mvvlva_sort(std::vector<Move>& move_list)
 {
     std::sort(move_list.begin(), move_list.end(), [](Move a, Move b) {
         const VL a_beg = WEIGHTS[abs(piece_on(a.beg))];
