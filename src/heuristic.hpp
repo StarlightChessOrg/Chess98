@@ -36,7 +36,7 @@ std::array<std::array<Move, 2>, 128> killer_table_ { };
 
 void killer_init() { killer_table_.fill({ }); }
 
-void update(Move move, DEPTH d)
+void killer_set(Move move, DEPTH d)
 {
     killer_table_[d][1] = killer_table_[d][0];
     killer_table_[d][0] = move;
