@@ -66,6 +66,7 @@ VL search_vl_(DEPTH depth, VL a, VL b)
     // repeat status validation todo
     // search
     VL vlbest { -INF };
+    Move movebest { };
     HASH_FLAG movetype { EXACT };
     MovePicker mp { depth };
     for (Move m = mp.next(); m; m = mp.next()) {
@@ -85,11 +86,16 @@ VL search_vl_(DEPTH depth, VL a, VL b)
         }
         position_undo(), distance_--, history_captures_.pop_back();
         if (vl > vlbest) {
+            movebest = m;
             if (vl > b) break;
             a = std::max(a, vl);
         }
     }
-
+    if (movebest) {
+        if (type != ALPHA) killer_set(movebest, depth);
+        history_set(movebest, g_team, depth);
+        tt_set(g_hashkey, movetype);
+    }
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
