@@ -8,4 +8,5 @@
 **/*.exe
 
 # Temp Files
-**/*.tmp
+**/*.tmp*
+**/__pycache__
