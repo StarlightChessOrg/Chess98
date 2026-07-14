@@ -73,9 +73,9 @@ VL search_vl_(DEPTH depth, VL a, VL b)
         }
     }
     if (movebest) {
-        if (type != ALPHA) killer_set(movebest, depth);
+        if (movetype != ALPHA) killer_set(movebest, depth);
         history_set(movebest, g_team, depth);
-        tt_set(g_hashkey, movetype);
+        tt_set(g_hashkey, movetype, depth, movebest, vlbest);
     }
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
