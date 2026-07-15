@@ -27,7 +27,7 @@
 
 其中某些事项如下：
 
-- 源文件路径为`<PROJECT>/src/main.cpp`，C++14及以上三大编译器均能通过编译
+- 源文件路径为`<PROJECT>/src/main.cpp`，C++17及以上三大编译器均能通过编译
 - 编译路径`kits/__pycache__/chess98.exe`
 - chess98到目前为止还没有写完，但预计支持uci/ucci双协议，这里按uci协议测试即可
 - 由于还没有写完，可以用皮卡鱼代替chess98对弈来验证python有无bug，反正协议相同
