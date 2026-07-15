@@ -566,11 +566,12 @@ class OpenBookDB:
                 value TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS positions (
-                fen       TEXT PRIMARY KEY,
-                ply       INTEGER NOT NULL,
-                bestmove  TEXT,
-                score     TEXT,
-                expanded  INTEGER NOT NULL DEFAULT 0
+                fen          TEXT PRIMARY KEY,
+                ply          INTEGER NOT NULL,
+                bestmove     TEXT,
+                score        TEXT,
+                expanded     INTEGER NOT NULL DEFAULT 0,
+                search_depth INTEGER NOT NULL DEFAULT 0
             );
             CREATE TABLE IF NOT EXISTS edges (
                 parent_fen TEXT NOT NULL,
@@ -582,6 +583,16 @@ class OpenBookDB:
             CREATE INDEX IF NOT EXISTS idx_edges_parent ON edges(parent_fen);
             """
         )
+        # 旧库迁移：补 search_depth 列
+        cols = {
+            r[1]
+            for r in self.conn.execute("PRAGMA table_info(positions)").fetchall()
+        }
+        if "search_depth" not in cols:
+            self.conn.execute(
+                "ALTER TABLE positions ADD COLUMN search_depth "
+                "INTEGER NOT NULL DEFAULT 0"
+            )
         self.conn.commit()
 
     def get_meta(self, key: str, default: str | None = None) -> str | None:
@@ -613,19 +624,27 @@ class OpenBookDB:
         bestmove: str,
         score: str,
         expanded: int = 0,
+        search_depth: int = 0,
     ) -> None:
         self.conn.execute(
             """
-            INSERT INTO positions(fen, ply, bestmove, score, expanded)
-            VALUES(?, ?, ?, ?, ?)
+            INSERT INTO positions(
+                fen, ply, bestmove, score, expanded, search_depth
+            )
+            VALUES(?, ?, ?, ?, ?, ?)
             ON CONFLICT(fen) DO UPDATE SET
                 ply=excluded.ply,
                 bestmove=excluded.bestmove,
                 score=excluded.score,
-                expanded=excluded.expanded
+                expanded=excluded.expanded,
+                search_depth=excluded.search_depth
             """,
-            (fen, ply, bestmove, score, expanded),
+            (fen, ply, bestmove, score, expanded, search_depth),
         )
+        self.conn.commit()
+
+    def clear_edges(self, parent: str) -> None:
+        self.conn.execute("DELETE FROM edges WHERE parent_fen=?", (parent,))
         self.conn.commit()
 
     def mark_expanded(self, fen: str) -> None:
@@ -672,6 +691,24 @@ class OpenBookDB:
             (max_ply,),
         ).fetchall()
         return [(r[0], int(r[1])) for r in rows]
+
+    def stale_searches(self, engine_depth: int) -> list[tuple[str, int]]:
+        """搜索深度低于当前引擎深度的局面（需重搜）。"""
+        rows = self.conn.execute(
+            """
+            SELECT fen, ply FROM positions
+            WHERE bestmove IS NOT NULL AND IFNULL(search_depth, 0) < ?
+            ORDER BY ply ASC
+            """,
+            (engine_depth,),
+        ).fetchall()
+        return [(r[0], int(r[1])) for r in rows]
+
+    def needs_search(self, fen: str, engine_depth: int) -> bool:
+        row = self.get_position(fen)
+        if row is None or not row["bestmove"]:
+            return True
+        return int(row["search_depth"] or 0) < engine_depth
 
     def prepare_resume(self, target_depth: int) -> None:
         """加深训练时，把仍需扩展的节点重新标为未扩展。"""
@@ -753,9 +790,6 @@ def train(target_depth: int, engine_depth: int = MAX_DEPTH) -> None:
     db.prepare_resume(target_depth)
 
     root, _ = canonicalize(INIT_FEN)
-    if db.get_position(root) is None and target_depth >= 0:
-        # 先放入队列，由 worker 搜索根局面
-        pass
 
     pending: dict[str, int] = {}
     for fen, ply in db.unexpanded(target_depth):
@@ -763,14 +797,19 @@ def train(target_depth: int, engine_depth: int = MAX_DEPTH) -> None:
     if root not in pending and db.get_position(root) is None:
         pending[root] = 0
     elif root not in pending:
-        # 根已扩展完且无需加深
         row = db.get_position(root)
         if row is not None and int(row["expanded"]) == 0:
             pending[root] = int(row["ply"])
 
-    # 若库非空但全部已扩展且目标未加深，可能无任务
+    # 引擎加深后，旧搜索结果视为过期，强制重搜
+    stale = db.stale_searches(engine_depth)
+    if stale:
+        _log(f"发现 {len(stale)} 个浅层旧结果，将按深度 {engine_depth} 重搜…")
+        for fen, ply in stale:
+            if ply <= target_depth:
+                pending[fen] = ply
+
     if not pending:
-        # 仍检查是否有 ply < target 却缺边的叶子
         db.prepare_resume(target_depth)
         for fen, ply in db.unexpanded(target_depth):
             pending[fen] = ply
@@ -791,7 +830,6 @@ def train(target_depth: int, engine_depth: int = MAX_DEPTH) -> None:
             initargs=(engine_depth,),
         ) as pool:
             while pending:
-                # 本轮取一批（控制内存与进度刷新）
                 batch_items = list(pending.items())
                 batch_items.sort(key=lambda x: x[1])
                 batch = batch_items[: max(workers * 2, 4)]
@@ -802,15 +840,13 @@ def train(target_depth: int, engine_depth: int = MAX_DEPTH) -> None:
                 skip_expand: list[tuple[str, int]] = []
 
                 for fen, ply in batch:
-                    row = db.get_position(fen)
-                    if row is not None and row["bestmove"]:
-                        # 已有搜索结果：只需补边/展开
+                    if db.needs_search(fen, engine_depth):
+                        use_multipv = ply >= PRUNING_BEG_PLY
+                        tasks.append(
+                            (fen, ply, use_multipv, BEST_MOVES_NUM)
+                        )
+                    else:
                         skip_expand.append((fen, ply))
-                        continue
-                    use_multipv = ply >= PRUNING_BEG_PLY
-                    tasks.append(
-                        (fen, ply, use_multipv, BEST_MOVES_NUM)
-                    )
 
                 futures = {
                     pool.submit(_worker_search, t): t for t in tasks
@@ -819,16 +855,18 @@ def train(target_depth: int, engine_depth: int = MAX_DEPTH) -> None:
                 for fut in as_completed(futures):
                     search_results.append(fut.result())
 
-                # 处理新搜索
                 for result in search_results:
                     fen = result["fen"]
                     ply = int(result["ply"])
+                    # 重搜时清掉旧剪枝边，按新 MultiPV/合法着重建
+                    db.clear_edges(fen)
                     db.upsert_position(
                         fen,
                         ply,
                         result["bestmove"],
                         result["score"],
                         expanded=0,
+                        search_depth=engine_depth,
                     )
                     _expand_position(
                         db,
@@ -839,23 +877,23 @@ def train(target_depth: int, engine_depth: int = MAX_DEPTH) -> None:
                         pending,
                     )
 
-                # 处理仅展开
                 for fen, ply in skip_expand:
                     edges = db.get_edges(fen)
                     if edges:
                         branch_moves = [m for m, _ in edges]
                     else:
                         if ply >= PRUNING_BEG_PLY:
-                            # 需要重新 MultiPV 才能知道剪枝分支
                             result = _worker_search_local(
                                 fen, ply, True, BEST_MOVES_NUM, engine_depth
                             )
+                            db.clear_edges(fen)
                             db.upsert_position(
                                 fen,
                                 ply,
                                 result["bestmove"],
                                 result["score"],
                                 expanded=0,
+                                search_depth=engine_depth,
                             )
                             branch_moves = result["branch_moves"]
                         else:

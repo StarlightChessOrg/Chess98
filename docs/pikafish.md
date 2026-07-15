@@ -1,4 +1,4 @@
-# `pikafish.py`文档
+# pikafish
 
 这篇文章提供`pikafish.py`的功能以及实现细节等
 
@@ -9,7 +9,7 @@
 
 ## 实现细节
 
-模块路径为`/kits/pikafish.py`，仅作为模块被导入，`__main__`直接退出
+模块路径为`<PROJECT>/kits/pikafish.py`，仅作为模块被导入，`__main__`直接退出
 
 各种常量如下：
 

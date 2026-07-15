@@ -1,4 +1,4 @@
-# `autotest.py`文档
+# autotest
 
 这篇文章提供`autotest.py`的功能以及实现细节等。
 
