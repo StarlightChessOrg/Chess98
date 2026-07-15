@@ -15,7 +15,7 @@ constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
 constexpr int get_bit_on_(PREGEN_DATA d, UINT32 i) { return (d >> i) & 1; }
 
 // rook captures & cannon scaffolds pregen points
-constexpr PREGEN_TABLE ROOK_PREGEN = []() {
+const PREGEN_TABLE ROOK_PREGEN = []() {
     PREGEN_TABLE ret {};
     for (UINT32 pos = 0; pos < 10; pos++) {
         for (UINT32 bitline = 0; bitline < 1024; bitline++) {
@@ -38,7 +38,7 @@ constexpr PREGEN_TABLE ROOK_PREGEN = []() {
 }();
 
 // cannon captures pregen points
-constexpr PREGEN_TABLE CANNON_PREGEN = []() {
+const PREGEN_TABLE CANNON_PREGEN = []() {
     PREGEN_TABLE ret {};
     for (UINT32 pos = 0; pos < 10; pos++) {
         for (UINT32 bitline = 0; bitline < 1024; bitline++) {
@@ -78,7 +78,7 @@ constexpr PREGEN_TABLE CANNON_PREGEN = []() {
 
 // interface (invalid pos which is greater than 100 contained in cannon)
 template <bool IS_9, bool IS_ROOK>
-constexpr std::pair<POS, POS> get_banner(UINT16 bl, POS p)
+std::pair<POS, POS> get_banner(UINT16 bl, POS p)
 {
     const PREGEN_DATA v = [p, bl]() constexpr {
         if constexpr (IS_ROOK) {
@@ -99,22 +99,22 @@ constexpr std::pair<POS, POS> get_banner(UINT16 bl, POS p)
     }
 }
 
-constexpr std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
+std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 {
     return get_banner<true, true>(bl9, p);
 }
 
-constexpr std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
+std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
 {
     return get_banner<false, true>(bl10, p);
 }
 
-constexpr std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
+std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
 {
     return get_banner<true, false>(bl9, p);
 }
 
-constexpr std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
+std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
 {
     return get_banner<false, false>(bl10, p);
 }

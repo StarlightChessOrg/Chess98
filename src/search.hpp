@@ -53,7 +53,7 @@ VL search_vl_(DEPTH depth, VL a, VL b)
     for (Move m = mp.next(); m; m = mp.next()) {
         position_move(m), distance_++;
         VL vl { -INF };
-        if constexpr (CUT) {
+        if (CUT) {
             if (vlbest == -INF) {
                 vl = -search_vl_<false>(depth - 1, -b, -a);
             } else {

@@ -114,7 +114,7 @@ std::vector<Move> gen_rook_(POS pos)
     const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
     const auto [left, right] = rook_9(bl9, pos);
     const auto [top, bottom] = rook_10(bl10, pos);
-    if constexpr (G) {
+    if (G) {
         if (teamcheck<G>(left))
             ret.emplace_back(pos, left);
         if (teamcheck<G>(right))
@@ -144,7 +144,7 @@ std::vector<Move> gen_rook_(POS pos)
 template <bool G>
 std::vector<Move> gen_cannon_(POS pos)
 {
-    if constexpr (G) {
+    if (G) {
         std::vector<Move> ret { };
         ret.reserve(4);
         const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
