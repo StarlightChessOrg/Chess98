@@ -15,7 +15,7 @@ This project is being refactored now...
 - [x] fix bugs of cannon & rook move generator and improvements
 - [x] MVV/LVA and SEE
 - [x] move picker
-- [ ] basic evaluation
+- [x] basic evaluation
 - [ ] search
 - [ ] ucci
 
@@ -25,5 +25,5 @@ The progress is measured under MSVC Release Compilation:
 
 - position: from shit to excellence
 - heuristic: the simplified styles
-- movegen: 238618 -> 636702 2.8x faster
-- movepicker: from nothing to the optimized movepicker
+- movegen: 238618 -> 636702 2.8x faster than things used to be
+- movepicker: more optimized than the past all-in-one move generation
