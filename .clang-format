@@ -4,3 +4,4 @@ AllowShortIfStatementsOnASingleLine: Always
 AllowShortLoopsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+BreakTemplateDeclarations: No

@@ -5,6 +5,7 @@ int main()
 {
     // test code
     movepicker_1sec_count();
+    movegen_1sec_count();
     system("pause");
     return 0;
 }

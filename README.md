@@ -25,5 +25,5 @@ The progress is measured under MSVC Release Compilation:
 
 - position: from shit to excellence
 - heuristic: the simplified styles
-- movegen: 238618 -> 636702 2.8x faster than things used to be
+- movegen: 238618 -> 845605 3x faster than things used to be
 - movepicker: more optimized than the past all-in-one move generation

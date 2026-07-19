@@ -1,7 +1,7 @@
 #pragma once
 #include "base.hpp"
 
-MATRIX utils_fen_to_matrix(const std::string& fen)
+MATRIX fen_to_matrix(const std::string& fen)
 {
     MATRIX m { };
     int i = 0;
@@ -22,7 +22,7 @@ MATRIX utils_fen_to_matrix(const std::string& fen)
     return m;
 }
 
-std::string utils_matrix_to_fen(const MATRIX& m)
+std::string matrix_to_fen(const MATRIX& m)
 {
     std::string s;
     for (int r = 0; r < 10; r++) {
@@ -42,7 +42,7 @@ std::string utils_matrix_to_fen(const MATRIX& m)
     return s;
 }
 
-std::string utils_to_ucci_move(Move move)
+std::string move_to_ucimove(Move move)
 {
     std::string s;
     s += char('a' + move.beg % 9);
