@@ -55,3 +55,10 @@ void movegen_1sec_count()
     std::cout << " id: " << id;
     std::cout << std::endl;
 }
+
+void search_validation()
+{
+    SEARCH_RET ret = search();
+    std::cout << "search move: " << move_to_ucimove(ret.first) << " ";
+    std::cout << "search vl: " << ret.second << std::endl;
+}

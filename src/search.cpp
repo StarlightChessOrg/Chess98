@@ -6,11 +6,12 @@ SEARCH_RET search()
     VL vl { -INF };
     
     // search
-    for (DEPTH depth = 0; !timer.time_up_3xless(); depth++) {
+    for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
         if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
-        vl = search_vl_<false>(depth, -INF, INF);
+        vl = search_vl_<NODE_PV>(depth, -INF, INF);
     }
 
+    std::cout << search_vl_<NODE_PV>(1, -INF, INF) << std::endl;
     // end
     const Move move = tt_get_move(g_hashkey);
     return { move, vl };

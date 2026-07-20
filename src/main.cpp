@@ -10,8 +10,7 @@ int main(int argc, char* argv[])
     history_init();
     // test code
     move_validation();
-    movepicker_1sec_count();
-    movegen_1sec_count();
+    search_validation();
     system("pause");
     return 0;
 }

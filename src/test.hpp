@@ -19,3 +19,4 @@ constexpr MATRIX INIT_MATRIX {
 void move_validation();
 void movepicker_1sec_count();
 void movegen_1sec_count();
+void search_validation();

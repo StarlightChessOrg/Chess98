@@ -63,6 +63,12 @@ std::vector<Move> gen_all_quiet_moves()
             ret.insert(ret.end(), moves.begin(), moves.end());
         }
     }
+    if (ret[1].beg == 0) {
+        std::cout << "???";
+        auto moves = gen_rook_<false>(0);
+        std::cout << "???";
+
+    }
     return ret;
 }
 
@@ -106,6 +112,7 @@ Move MovePicker::next()
         if (!generated) {
             moves = gen_all_quiet_moves(), generated = true;
             history_sort(moves, g_team);
+            auto a = gen_all_quiet_moves();
         }
         if (i < moves.size()) {
             Move m = moves[i++];
