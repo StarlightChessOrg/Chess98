@@ -19,9 +19,7 @@ VL search_vl_(DEPTH depth, VL a, VL b)
     const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
     if (vlhash > b) return vlhash;
     const bool checking = in_check();
-    if (checking) {
-        history_checkings.emplace_back(checking);
-    } else {
+    if (!checking) {
         // fp
         const VL vl = evaluate();
         if (depth <= 2 && vl - FP_MARGIN * depth >= b) return vl;
@@ -35,7 +33,9 @@ VL search_vl_(DEPTH depth, VL a, VL b)
     for (Move m = mp.next(); m; m = mp.next()) {
         position_move(m), distance_++;
         VL vl { -INF };
-        if (CUT) {
+        if constexpr (CUT) {
+            vl = -search_vl_<NODE_CUT>(depth - 1, -INF, -a);
+        } else {
             if (vlbest == -INF) {
                 vl = -search_vl_<NODE_PV>(depth - 1, -b, -a);
             } else {
@@ -44,10 +44,8 @@ VL search_vl_(DEPTH depth, VL a, VL b)
                     vl = -search_vl_<NODE_PV>(depth - 1, -b, -a);
                 }
             }
-        } else {
-            vl = -search_vl_<NODE_CUT>(depth - 1, -INF, -a);
         }
-        position_undo(), distance_--, history_captures_.pop_back();
+        position_undo(), distance_--;
         if (vl > vlbest) {
             movebest = m;
             a = std::max(a, vl);
@@ -68,7 +66,6 @@ VL search_q_(VL a, VL b, DEPTH depth)
     const bool checking = in_check();
     VL vlbest { -INF };
     if (checking) {
-        history_checkings.emplace_back(true);
         depth = std::min(depth, Q_CHECKING_DEPTH);
     } else {
         // delta pruning
@@ -89,7 +86,7 @@ VL search_q_(VL a, VL b, DEPTH depth)
     for (const Move m : moves) {
         position_move(m), distance_++;
         const VL vl = -search_q_(-b, -a, depth - 1);
-        position_undo(), distance_--, history_checkings.pop_back();
+        position_undo(), distance_--;
         if (vl > vlbest) {
             if (vl > b) return vl;
             vlbest = vl;
