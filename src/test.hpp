@@ -1,4 +1,5 @@
 #pragma once
+#include "base.hpp"
 
 constexpr MATRIX INIT_MATRIX {
     B_ROOK, B_KNIGHT, B_BISHOP, B_ADVISOR,
