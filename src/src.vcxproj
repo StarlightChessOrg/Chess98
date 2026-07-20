@@ -155,17 +155,23 @@
     <ClInclude Include="base.hpp" />
     <ClInclude Include="evaluate.hpp" />
     <ClInclude Include="heuristic.hpp" />
+    <ClInclude Include="main.hpp" />
     <ClInclude Include="moves.hpp" />
     <ClInclude Include="position.hpp" />
-    <ClInclude Include="pregen.hpp" />
     <ClInclude Include="search.hpp" />
     <ClInclude Include="test.hpp" />
     <ClInclude Include="ucci.hpp" />
-    <ClInclude Include="utils.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="base.cpp" />
+    <ClCompile Include="evaluate.cpp" />
+    <ClCompile Include="heuristic.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="statistics.hpp" />
+    <ClCompile Include="moves.cpp" />
+    <ClCompile Include="position.cpp" />
+    <ClCompile Include="search.cpp" />
+    <ClCompile Include="test.cpp" />
+    <ClCompile Include="ucci.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

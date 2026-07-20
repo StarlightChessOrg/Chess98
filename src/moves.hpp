@@ -2,15 +2,14 @@
 #include "heuristic.hpp"
 #include "position.hpp"
 
-// king moves
 template <bool G>
 std::vector<Move> gen_king_(POS pos)
 {
     std::vector<Move> ret { };
     ret.reserve(4);
-    if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && teamcheck<G>(pos + 9))
+    if (((2 < pos && pos < 15) || (65 < pos && pos < 78)) && teamcheck<G>(pos + 9))
         ret.emplace_back(pos, pos + 9);
-    if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && teamcheck<G>(pos - 9))
+    if (((11 < pos && pos < 24) || (74 < pos && pos < 87)) && teamcheck<G>(pos - 9))
         ret.emplace_back(pos, pos - 9);
     if ((pos % 9 == 4 || pos % 9 == 5) && teamcheck<G>(pos - 1))
         ret.emplace_back(pos, pos - 1);
@@ -19,11 +18,10 @@ std::vector<Move> gen_king_(POS pos)
     return ret;
 }
 
-// advisor moves
 template <bool G>
 std::vector<Move> gen_advisor_(POS pos)
 {
-    if (pos == 13 || pos == 76) { // black center
+    if (pos == 13 || pos == 76) {
         std::vector<Move> ret { };
         ret.reserve(4);
         if (teamcheck<G>(pos - 10))
@@ -35,15 +33,14 @@ std::vector<Move> gen_advisor_(POS pos)
         if (teamcheck<G>(pos + 8))
             ret.emplace_back(pos, pos + 8);
         return ret;
-    } else if (pos < 24 && teamcheck<G>(13)) { // black corner
+    } else if (pos < 24 && teamcheck<G>(13)) {
         return { Move(pos, 13) };
-    } else if (teamcheck<G>(76)) { // red corner
+    } else if (teamcheck<G>(76)) {
         return { Move(pos, 76) };
     }
     return { };
 }
 
-// bishop moves
 template <bool G>
 std::vector<Move> gen_bishop_(POS pos)
 {
@@ -64,7 +61,6 @@ std::vector<Move> gen_bishop_(POS pos)
     return ret;
 }
 
-// knight moves
 template <bool G>
 std::vector<Move> gen_knight_(POS pos)
 {
@@ -105,7 +101,6 @@ std::vector<Move> gen_knight_(POS pos)
     return ret;
 }
 
-// rook moves
 template <bool G>
 std::vector<Move> gen_rook_(POS pos)
 {
@@ -140,7 +135,6 @@ std::vector<Move> gen_rook_(POS pos)
     return ret;
 }
 
-// cannon moves
 template <bool G>
 std::vector<Move> gen_cannon_(POS pos)
 {
@@ -163,7 +157,6 @@ std::vector<Move> gen_cannon_(POS pos)
     return gen_rook_<false>(pos);
 }
 
-// pawn moves
 template <bool G>
 std::vector<Move> gen_pawn_(POS pos)
 {
@@ -181,136 +174,20 @@ std::vector<Move> gen_pawn_(POS pos)
     return ret;
 }
 
-// generate all capture moves
-std::vector<Move> gen_all_capture_moves()
-{
-    std::vector<Move> ret { };
-    ret.reserve(16);
-    for (const POS p : pos_list()) {
-        const PTYPE t = abs(piece_on(p));
-        if (t == R_KING) {
-            const auto moves = gen_king_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_ADVISOR) {
-            const auto moves = gen_advisor_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_BISHOP) {
-            const auto moves = gen_bishop_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_KNIGHT) {
-            const auto moves = gen_knight_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_ROOK) {
-            const auto moves = gen_rook_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_CANNON) {
-            const auto moves = gen_cannon_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_PAWN) {
-            const auto moves = gen_pawn_<true>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        }
-    }
-    return ret;
-}
-
-// generate all quiet moves
-std::vector<Move> gen_all_quiet_moves()
-{
-    std::vector<Move> ret { };
-    ret.reserve(64);
-    for (const POS p : pos_list()) {
-        const PTYPE t = abs(piece_on(p));
-        if (t == R_KING) {
-            const auto moves = gen_king_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_ADVISOR) {
-            const auto moves = gen_advisor_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_BISHOP) {
-            const auto moves = gen_bishop_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_KNIGHT) {
-            const auto moves = gen_knight_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_ROOK) {
-            const auto moves = gen_rook_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_CANNON) {
-            const auto moves = gen_cannon_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        } else if (t == R_PAWN) {
-            const auto moves = gen_pawn_<false>(p);
-            ret.insert(ret.end(), moves.begin(), moves.end());
-        }
-    }
-    return ret;
-}
+std::vector<Move> gen_all_capture_moves();
+std::vector<Move> gen_all_quiet_moves();
 
 class MovePicker {
     DEPTH depth { 0 };
     MovePickerStatus status = STATUS_TT;
-    Move tt_move { }; // regester tt move
-    std::array<Move, 2> killers { }; // and killer moves
+    Move tt_move { };
+    std::array<Move, 2> killers { };
     std::vector<Move> moves { };
     std::vector<Move> bad_captures { };
-    bool generated = false; // 0 is false, others are true
-    std::uint8_t i { 0 }; // the index
+    bool generated = false;
+    std::uint8_t i { 0 };
 
 public:
-    MovePicker(DEPTH depth) : depth(depth) { }
+    explicit MovePicker(DEPTH depth) : depth(depth) { }
     Move next();
 };
-
-Move MovePicker::next()
-{
-    if (status == STATUS_TT) {
-        tt_move = tt_get_move(g_hashkey), status++;
-        return tt_move ? tt_move : next();
-    } else if (status == STATUS_GOOD_CAPTURES) {
-        if (!generated) {
-            moves = gen_all_capture_moves();
-            mvvlva_sort(moves), generated = true;
-        }
-        if (i < moves.size()) {
-            if (moves[i] == tt_move) return next();
-            if (see_ge(moves[i], 0)) {
-                return moves[i++];
-            } else {
-                bad_captures.emplace_back(moves[i++]);
-                return next();
-            }
-        } else {
-            generated = i = 0, status++;
-            return next();
-        }
-    } else if (status == STATUS_KILLER) {
-        if (!generated) {
-            killers = killer_get(depth), generated = true;
-        }
-        if (i < killers.size()) {
-            if (legal_move(killers[i++])) {
-                return killers[static_cast<size_t>(i - 1)];
-            } else {
-                return next();
-            }
-        } else {
-            generated = i = 0, status++;
-            return next();
-        }
-    } else if (status == STATUS_QUIET) {
-        if (!generated) {
-            moves = gen_all_quiet_moves(), generated = true;
-            history_sort(moves, g_team);
-        }
-        if (i < moves.size()) {
-            Move m = moves[i++];
-            bool c = m == tt_move || m == killers[0] || m == killers[1];
-            return c ? next() : m;
-        } else {
-            generated = i = 0, status++;
-            return next();
-        }
-    }
-    return i < bad_captures.size() ? bad_captures[i++] : Move { };
-}
