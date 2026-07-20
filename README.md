@@ -16,7 +16,7 @@ This project is being refactored now...
 - [x] MVV/LVA and SEE
 - [x] move picker
 - [x] basic evaluation
-- [ ] search
+- [x] search
 - [ ] ucci
 
 ## Progress
