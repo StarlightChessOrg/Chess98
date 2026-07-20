@@ -28,3 +28,4 @@ void position_undo();
 bool in_check();
 bool legal_move(Move move);
 POS get_protector(POS pos);
+bool is_repeat();

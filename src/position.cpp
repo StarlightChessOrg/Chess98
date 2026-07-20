@@ -346,3 +346,14 @@ POS get_protector(POS pos)
     }
     return INVALID_POS;
 }
+
+// repeat validation
+bool is_repeat()
+{
+    const size_t n = history_hashkeys_.size();
+    for (size_t i = n - 1; i + 1 != 0; i--) {
+        if (history_hashkeys_[i] == g_hashkey) return n - i >= 4;
+        if (history_captures_[i]) break;
+    }
+    return false;
+}
