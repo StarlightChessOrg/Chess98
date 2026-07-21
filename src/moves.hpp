@@ -290,7 +290,7 @@ Move MovePicker::next()
         }
         if (i < killers.size()) {
             if (legal_move(killers[i++])) {
-                return killers[static_cast<size_t>(i - 1)];
+                return killers[size_t(i - 1)];
             } else {
                 return next();
             }

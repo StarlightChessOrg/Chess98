@@ -5,6 +5,7 @@ MATRIX fen_to_matrix(const std::string& fen)
 {
     MATRIX m { };
     int i = 0;
+    constexpr const char* t = "KABNRCPkabnrcp";
     for (const char c : fen) {
         if (c == ' ') break;
         if (c == '/') continue;
@@ -12,12 +13,11 @@ MATRIX fen_to_matrix(const std::string& fen)
             i += c - '0';
             continue;
         }
-        constexpr const char* t = "KABNRCPkabnrcp";
         const char* q = t;
         while (*q && *q != c) q++;
         if (!*q || i >= 90) continue;
         const int k = int(q - t);
-        m[i++] = k < 7 ? static_cast<PTYPE>(k + 1) : static_cast<PTYPE>(6 - k);
+        m[i++] = k < 7 ? PTYPE(k + 1) : PTYPE(6 - k);
     }
     return m;
 }

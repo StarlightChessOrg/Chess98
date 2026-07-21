@@ -51,11 +51,11 @@ void position_init(const MATRIX& board, TEAM team)
             bl9_container[i / 9] |= 1 << (i % 9);
         }
         if (board[i] > 0 && board[i] != R_KING) {
-            pos_pid_r_[i] = static_cast<PID>(pos_list_r_.size());
+            pos_pid_r_[i] = PID(pos_list_r_.size());
             pos_list_r_.emplace_back(i);
         }
         if (board[i] < 0 && board[i] != B_KING) {
-            pos_pid_b_[i] = static_cast<PID>(pos_list_b_.size());
+            pos_pid_b_[i] = PID(pos_list_b_.size());
             pos_list_b_.emplace_back(i);
         }
     }
@@ -155,14 +155,14 @@ void position_undo()
         pos_list_b_[pos_pid_b_[move.end]] = move.beg;
         std::swap(pos_pid_b_[move.end], pos_pid_b_[move.beg]);
         if (captured) {
-            pos_pid_r_[move.end] = static_cast<PID>(pos_list_r_.size());
+            pos_pid_r_[move.end] = PID(pos_list_r_.size());
             pos_list_r_.emplace_back(move.end);
         }
     } else {
         pos_list_r_[pos_pid_r_[move.end]] = move.beg;
         std::swap(pos_pid_r_[move.end], pos_pid_r_[move.beg]);
         if (captured) {
-            pos_pid_b_[move.end] = static_cast<PID>(pos_list_b_.size());
+            pos_pid_b_[move.end] = PID(pos_list_b_.size());
             pos_list_b_.emplace_back(move.end);
         }
     }

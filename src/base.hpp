@@ -44,7 +44,7 @@ struct Timer {
         using namespace std::chrono;
         const auto duration = steady_clock::now() - beg;
         const auto ms = duration_cast<milliseconds>(duration).count();
-        return static_cast<int>(ms);
+        return int(ms);
     }
 };
 

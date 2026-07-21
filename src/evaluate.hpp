@@ -1,8 +1,6 @@
 #pragma once
 #include "position.hpp"
 
-
-// —— 开局·攻势：将/兵（过河兵更强，逼宫分更高）——
 constexpr std::array<VL, 90> OPEN_ATTACK_KING_PAWN_ {
     0, 0, 0, 10037, 10055, 10037, 0, 0, 0,
     0, 0, 0, 10008, 10022, 10008, 0, 0, 0,
@@ -16,7 +14,6 @@ constexpr std::array<VL, 90> OPEN_ATTACK_KING_PAWN_ {
     8, 8, 8, 14, 20, 14, 8, 8, 8
 };
 
-// —— 开局·守势：将/兵（未过河兵略值钱，减少乱动兵）——
 constexpr std::array<VL, 90> OPEN_DEFEND_KING_PAWN_ {
     0, 0, 0, 10033, 10048, 10033, 0, 0, 0,
     0, 0, 0, 10006, 10008, 10006, 0, 0, 0,
@@ -30,7 +27,6 @@ constexpr std::array<VL, 90> OPEN_DEFEND_KING_PAWN_ {
     30, 30, 30, 36, 42, 36, 30, 30, 30
 };
 
-// —— 残局·攻势：将/兵（兵升值，将更愿出宫助攻）——
 constexpr std::array<VL, 90> END_ATTACK_KING_PAWN_ {
     0, 0, 0, 10005, 10036, 10005, 0, 0, 0,
     0, 0, 0, 10012, 10042, 10012, 0, 0, 0,
@@ -44,7 +40,6 @@ constexpr std::array<VL, 90> END_ATTACK_KING_PAWN_ {
     12, 12, 12, 28, 32, 28, 12, 12, 12
 };
 
-// —— 残局·守势：将/兵 ——
 constexpr std::array<VL, 90> END_DEFEND_KING_PAWN_ {
     0, 0, 0, 10005, 10036, 10005, 0, 0, 0,
     0, 0, 0, 10012, 10040, 10012, 0, 0, 0,
@@ -58,7 +53,6 @@ constexpr std::array<VL, 90> END_DEFEND_KING_PAWN_ {
     32, 32, 32, 48, 52, 48, 32, 32, 32
 };
 
-// —— 士象安位（已按红下翻转；花心/宫心留出）——
 constexpr std::array<VL, 90> SAFE_GUARD_BISHOP_ {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -72,7 +66,6 @@ constexpr std::array<VL, 90> SAFE_GUARD_BISHOP_ {
     0, 0, 65, 70, 0, 70, 65, 0, 0
 };
 
-// —— 士象危位：缺士象时抬高防守子价值，避免轻兑 ——
 constexpr std::array<VL, 90> DANGER_GUARD_BISHOP_ {
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -86,7 +79,6 @@ constexpr std::array<VL, 90> DANGER_GUARD_BISHOP_ {
     0, 0, 130, 135, 0, 135, 130, 0, 0
 };
 
-// —— 开局马：抑边马，抬河口马 / 中路马 ——
 constexpr std::array<VL, 90> OPEN_KNIGHT_ {
     255, 246, 265, 258, 265, 258, 265, 246, 255,
     246, 265, 272, 276, 228, 276, 272, 265, 246,
@@ -100,7 +92,6 @@ constexpr std::array<VL, 90> OPEN_KNIGHT_ {
     262, 265, 268, 285, 265, 285, 268, 265, 262
 };
 
-// —— 残局马：更均、略抬前场（残局马胜炮）——
 constexpr std::array<VL, 90> END_KNIGHT_ {
     270, 276, 282, 276, 278, 276, 282, 276, 270,
     276, 282, 288, 282, 284, 282, 288, 282, 276,
@@ -114,7 +105,6 @@ constexpr std::array<VL, 90> END_KNIGHT_ {
     280, 288, 295, 295, 295, 295, 295, 288, 280
 };
 
-// —— 开局车：巡河、肋道、对方肋门优先 ——
 constexpr std::array<VL, 90> OPEN_ROOK_ {
     575, 615, 610, 640, 605, 640, 610, 615, 575,
     595, 625, 620, 640, 608, 640, 620, 625, 595,
@@ -128,7 +118,6 @@ constexpr std::array<VL, 90> OPEN_ROOK_ {
     612, 625, 622, 645, 652, 645, 622, 625, 612
 };
 
-// —— 残局车：强调深入与中路 ——
 constexpr std::array<VL, 90> END_ROOK_ {
     548, 548, 548, 555, 562, 555, 548, 548, 548,
     548, 548, 548, 555, 562, 555, 548, 548, 548,
@@ -142,7 +131,6 @@ constexpr std::array<VL, 90> END_ROOK_ {
     555, 558, 560, 570, 580, 570, 560, 558, 555
 };
 
-// —— 开局炮：当头/中路略抬，压低窝底无根炮 ——
 constexpr std::array<VL, 90> OPEN_CANNON_ {
     285, 285, 292, 305, 312, 305, 292, 285, 285,
     285, 292, 298, 302, 308, 302, 298, 292, 285,
@@ -156,7 +144,6 @@ constexpr std::array<VL, 90> OPEN_CANNON_ {
     295, 295, 285, 268, 258, 268, 285, 295, 295
 };
 
-// —— 残局炮：略降（残局炮弱于马），中路仍略好 ——
 constexpr std::array<VL, 90> END_CANNON_ {
     292, 292, 295, 308, 315, 308, 295, 292, 292,
     292, 292, 295, 308, 315, 308, 295, 292, 292,
@@ -173,7 +160,6 @@ constexpr std::array<VL, 90> END_CANNON_ {
 namespace eval_detail_ {
 
 constexpr int PHASE_MAX = 32;
-// 车4 马2 炮2 士1 象1；开局双方满配接近 40，截到 32
 constexpr int PHASE_ROOK = 4;
 constexpr int PHASE_KNIGHT = 2;
 constexpr int PHASE_CANNON = 2;
@@ -206,7 +192,7 @@ struct SideStat {
 
 inline POS sq_of(TEAM team, POS pos)
 {
-    return team == R ? pos : static_cast<POS>(FLIP_SQ - pos);
+    return team == R ? pos : POS(FLIP_SQ - pos);
 }
 
 inline int taper(int open_vl, int end_vl, int phase)
@@ -276,7 +262,7 @@ inline bool hollow_cannon_(POS cannon, POS king)
     if (cannon % 9 != king % 9) return false;
     const POS lo = std::min(cannon, king);
     const POS hi = std::max(cannon, king);
-    for (POS p = lo + 9; p < hi; p = static_cast<POS>(p + 9)) {
+    for (POS p = lo + 9; p < hi; p = POS(p + 9)) {
         if (g_board[p]) return false;
     }
     return true;
@@ -368,7 +354,6 @@ inline int side_pst_(TEAM team, const SideStat& me, const SideStat& opp, int pha
 
 } // namespace eval_detail_
 
-// 局面评估：返回当前行棋方视角的分值（Negamax）
 VL evaluate()
 {
     using namespace eval_detail_;
@@ -378,5 +363,5 @@ VL evaluate()
     const int vl_red = side_pst_(R, red, black, phase);
     const int vl_black = side_pst_(B, black, red, phase);
     const int vl = vl_red - vl_black + (g_team == R ? 8 : -8);
-    return static_cast<VL>(g_team * vl);
+    return VL(g_team * vl);
 }
