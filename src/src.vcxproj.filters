@@ -1,69 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
+    <ClInclude Include="base.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="evaluate.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="heuristic.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="moves.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="position.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="pregen.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="search.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="test.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="ucci.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.hpp">
+      <Filter>Source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Main">
       <UniqueIdentifier>{75e298e2-ea56-44b6-b5c7-d8783f872082}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
+    <Filter Include="Source">
       <UniqueIdentifier>{38e55271-e67d-4ea5-ac9d-d4f29f083337}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="base.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="evaluate.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="heuristic.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="moves.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="position.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="search.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="test.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ucci.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="main.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="moves.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="base.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="evaluate.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="heuristic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="position.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="search.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ucci.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="statistics.hpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
