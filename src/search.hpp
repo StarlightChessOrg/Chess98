@@ -21,7 +21,7 @@ VL search_q_(VL a, VL b, DEPTH depth)
     if (distance_ == Q_MAX_DISTANCE || depth == 0) return evaluate();
     const bool checking = in_check();
     if (checking) {
-        history_checkings.emplace_back(true);
+        g_history_checkings.emplace_back(true);
         depth = std::min(depth, Q_CHECKING_DEPTH);
     } else {
         // ndp todo
@@ -40,7 +40,7 @@ VL search_q_(VL a, VL b, DEPTH depth)
     for (const Move m : moves) {
         position_move(m), distance_++;
         const VL vl = -search_q_(-b, -a, depth - 1);
-        position_undo(), distance_--, history_checkings.pop_back();
+        position_undo(), distance_--, g_history_checkings.pop_back();
         if (vl > vlbest) {
             if (vl > b) return vl;
             vlbest = vl;
@@ -58,10 +58,12 @@ VL search_vl_(DEPTH depth, VL a, VL b)
     if (vlhash > b) return vlhash;
     const bool checking = in_check();
     if (checking) {
-        history_checkings.emplace_back(checking);
+        g_history_checkings.emplace_back(checking);
     } else {
-        // fp todo
-        // nmp todo
+        // futility pruning
+        const VL vl = evaluate();
+        if (depth <= 2 && vl - FP_MARGIN * depth >= b) return vl;
+        // TODO: null move pruning
     }
     // repeat status validation todo
     // search

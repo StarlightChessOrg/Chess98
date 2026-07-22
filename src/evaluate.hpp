@@ -190,22 +190,22 @@ struct SideStat {
     POS king { INVALID_POS };
 };
 
-inline POS sq_of(TEAM team, POS pos)
+POS sq_of(TEAM team, POS pos)
 {
     return team == R ? pos : POS(FLIP_SQ - pos);
 }
 
-inline int taper(int open_vl, int end_vl, int phase)
+int taper(int open_vl, int end_vl, int phase)
 {
     return (open_vl * phase + end_vl * (PHASE_MAX - phase)) / PHASE_MAX;
 }
 
-inline bool crossed_river(TEAM team, POS pos)
+bool crossed_river(TEAM team, POS pos)
 {
     return team == R ? pos / 9 < 5 : pos / 9 > 4;
 }
 
-inline SideStat collect_(TEAM team)
+SideStat collect_(TEAM team)
 {
     SideStat s { };
     const auto& list = team == R ? pos_list_r_ : pos_list_b_;
@@ -257,7 +257,7 @@ inline SideStat collect_(TEAM team)
 }
 
 // 同列无子阻隔：炮对将形成空头（以车的吃法打到将）
-inline bool hollow_cannon_(POS cannon, POS king)
+bool hollow_cannon_(POS cannon, POS king)
 {
     if (cannon % 9 != king % 9) return false;
     const POS lo = std::min(cannon, king);
@@ -268,7 +268,7 @@ inline bool hollow_cannon_(POS cannon, POS king)
     return true;
 }
 
-inline int shape_bonus_(TEAM team, const SideStat& me, const SideStat& opp)
+int shape_bonus_(TEAM team, const SideStat& me, const SideStat& opp)
 {
     int vl = 0;
 
@@ -307,7 +307,7 @@ inline int shape_bonus_(TEAM team, const SideStat& me, const SideStat& opp)
     return vl;
 }
 
-inline int side_pst_(TEAM team, const SideStat& me, const SideStat& opp, int phase)
+int side_pst_(TEAM team, const SideStat& me, const SideStat& opp, int phase)
 {
     // 攻势：子力优、过河势、或对方残缺士象时我方车炮可攻
     const bool attack = (me.material > opp.material)

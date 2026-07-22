@@ -1,11 +1,11 @@
 #pragma once
-#include "pregen.hpp"
+#include "base.hpp"
 
 // global variables
 MATRIX g_board { };
 TEAM g_team { };
 HASH g_hashkey { };
-std::vector<bool> history_checkings { };
+std::vector<bool> g_history_checkings { };
 
 // history moves and maintaining all pieces on board
 std::vector<Move> history_moves_ { };
@@ -25,7 +25,7 @@ void position_init(const MATRIX& board, TEAM team)
     history_moves_.clear();
     history_captures_.clear();
     history_hashkeys_.clear();
-    history_checkings.clear();
+    g_history_checkings.clear();
     pos_list_r_ = pos_list_b_ = {};
     pos_pid_r_ =pos_pid_b_= {};
     bl10_container = {};
@@ -45,7 +45,7 @@ void position_init(const MATRIX& board, TEAM team)
     }
     // init pos list and hash
     for (int i = 0; i < 90; i++) {
-        g_hashkey ^= hashkey_on(board[i], i);
+        g_hashkey ^= HASH_KEYS[size_t(board[i] + 7)][i];
         if (board[i] != 0) {
             bl10_container[i % 9] |= 1 << (i / 9);
             bl9_container[i / 9] |= 1 << (i % 9);
@@ -63,7 +63,7 @@ void position_init(const MATRIX& board, TEAM team)
     history_moves_.reserve(256);
     history_captures_.reserve(256);
     history_hashkeys_.reserve(256);
-    history_checkings.reserve(256);
+    g_history_checkings.reserve(256);
 }
 
 // get all live pieces of current team
@@ -133,8 +133,8 @@ void position_move(Move move)
     bl9_container[move.end / 9] |= 1 << (move.end % 9);
     bl10_container[move.beg % 9] &= ~(1 << (move.beg / 9));
     bl9_container[move.beg / 9] &= ~(1 << (move.beg % 9));
-    g_hashkey ^= hashkey_on(g_board[move.beg], move.beg);
-    g_hashkey ^= hashkey_on(g_board[move.end], move.end);
+    g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
+    g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
     g_hashkey ^= SIDE_KEY;
     g_board[move.end] = g_board[move.beg];
     g_board[move.beg] = 0;

@@ -2,17 +2,21 @@
 #include "base.hpp"
 #include "position.hpp"
 
-// history
-
 std::array<std::array<UINT32, 90>, 90> history_table_r_ { };
 std::array<std::array<UINT32, 90>, 90> history_table_b_ { };
+std::array<std::array<Move, 2>, 128> killer_table_ { };
+std::vector<TTEntry> tt_table_ { };
+UINT8 tt_size_ { 0 };
+UINT8 tt_mask_ { 0 };
 
+// init the history table
 void history_init()
 {
     history_table_r_.fill({ });
     history_table_b_.fill({ });
 }
 
+// set a history weight to the table
 void history_set(Move move, TEAM team, DEPTH depth)
 {
     if (team == R) {
@@ -22,6 +26,7 @@ void history_set(Move move, TEAM team, DEPTH depth)
     }
 }
 
+// sort moves via history table
 void history_sort(std::vector<Move>& moves, TEAM team)
 {
     const auto& t = team == R ? history_table_r_ : history_table_b_;
@@ -30,35 +35,26 @@ void history_sort(std::vector<Move>& moves, TEAM team)
     });
 }
 
-// killer
+// init the killer table
+void killer_init()
+{
+    killer_table_.fill({ });
+}
 
-std::array<std::array<Move, 2>, 128> killer_table_ { };
-
-void killer_init() { killer_table_.fill({ }); }
-
+// set a killer move for a depth to the table
 void killer_set(Move move, DEPTH d)
 {
     killer_table_[d][1] = killer_table_[d][0];
     killer_table_[d][0] = move;
 }
 
-std::array<Move, 2> killer_get(DEPTH d) { return killer_table_[d]; }
+// get killer moves for a depth from the table
+std::array<Move, 2> killer_get(DEPTH d)
+{
+    return killer_table_[d];
+}
 
-// tt
-
-// tt entry
-struct TTEntry {
-    HASH key { 0 };
-    HASH_FLAG flag { 0 };
-    VL vl { 0 };
-    DEPTH depth { 0 };
-    Move move { };
-};
-
-std::vector<TTEntry> tt_table_ { };
-UINT8 tt_size_ { 0 };
-UINT8 tt_mask_ { 0 };
-
+// init the tt
 void tt_init(int _size = 8)
 {
     tt_table_.clear();
@@ -67,6 +63,7 @@ void tt_init(int _size = 8)
     tt_mask_ = (1 << _size) - 1;
 }
 
+// set a tt entry
 void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
 {
     TTEntry& e = tt_table_[hashkey & tt_mask_];
@@ -92,6 +89,7 @@ void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
     }
 }
 
+// get a vl from the tt entry, return INVALID_VL if not found
 VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 {
     const TTEntry& e = tt_table_[hashkey & tt_mask_];
@@ -107,14 +105,15 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
     return INVALID_VL;
 }
 
-Move tt_get_move(HASH hashkey) { return tt_table_[hashkey & tt_mask_].move; }
+// get a move from the tt entry, return an empty move if not found
+Move tt_get_move(HASH hashkey)
+{
+    if (g_hashkey != hashkey) return { };
+    return tt_table_[hashkey & tt_mask_].move;
+}
 
-// capture
-
-// id order is empty, king, advisor, bishop, knight, rook, cannon, pawn
-constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
-
-VL see_ge(Move move, VL threshold)
+// culculate whether a move is good enough via SEE
+bool see_ge(Move move, VL threshold)
 {
     VL vl = 0;
     int count = 0;
@@ -127,9 +126,10 @@ VL see_ge(Move move, VL threshold)
         count++;
     }
     for (int i = 0; i < count; i++) position_undo();
-    return vl;
+    return vl >= threshold;
 }
 
+// sort the moves via MVV-LVA
 void mvvlva_sort(std::vector<Move>& move_list)
 {
     std::sort(move_list.begin(), move_list.end(), [](Move a, Move b) {
