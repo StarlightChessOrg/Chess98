@@ -16,9 +16,6 @@
     <ClInclude Include="position.hpp">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="pregen.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="search.hpp">
       <Filter>Source</Filter>
     </ClInclude>
@@ -26,9 +23,6 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="ucci.hpp">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.hpp">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
@@ -43,9 +37,6 @@
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="statistics.hpp">
-      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

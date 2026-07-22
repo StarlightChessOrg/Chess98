@@ -2,60 +2,40 @@
 #include "evaluate.hpp"
 #include "moves.hpp"
 
-// defines
-constexpr DEPTH Q_MAX_DISTANCE { 64 };
-constexpr DEPTH Q_CHECKING_DEPTH { 8 };
-constexpr bool NODE_PV = false;
-constexpr bool NODE_CUT = true;
-
-// global variables
 STATE g_searchstop { 0 };
 DEPTH g_maxdepth = { 20 };
-
-// local variables
 DEPTH distance_ { 0 };
 
-// search
-VL search_q_(VL a, VL b, DEPTH depth)
+SEARCH_RET search();
+VL search_vl_(DEPTH depth, VL a, VL b, bool CUT);
+VL search_q_(VL a, VL b, DEPTH depth);
+
+// search for best move and vl
+SEARCH_RET search()
 {
-    if (distance_ == Q_MAX_DISTANCE || depth == 0) return evaluate();
-    const bool checking = in_check();
-    if (checking) {
-        g_history_checkings.emplace_back(true);
-        depth = std::min(depth, Q_CHECKING_DEPTH);
-    } else {
-        // ndp todo
+    const Timer timer { 1000 };
+    VL vl { -INF };
+    for (DEPTH depth = 0; !timer.time_up_3xless(); depth++) {
+        if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
+        vl = search_vl_(depth, -INF, INF, false);
     }
-    // repeat status validation todo
-    // search
-    VL vlbest { -INF };
-    std::vector<Move> moves { };
-    if (checking) {
-        moves = gen_all_quiet_moves();
-        history_sort(moves, g_team);
-    } else {
-        moves = gen_all_capture_moves();
-        mvvlva_sort(moves);
-    }
-    for (const Move m : moves) {
-        position_move(m), distance_++;
-        const VL vl = -search_q_(-b, -a, depth - 1);
-        position_undo(), distance_--, g_history_checkings.pop_back();
-        if (vl > vlbest) {
-            if (vl > b) return vl;
-            vlbest = vl;
-            a = std::max(a, vl);
-        }
-    }
-    return vlbest != -INF ? vlbest : vlbest + distance_;
+    const Move move = tt_get_move(g_hashkey);
+    return { move, vl };
 }
 
-template <bool CUT>
-VL search_vl_(DEPTH depth, VL a, VL b)
+// search for the best vl
+VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
 {
     if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE);
+    const VL original_alpha = a;
+    VL vlbest { -INF };
+    Move movebest { };
+
+    // tt vl
     const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
-    if (vlhash > b) return vlhash;
+    if (vlhash != INVALID_VL) return vlhash;
+
+    // checking validation
     const bool checking = in_check();
     if (checking) {
         g_history_checkings.emplace_back(checking);
@@ -65,50 +45,95 @@ VL search_vl_(DEPTH depth, VL a, VL b)
         if (depth <= 2 && vl - FP_MARGIN * depth >= b) return vl;
         // TODO: null move pruning
     }
-    // repeat status validation todo
+
+    // TODO: repeat status validation
+
     // search
-    VL vlbest { -INF };
-    Move movebest { };
-    HASH_FLAG movetype { EXACT };
     MovePicker mp { depth };
-    for (Move m = mp.next(); m; m = mp.next()) {
-        position_move(m), distance_++;
+    for (Move move = mp.next(); move; move = mp.next()) {
+        position_move(move), distance_++;
         VL vl { -INF };
-        if (CUT) {
+        if (is_cut) {
             if (vlbest == -INF) {
-                vl = -search_vl_<NODE_PV>(depth - 1, -b, -a);
+                vl = -search_vl_(depth - 1, -b, -a, true);
             } else {
-                vl = -search_vl_<NODE_CUT>(depth - 1, -INF, -a);
+                vl = -search_vl_(depth - 1, -INF, -a, true);
                 if (a < vl && vl < b) {
-                    vl = -search_vl_<NODE_PV>(depth - 1, -b, -a);
+                    vl = -search_vl_(depth - 1, -b, -a, false);
                 }
             }
         } else {
-            vl = -search_vl_<NODE_CUT>(depth - 1, -INF, -a);
+            vl = -search_vl_(depth - 1, -INF, -a, false);
         }
-        position_undo(), distance_--, history_captures_.pop_back();
+        position_undo(), distance_--;
         if (vl > vlbest) {
-            movebest = m;
+            movebest = move;
+            vlbest = vl;
             a = std::max(a, vl);
             if (vl > b) break;
         }
     }
+
+    // caching the search informantion
     if (movebest) {
+        HASH_FLAG movetype { EXACT };
+        if (vlbest > b) {
+            movetype = BETA;
+        } else if (vlbest <= original_alpha) {
+            movetype = ALPHA;
+        }
         if (movetype != ALPHA) killer_set(movebest, depth);
         history_set(movebest, g_team, depth);
         tt_set(g_hashkey, movetype, depth, movebest, vlbest);
     }
+
+    // end
+    if (checking) g_history_checkings.pop_back();
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
-SEARCH_RET search()
+// search quiescence
+VL search_q_(VL a, VL b, DEPTH depth)
 {
-    const Timer timer { 1000 };
-    VL vl { -INF };
-    for (DEPTH depth = 0; !timer.time_up_3xless(); depth++) {
-        if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
-        vl = search_vl_<false>(depth, -INF, INF);
+    if (distance_ == Q_MAX_DISTANCE || depth == 0) return evaluate();
+    VL vlbest { -INF };
+
+    // checking validation
+    const bool checking = in_check();
+    if (checking) {
+        g_history_checkings.emplace_back(true);
+        depth = std::min(depth, Q_CHECKING_DEPTH);
+    } else {
+        // delta pruning
+        const VL vl = evaluate();
+        if (vl >= b) return vl;
+        vlbest = vl;
+        if (vl > a) a = vl;
     }
-    const Move move = tt_get_move(g_hashkey);
-    return { move, vl };
+
+    // TODO: repeat status validation
+
+    // search
+    std::vector<Move> moves { };
+    if (checking) {
+        moves = gen_all_quiet_moves();
+        history_sort(moves, g_team);
+    } else {
+        moves = gen_all_capture_moves();
+        mvvlva_sort(moves);
+    }
+    for (const Move move : moves) {
+        position_move(move), distance_++;
+        const VL vl = -search_q_(-b, -a, depth - 1);
+        position_undo(), distance_--;
+        if (vl > vlbest) {
+            vlbest = vl;
+            a = std::max(a, vl);
+            if (vl > b) break;
+        }
+    }
+
+    // end
+    if (checking) g_history_checkings.pop_back();
+    return vlbest != -INF ? vlbest : vlbest + distance_;
 }
