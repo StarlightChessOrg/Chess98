@@ -46,7 +46,11 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
         // TODO: null move pruning
     }
 
-    // TODO: repeat status validation
+    // repeat status validation
+    if (is_repeat()) {
+        if (checking) g_history_checkings.pop_back();
+        return -INF;
+    }
 
     // search
     MovePicker mp { depth };
@@ -111,7 +115,11 @@ VL search_q_(VL a, VL b, DEPTH depth)
         if (vl > a) a = vl;
     }
 
-    // TODO: repeat status validation
+    // repeat status validation
+    if (is_repeat()) {
+        if (checking) g_history_checkings.pop_back();
+        return -INF;
+    }
 
     // search
     std::vector<Move> moves { };

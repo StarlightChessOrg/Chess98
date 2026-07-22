@@ -1,13 +1,10 @@
 #pragma once
 #include "base.hpp"
 
-// global variables
 MATRIX g_board { };
 TEAM g_team { };
 HASH g_hashkey { };
 std::vector<bool> g_history_checkings { };
-
-// history moves and maintaining all pieces on board
 std::vector<Move> history_moves_ { };
 std::vector<PTYPE> history_captures_ { };
 std::vector<HASH> history_hashkeys_ { };
@@ -18,6 +15,20 @@ std::array<PID, 90> pos_pid_b_ { };
 std::array<UINT16, 9> bl10_items_ { };
 std::array<UINT16, 10> bl9_items_ { };
 
+void position_init(const MATRIX& board, TEAM team);
+std::vector<POS> get_pos_list();
+bool teamcheck(POS p, bool G);
+PTYPE piece_on(POS p);
+UINT16 get_bl10(POS pos);
+UINT16 get_bl9(POS pos);
+bool face_king_();
+void position_move(Move move);
+void position_undo();
+bool in_check();
+bool legal_move(Move move);
+POS get_protector(POS pos);
+bool is_repeat();
+
 // init global position
 void position_init(const MATRIX& board, TEAM team)
 {
@@ -26,10 +37,10 @@ void position_init(const MATRIX& board, TEAM team)
     history_captures_.clear();
     history_hashkeys_.clear();
     g_history_checkings.clear();
-    pos_list_r_ = pos_list_b_ = {};
-    pos_pid_r_ =pos_pid_b_= {};
-    bl10_items_ = {};
-    bl9_items_ = {};
+    pos_list_r_ = pos_list_b_ = { };
+    pos_pid_r_ = pos_pid_b_ = { };
+    bl10_items_ = { };
+    bl9_items_ = { };
     g_hashkey = 0;
     g_board = board;
     g_team = team;
@@ -67,22 +78,30 @@ void position_init(const MATRIX& board, TEAM team)
 }
 
 // get all live pieces of current team
-std::vector<POS> pos_list() { return g_team == R ? pos_list_r_ : pos_list_b_; }
+std::vector<POS> get_pos_list()
+{
+    return g_team == R ? pos_list_r_ : pos_list_b_;
+}
 
 // return team differences based on wheter you want to gen captures or not
-template <bool G>
-bool teamcheck(POS p) { 
-    return G ? g_team * g_board[p] < 0 : !g_board[p]; 
+bool teamcheck(POS p, bool G)
+{
+    return G ? g_team * g_board[p] < 0 : !g_board[p];
 }
 
 // get piece on pos
-PTYPE piece_on(POS p) { return p < 90 ? g_board[p] : 0; }
+PTYPE piece_on(POS p) { 
+    return p < 90 ? g_board[p] : 0; }
 
 // get bl10 from the table
-UINT16 get_bl10(POS pos) { return bl10_items_[pos % 9]; }
+UINT16 get_bl10(POS pos) { 
+    return bl10_items_[pos % 9];
+ }
 
 // get_bl9 from the table
-UINT16 get_bl9(POS pos) { return bl9_items_[pos / 9]; }
+UINT16 get_bl9(POS pos) { 
+    return bl9_items_[pos / 9];
+ }
 
 // judge face-kings
 bool face_king_()
@@ -352,4 +371,21 @@ POS get_protector(POS pos)
         if (piece_on(pos + 8) * g_team == R_ADVISOR) return pos + 8;
     }
     return INVALID_POS;
+}
+
+// repeat validation
+bool is_repeat()
+{
+    const size_t n = history_hashkeys_.size();
+    if (n < 4) return false;
+    for (size_t i = n; i-- > 0; ) {
+        if (history_hashkeys_[i] == g_hashkey) {
+            if (n - i < 4) return false;
+            for (size_t j = i; j < n; j += 2) // 己方着：i, i+2, ...
+                if (!g_history_checkings[j]) return false;
+            return true;
+        }
+        if (history_captures_[i]) break;
+    }
+    return false;
 }

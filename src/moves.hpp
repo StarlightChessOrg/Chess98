@@ -8,13 +8,13 @@ std::vector<Move> gen_king_(POS pos)
 {
     std::vector<Move> ret { };
     ret.reserve(4);
-    if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && teamcheck<G>(pos + 9))
+    if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && teamcheck(pos + 9, G))
         ret.emplace_back(pos, pos + 9);
-    if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && teamcheck<G>(pos - 9))
+    if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && teamcheck(pos - 9, G))
         ret.emplace_back(pos, pos - 9);
-    if ((pos % 9 == 4 || pos % 9 == 5) && teamcheck<G>(pos - 1))
+    if ((pos % 9 == 4 || pos % 9 == 5) && teamcheck(pos - 1, G))
         ret.emplace_back(pos, pos - 1);
-    if ((pos % 9 == 4 || pos % 9 == 3) && teamcheck<G>(pos + 1))
+    if ((pos % 9 == 4 || pos % 9 == 3) && teamcheck(pos + 1, G))
         ret.emplace_back(pos, pos + 1);
     return ret;
 }
@@ -26,18 +26,18 @@ std::vector<Move> gen_advisor_(POS pos)
     if (pos == 13 || pos == 76) { // black center
         std::vector<Move> ret { };
         ret.reserve(4);
-        if (teamcheck<G>(pos - 10))
+        if (teamcheck(pos - 10, G))
             ret.emplace_back(pos, pos - 10);
-        if (teamcheck<G>(pos - 8))
+        if (teamcheck(pos - 8, G))
             ret.emplace_back(pos, pos - 8);
-        if (teamcheck<G>(pos + 10))
+        if (teamcheck(pos + 10, G))
             ret.emplace_back(pos, pos + 10);
-        if (teamcheck<G>(pos + 8))
+        if (teamcheck(pos + 8, G))
             ret.emplace_back(pos, pos + 8);
         return ret;
-    } else if (pos < 24 && teamcheck<G>(13)) { // black corner
+    } else if (pos < 24 && teamcheck(13, G)) { // black corner
         return { Move(pos, 13) };
-    } else if (teamcheck<G>(76)) { // red corner
+    } else if (teamcheck(76, G)) { // red corner
         return { Move(pos, 76) };
     }
     return { };
@@ -50,15 +50,15 @@ std::vector<Move> gen_bishop_(POS pos)
     std::vector<Move> ret { };
     ret.reserve(4);
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos + 10) && teamcheck<G>(pos + 16))
+        if (!piece_on(pos + 10) && teamcheck(pos + 16, G))
             ret.emplace_back(pos, pos + 16);
-        if (!piece_on(pos + 12) && teamcheck<G>(pos + 20))
+        if (!piece_on(pos + 12) && teamcheck(pos + 20, G))
             ret.emplace_back(pos, pos + 20);
     }
     if (pos / 9 == 4 || pos / 9 == 9 || pos / 9 == 7 || pos / 9 == 3) {
-        if (!piece_on(pos - 10) && teamcheck<G>(pos - 16))
+        if (!piece_on(pos - 10) && teamcheck(pos - 16, G))
             ret.emplace_back(pos, pos - 16);
-        if (!piece_on(pos - 12) && teamcheck<G>(pos - 20))
+        if (!piece_on(pos - 12) && teamcheck(pos - 20, G))
             ret.emplace_back(pos, pos - 20);
     }
     return ret;
@@ -71,34 +71,34 @@ std::vector<Move> gen_knight_(POS pos)
     std::vector<Move> ret { };
     ret.reserve(8);
     if (pos > 17 && !piece_on(pos - 9)) {
-        if (pos % 9 != 0 && teamcheck<G>(pos - 19)) {
+        if (pos % 9 != 0 && teamcheck(pos - 19, G)) {
             ret.emplace_back(pos, pos - 19);
         }
-        if (pos % 9 != 8 && teamcheck<G>(pos - 17)) {
+        if (pos % 9 != 8 && teamcheck(pos - 17, G)) {
             ret.emplace_back(pos, pos - 17);
         }
     }
     if (pos < 72 && !piece_on(pos + 9)) {
-        if (pos % 9 != 8 && teamcheck<G>(pos + 19)) {
+        if (pos % 9 != 8 && teamcheck(pos + 19, G)) {
             ret.emplace_back(pos, pos + 19);
         }
-        if (pos % 9 != 0 && teamcheck<G>(pos + 17)) {
+        if (pos % 9 != 0 && teamcheck(pos + 17, G)) {
             ret.emplace_back(pos, pos + 17);
         }
     }
     if (pos % 9 > 1 && !piece_on(pos - 1)) {
-        if (pos / 9 != 0 && teamcheck<G>(pos - 11)) {
+        if (pos / 9 != 0 && teamcheck(pos - 11, G)) {
             ret.emplace_back(pos, pos - 11);
         }
-        if (pos / 9 != 9 && teamcheck<G>(pos + 7)) {
+        if (pos / 9 != 9 && teamcheck(pos + 7, G)) {
             ret.emplace_back(pos, pos + 7);
         }
     }
     if (pos % 9 < 7 && !piece_on(pos + 1)) {
-        if (pos / 9 != 9 && teamcheck<G>(pos + 11)) {
+        if (pos / 9 != 9 && teamcheck(pos + 11, G)) {
             ret.emplace_back(pos, pos + 11);
         }
-        if (pos / 9 != 0 && teamcheck<G>(pos - 7)) {
+        if (pos / 9 != 0 && teamcheck(pos - 7, G)) {
             ret.emplace_back(pos, pos - 7);
         }
     }
@@ -115,13 +115,13 @@ std::vector<Move> gen_rook_(POS pos)
     const auto [left, right] = rook_9(bl9, pos);
     const auto [top, bottom] = rook_10(bl10, pos);
     if (G) {
-        if (teamcheck<G>(left))
+        if (teamcheck(left, G))
             ret.emplace_back(pos, left);
-        if (teamcheck<G>(right))
+        if (teamcheck(right, G))
             ret.emplace_back(pos, right);
-        if (teamcheck<G>(top))
+        if (teamcheck(top, G))
             ret.emplace_back(pos, top);
-        if (teamcheck<G>(bottom))
+        if (teamcheck(bottom, G))
             ret.emplace_back(pos, bottom);
     } else {
         for (POS p = pos - 1; p > left; p--) ret.emplace_back(pos, p);
@@ -150,13 +150,13 @@ std::vector<Move> gen_cannon_(POS pos)
         const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
         const auto [left, right] = cannon_9(bl9, pos);
         const auto [top, bottom] = cannon_10(bl10, pos);
-        if (left < INVALID_POS && teamcheck<G>(left))
+        if (left < INVALID_POS && teamcheck(left, G))
             ret.emplace_back(pos, left);
-        if (right < INVALID_POS && teamcheck<G>(right))
+        if (right < INVALID_POS && teamcheck(right, G))
             ret.emplace_back(pos, right);
-        if (top < INVALID_POS && teamcheck<G>(top))
+        if (top < INVALID_POS && teamcheck(top, G))
             ret.emplace_back(pos, top);
-        if (bottom < INVALID_POS && teamcheck<G>(bottom))
+        if (bottom < INVALID_POS && teamcheck(bottom, G))
             ret.emplace_back(pos, bottom);
         return ret;
     }
@@ -170,12 +170,12 @@ std::vector<Move> gen_pawn_(POS pos)
     std::vector<Move> ret { };
     ret.reserve(3);
     const int target = pos - 9 * g_team;
-    if (0 <= target && target < 90 && teamcheck<G>(target))
+    if (0 <= target && target < 90 && teamcheck(target, G))
         ret.emplace_back(pos, target);
     if ((pos / 9 < 5 && g_team == R) || (pos / 9 > 4 && g_team == B)) {
-        if (pos % 9 != 0 && teamcheck<G>(pos - 1))
+        if (pos % 9 != 0 && teamcheck(pos - 1, G))
             ret.emplace_back(pos, pos - 1);
-        if (pos % 9 != 8 && teamcheck<G>(pos + 1))
+        if (pos % 9 != 8 && teamcheck(pos + 1, G))
             ret.emplace_back(pos, pos + 1);
     }
     return ret;
@@ -186,7 +186,7 @@ std::vector<Move> gen_all_capture_moves()
 {
     std::vector<Move> ret { };
     ret.reserve(16);
-    for (const POS p : pos_list()) {
+    for (const POS p : get_pos_list()) {
         const PTYPE t = abs(piece_on(p));
         if (t == R_KING) {
             const auto moves = gen_king_<true>(p);
@@ -219,7 +219,7 @@ std::vector<Move> gen_all_quiet_moves()
 {
     std::vector<Move> ret { };
     ret.reserve(64);
-    for (const POS p : pos_list()) {
+    for (const POS p : get_pos_list()) {
         const PTYPE t = abs(piece_on(p));
         if (t == R_KING) {
             const auto moves = gen_king_<false>(p);
@@ -247,6 +247,7 @@ std::vector<Move> gen_all_quiet_moves()
     return ret;
 }
 
+// the move picker to generate moves step-by-step
 class MovePicker {
     DEPTH depth { 0 };
     MovePickerStatus status = STATUS_TT;
@@ -262,6 +263,7 @@ public:
     Move next();
 };
 
+// get the next move in move picker
 Move MovePicker::next()
 {
     if (status == STATUS_TT) {
