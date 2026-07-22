@@ -15,8 +15,8 @@ std::vector<POS> pos_list_r_ { };
 std::vector<POS> pos_list_b_ { };
 std::array<PID, 90> pos_pid_r_ { };
 std::array<PID, 90> pos_pid_b_ { };
-std::array<UINT16, 9> bl10_container { };
-std::array<UINT16, 10> bl9_container { };
+std::array<UINT16, 9> bl10_items_ { };
+std::array<UINT16, 10> bl9_items_ { };
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -28,8 +28,8 @@ void position_init(const MATRIX& board, TEAM team)
     g_history_checkings.clear();
     pos_list_r_ = pos_list_b_ = {};
     pos_pid_r_ =pos_pid_b_= {};
-    bl10_container = {};
-    bl9_container = {};
+    bl10_items_ = {};
+    bl9_items_ = {};
     g_hashkey = 0;
     g_board = board;
     g_team = team;
@@ -47,8 +47,8 @@ void position_init(const MATRIX& board, TEAM team)
     for (int i = 0; i < 90; i++) {
         g_hashkey ^= HASH_KEYS[size_t(board[i] + 7)][i];
         if (board[i] != 0) {
-            bl10_container[i % 9] |= 1 << (i / 9);
-            bl9_container[i / 9] |= 1 << (i % 9);
+            bl10_items_[i % 9] |= 1 << (i / 9);
+            bl9_items_[i / 9] |= 1 << (i % 9);
         }
         if (board[i] > 0 && board[i] != R_KING) {
             pos_pid_r_[i] = PID(pos_list_r_.size());
@@ -71,16 +71,18 @@ std::vector<POS> pos_list() { return g_team == R ? pos_list_r_ : pos_list_b_; }
 
 // return team differences based on wheter you want to gen captures or not
 template <bool G>
-bool teamcheck(POS p) { return G ? g_team * g_board[p] < 0 : !g_board[p]; }
+bool teamcheck(POS p) { 
+    return G ? g_team * g_board[p] < 0 : !g_board[p]; 
+}
 
 // get piece on pos
 PTYPE piece_on(POS p) { return p < 90 ? g_board[p] : 0; }
 
 // get bl10 from the table
-UINT16 get_bl10(POS pos) { return bl10_container[pos % 9]; }
+UINT16 get_bl10(POS pos) { return bl10_items_[pos % 9]; }
 
 // get_bl9 from the table
-UINT16 get_bl9(POS pos) { return bl9_container[pos / 9]; }
+UINT16 get_bl9(POS pos) { return bl9_items_[pos / 9]; }
 
 // judge face-kings
 bool face_king_()
@@ -129,10 +131,10 @@ void position_move(Move move)
             pos_pid_r_[move.end] = 0;
         }
     }
-    bl10_container[move.end % 9] |= 1 << (move.end / 9);
-    bl9_container[move.end / 9] |= 1 << (move.end % 9);
-    bl10_container[move.beg % 9] &= ~(1 << (move.beg / 9));
-    bl9_container[move.beg / 9] &= ~(1 << (move.beg % 9));
+    bl10_items_[move.end % 9] |= 1 << (move.end / 9);
+    bl9_items_[move.end / 9] |= 1 << (move.end % 9);
+    bl10_items_[move.beg % 9] &= ~(1 << (move.beg / 9));
+    bl9_items_[move.beg / 9] &= ~(1 << (move.beg % 9));
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
     g_hashkey ^= SIDE_KEY;
@@ -166,10 +168,10 @@ void position_undo()
             pos_list_b_.emplace_back(move.end);
         }
     }
-    bl10_container[move.end % 9] &= captured ? ~(1 << (move.end / 9)) : 0xfff;
-    bl9_container[move.end / 9] &= captured ? ~(1 << (move.end % 9)) : 0xfff;
-    bl10_container[move.beg % 9] |= 1 << (move.beg / 9);
-    bl9_container[move.beg / 9] |= 1 << (move.beg % 9);
+    bl10_items_[move.end % 9] &= captured ? ~(1 << (move.end / 9)) : 0xfff;
+    bl9_items_[move.end / 9] &= captured ? ~(1 << (move.end % 9)) : 0xfff;
+    bl10_items_[move.beg % 9] |= 1 << (move.beg / 9);
+    bl9_items_[move.beg / 9] |= 1 << (move.beg % 9);
     g_board[move.beg] = g_board[move.end];
     g_board[move.end] = captured;
     g_hashkey = hashkey;

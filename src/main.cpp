@@ -3,9 +3,12 @@
 
 int main()
 {
+    position_init(INIT_MATRIX, R);
+    history_init();
+    killer_init();
+    tt_init();
     // test code
-    movepicker_1sec_count();
-    movegen_1sec_count();
+    move_preformance_test();
     system("pause");
     return 0;
 }

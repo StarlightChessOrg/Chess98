@@ -157,6 +157,8 @@ constexpr std::array<VL, 90> END_CANNON_ {
     285, 285, 288, 288, 288, 288, 288, 285, 285
 };
 
+// FIXME: AI-generated code below, may contain bugs and I'll fix them later
+
 namespace eval_detail_ {
 
 constexpr int PHASE_MAX = 32;

@@ -16,6 +16,7 @@
 struct Move;
 struct Timer;
 struct TTEntry;
+
 using STATE = std::uint8_t;
 using UINT32 = std::uint32_t;
 using UINT16 = std::uint16_t;
@@ -151,6 +152,70 @@ const std::array<std::array<HASH, 90>, 15> HASH_KEYS = []() {
     return ret;
 }();
 
+// pregen points for rook and cannon non-capture moves
+// FIXME: there might be some bugs in the pregen, so be cautious to use it
+const PREGEN_TABLE ROOK_PREGEN_ = []() {
+    PREGEN_TABLE ret { };
+    for (UINT32 pos = 0; pos < 10; pos++) {
+        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
+            PREGEN_DATA& entry = ret[pos][bitline];
+            for (UINT8 i = pos + 1;; i++) {
+                if (i >= 9 || get_bit_on_(bitline, i)) {
+                    set_right_4bit_(entry, (i <= 9 ? i : 9));
+                    break;
+                }
+            }
+            for (UINT8 i = pos - 1;; i--) {
+                if (i == 0 || i > 90 || get_bit_on_(bitline, i)) {
+                    set_left_4bit_(entry, (i != 0xFF ? i : 0));
+                    break;
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
+// pregen points for cannon capture moves
+// FIXME: there might be some bugs in the pregen, so be cautious to use it
+const PREGEN_TABLE CANNON_PREGEN_ = []() {
+    PREGEN_TABLE ret { };
+    for (UINT32 pos = 0; pos < 10; pos++) {
+        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
+            PREGEN_DATA& entry = ret[pos][bitline];
+            for (UINT8 i = pos + 1, t = 0;; i++) {
+                if (i > 9) {
+                    set_right_4bit_(entry, 0b1111);
+                    break;
+                }
+                if (get_bit_on_(bitline, i)) {
+                    if (t == 0) {
+                        t = 1;
+                    } else if (i < 10) {
+                        set_right_4bit_(entry, i);
+                        break;
+                    }
+                }
+            }
+            for (UINT8 i = pos - 1, t = 0;; i--) {
+                if (i == 0xFF) {
+                    set_left_4bit_(entry, 0b1111);
+                    break;
+                }
+                if (get_bit_on_(bitline, i)) {
+                    if (t == 0) {
+                        t = 1;
+                    } else if (i >= 0) {
+                        set_left_4bit_(entry, i);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return ret;
+}();
+
 // convert fen string to matrix
 MATRIX fen_to_matrix(const std::string& fen)
 {
@@ -221,83 +286,18 @@ Move ucimove_to_move(const std::string& s)
     return Move { beg, end };
 }
 
-// pregen points for rook and cannon non-capture moves
-// FIXME: there might be some bugs in the pregen, so be cautious to use it
-constexpr PREGEN_TABLE ROOK_PREGEN_ = []() {
-    PREGEN_TABLE ret { };
-    for (UINT32 pos = 0; pos < 10; pos++) {
-        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
-            PREGEN_DATA& entry = ret[pos][bitline];
-            for (UINT8 i = pos + 1;; i++) {
-                if (i >= 9 || get_bit_on_(bitline, i)) {
-                    set_right_4bit_(entry, (i <= 9 ? i : 9));
-                    break;
-                }
-            }
-            for (UINT8 i = pos - 1;; i--) {
-                if (i == 0 || i > 90 || get_bit_on_(bitline, i)) {
-                    set_left_4bit_(entry, (i != 0xFF ? i : 0));
-                    break;
-                }
-            }
-        }
-    }
-    return ret;
-}();
-
-// pregen points for cannon capture moves
-// FIXME: there might be some bugs in the pregen, so be cautious to use it
-constexpr PREGEN_TABLE CANNON_PREGEN_ = []() {
-    PREGEN_TABLE ret { };
-    for (UINT32 pos = 0; pos < 10; pos++) {
-        for (UINT32 bitline = 0; bitline < 1024; bitline++) {
-            PREGEN_DATA& entry = ret[pos][bitline];
-            for (UINT8 i = pos + 1, t = 0;; i++) {
-                if (i > 9) {
-                    set_right_4bit_(entry, 0b1111);
-                    break;
-                }
-                if (get_bit_on_(bitline, i)) {
-                    if (t == 0) {
-                        t = 1;
-                    } else if (i < 10) {
-                        set_right_4bit_(entry, i);
-                        break;
-                    }
-                }
-            }
-            for (UINT8 i = pos - 1, t = 0;; i--) {
-                if (i == 0xFF) {
-                    set_left_4bit_(entry, 0b1111);
-                    break;
-                }
-                if (get_bit_on_(bitline, i)) {
-                    if (t == 0) {
-                        t = 1;
-                    } else if (i >= 0) {
-                        set_left_4bit_(entry, i);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    return ret;
-}();
-
 // get the banner points for rook and cannon moves
 // return {left, right} for horizontal moves and {up, down} for vertical moves
-// TODO: I'm about to add some validation checks for the return values
 template <bool IS_9, bool IS_ROOK>
 std::pair<POS, POS> get_bl_banner_points(UINT16 bl, POS p)
 {
-    constexpr PREGEN_DATA v = [p, bl]() {
-        if constexpr (IS_ROOK) {
-            return IS_9 ? ROOK_PREGEN_[p % 9][bl] : ROOK_PREGEN_[p / 9][bl];
-        } else {
-            return IS_9 ? CANNON_PREGEN[p % 9][bl] : CANNON_PREGEN[p / 9][bl];
-        }
-    }();
+    assert(p < 90);
+    PREGEN_DATA v { };
+    if constexpr (IS_ROOK) {
+        v = IS_9 ? ROOK_PREGEN_[p % 9][bl] : ROOK_PREGEN_[p / 9][bl];
+    } else {
+        v = IS_9 ? CANNON_PREGEN_[p % 9][bl] : CANNON_PREGEN_[p / 9][bl];
+    }
     const POS v1 = get_left_4bit(v);
     const POS v2 = get_right_4bit(v);
     const POS l = v1 != 0b1111 ? v1 : INVALID_POS;
@@ -312,7 +312,6 @@ std::pair<POS, POS> get_bl_banner_points(UINT16 bl, POS p)
 
 // get the banner points for the rook and cannon non-capture moves
 // in the horizontal direction, return {left, right}
-// TODO: Some checks are needed for convenience of debugging
 std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 {
     return get_bl_banner_points<true, true>(bl9, p);
@@ -320,7 +319,6 @@ std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 
 // get the banner points for the rook and cannon non-capture moves
 // in the vertical direction, return {up, down}
-// TODO: Some checks are needed for convenience of debugging
 std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
 {
     return get_bl_banner_points<false, true>(bl10, p);
@@ -328,7 +326,6 @@ std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
 
 // get the banner points for the cannon capture moves
 // in the horizontal direction, return {left, right}
-// TODO: Some checks are needed for convenience of debugging
 std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
 {
     return get_bl_banner_points<true, false>(bl9, p);
@@ -336,7 +333,6 @@ std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
 
 // get the banner points for the cannon capture moves
 // in the vertical direction, return {up, down}
-// TODO: Some checks are needed for convenience of debugging
 std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
 {
     return get_bl_banner_points<false, false>(bl10, p);
