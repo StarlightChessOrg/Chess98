@@ -106,10 +106,11 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 }
 
 // get a move from the tt entry, return an empty move if not found
-Move tt_get_move(HASH hashkey)
+Move tt_get_move()
 {
-    if (g_hashkey != hashkey) return { };
-    return tt_table_[hashkey & tt_mask_].move;
+    const TTEntry& entry = tt_table_[g_hashkey & tt_mask_];
+    if (entry.key != g_hashkey) return { };
+    return entry.move;
 }
 
 // culculate whether a move is good enough via SEE

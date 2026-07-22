@@ -71,20 +71,6 @@ constexpr DEPTH Q_CHECKING_DEPTH = 8;
 constexpr bool NODE_PV = false;
 constexpr bool NODE_CUT = true;
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
-constexpr MATRIX INIT_MATRIX {
-    B_ROOK, B_KNIGHT, B_BISHOP, B_ADVISOR, B_KING,
-    B_ADVISOR, B_BISHOP, B_KNIGHT, B_ROOK,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, B_CANNON, 0, 0, 0, 0, 0, B_CANNON, 0,
-    B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN,
-    0, R_CANNON, 0, 0, 0, 0, 0, R_CANNON, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    R_ROOK, R_KNIGHT, R_BISHOP, R_ADVISOR, R_KING,
-    R_ADVISOR, R_BISHOP, R_KNIGHT, R_ROOK
-};
 
 constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }

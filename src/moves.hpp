@@ -106,6 +106,8 @@ std::vector<Move> gen_knight_(POS pos)
 }
 
 // rook moves
+// FIXME: it must have some bugs in rook generation
+//        search cannot run at all 'cause of its funny results
 template <bool G>
 std::vector<Move> gen_rook_(POS pos)
 {
@@ -141,6 +143,8 @@ std::vector<Move> gen_rook_(POS pos)
 }
 
 // cannon moves
+// FIXME: and the bugs in rook move generation may affect cannon
+//        i'll fix it
 template <bool G>
 std::vector<Move> gen_cannon_(POS pos)
 {
@@ -267,7 +271,7 @@ public:
 Move MovePicker::next()
 {
     if (status == STATUS_TT) {
-        tt_move = tt_get_move(g_hashkey), status++;
+        tt_move = tt_get_move(), status++;
         return tt_move ? tt_move : next();
     } else if (status == STATUS_GOOD_CAPTURES) {
         if (!generated) {
@@ -275,7 +279,7 @@ Move MovePicker::next()
             mvvlva_sort(moves), generated = true;
         }
         if (i < moves.size()) {
-            if (moves[i] == tt_move) return next();
+            if (moves[i] == tt_move) return (i++, next());
             if (see_ge(moves[i], 0)) {
                 return moves[i++];
             } else {
@@ -308,7 +312,7 @@ Move MovePicker::next()
         if (i < moves.size()) {
             Move m = moves[i++];
             bool c = m == tt_move || m == killers[0] || m == killers[1];
-            return c ? next() : m;
+            return c ? (i++, next()) : m;
         } else {
             generated = i = 0, status++;
             return next();

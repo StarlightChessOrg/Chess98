@@ -28,3 +28,10 @@ void move_preformance_test()
     std::cout << " id: " << id;
     std::cout << std::endl;
 }
+
+void search_test()
+{
+    const SEARCH_RET ret = search();
+    std::cout << "[Search Test] best move: " << move_to_ucimove(ret.first);
+    std::cout << " best vl: " << ret.second << std::endl;
+}

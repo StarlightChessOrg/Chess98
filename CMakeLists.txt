@@ -6,9 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# 默认产物目录：可被 preset / -B 覆盖
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
-    message(FATAL_ERROR "In-source builds are not supported. Use: cmake -B .build/cmake/<preset>")
+    message(FATAL_ERROR "Use: cmake -B .build/cmake/<preset>")
 endif()
 
 set(CHESS98_SOURCES
@@ -39,7 +38,6 @@ else()
     endif()
 endif()
 
-# 各 preset 的可执行文件输出到对应构建目录根下（已由 -B 隔离）
 set_target_properties(Chess98 PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
     RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}"

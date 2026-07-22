@@ -19,7 +19,7 @@ SEARCH_RET search()
         if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
         vl = search_vl_(depth, -INF, INF, false);
     }
-    const Move move = tt_get_move(g_hashkey);
+    const Move move = tt_get_move();
     return { move, vl };
 }
 
