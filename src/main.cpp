@@ -17,8 +17,8 @@ constexpr MATRIX INIT_MATRIX {
 };
 
 constexpr MATRIX TEST_MATRIX {
-    0, 0, 0, 0, B_KING,
-    0, 0, 0, 0,
+    0, B_KNIGHT, B_BISHOP, B_ADVISOR, B_KING,
+    B_ADVISOR, B_BISHOP, B_KNIGHT, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN,
@@ -27,8 +27,8 @@ constexpr MATRIX TEST_MATRIX {
     R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, R_KING,
-    0, 0, 0, 0
+    0, 0, R_BISHOP, R_ADVISOR, R_KING,
+    R_ADVISOR, R_BISHOP, 0, 0
 };
 
 int main()

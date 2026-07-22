@@ -86,6 +86,7 @@ std::vector<POS> get_pos_list()
 // return team differences based on wheter you want to gen captures or not
 bool teamcheck(POS p, bool G)
 {
+    if (p >= 90) return false;
     return G ? g_team * g_board[p] < 0 : !g_board[p];
 }
 
@@ -124,13 +125,17 @@ bool face_king_()
 }
 
 // do move
+// FIXME: big problems in the tracking of board
 void position_move(Move move)
 {
     assert(move && g_board[move.beg] * g_team > 0);
+    assert(g_board[move.end] * g_team <= 0);
     assert(!pos_list_r_.empty() && !pos_list_b_.empty());
+    // maintain the history
     history_moves_.emplace_back(move);
     history_captures_.emplace_back(g_board[move.end]);
     history_hashkeys_.emplace_back(g_hashkey);
+    // pos list tracking (core part to avoid 90-square scanning)
     if (g_team == R) {
         pos_list_r_[pos_pid_r_[move.beg]] = move.end;
         std::swap(pos_pid_r_[move.end], pos_pid_r_[move.beg]);
@@ -150,10 +155,12 @@ void position_move(Move move)
             pos_pid_r_[move.end] = 0;
         }
     }
+    // bitline
     bl10_items_[move.end % 9] |= 1 << (move.end / 9);
     bl9_items_[move.end / 9] |= 1 << (move.end % 9);
     bl10_items_[move.beg % 9] &= ~(1 << (move.beg / 9));
     bl9_items_[move.beg / 9] &= ~(1 << (move.beg % 9));
+    // global updates
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
     g_hashkey ^= SIDE_KEY;
@@ -169,9 +176,11 @@ void position_undo()
     const Move move = history_moves_.back();
     const PTYPE captured = history_captures_.back();
     const HASH hashkey = history_hashkeys_.back();
+    // undo the history
     history_moves_.pop_back();
     history_captures_.pop_back();
     history_hashkeys_.pop_back();
+    // maintain the tracking
     if (g_team == R) {
         pos_list_b_[pos_pid_b_[move.end]] = move.beg;
         std::swap(pos_pid_b_[move.end], pos_pid_b_[move.beg]);
@@ -187,10 +196,12 @@ void position_undo()
             pos_list_b_.emplace_back(move.end);
         }
     }
-    bl10_items_[move.end % 9] &= captured ? ~(1 << (move.end / 9)) : 0xfff;
-    bl9_items_[move.end / 9] &= captured ? ~(1 << (move.end % 9)) : 0xfff;
+    // bitline undo
+    bl10_items_[move.end % 9] &= (!captured) ? ~(1 << (move.end / 9)) : 0xfff;
+    bl9_items_[move.end / 9] &= (!captured) ? ~(1 << (move.end % 9)) : 0xfff;
     bl10_items_[move.beg % 9] |= 1 << (move.beg / 9);
     bl9_items_[move.beg / 9] |= 1 << (move.beg % 9);
+    // global updates undo
     g_board[move.beg] = g_board[move.end];
     g_board[move.end] = captured;
     g_hashkey = hashkey;
