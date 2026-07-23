@@ -236,7 +236,7 @@ std::string matrix_to_fen(const MATRIX& m)
         if (r) s += '/';
         int e = 0;
         for (int c = 0; c < 9; c++) {
-            const PTYPE p = m[r * 9 + c];
+            const PTYPE p = m[size_t(r * 9 + c)];
             if (!p) {
                 e++;
                 continue;
