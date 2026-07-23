@@ -143,7 +143,6 @@ const std::array<std::array<HASH, 90>, 15> HASH_KEYS = []() {
 }();
 
 // pregen points for rook and cannon non-capture moves
-// FIXME: there might be some bugs in the pregen, so be cautious to use it
 const PREGEN_TABLE ROOK_PREGEN_ = []() {
     PREGEN_TABLE ret { };
     for (UINT32 pos = 0; pos < 10; pos++) {
@@ -167,7 +166,6 @@ const PREGEN_TABLE ROOK_PREGEN_ = []() {
 }();
 
 // pregen points for cannon capture moves
-// FIXME: there might be some bugs in the pregen, so be cautious to use it
 const PREGEN_TABLE CANNON_PREGEN_ = []() {
     PREGEN_TABLE ret { };
     for (UINT32 pos = 0; pos < 10; pos++) {

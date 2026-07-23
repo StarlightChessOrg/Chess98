@@ -215,10 +215,6 @@ std::vector<Move> gen_all_capture_moves()
             ret.insert(ret.end(), moves.begin(), moves.end());
         }
     }
-    // FIXME: DEBUGGING
-    for (const Move m : ret) {
-        assert(!(g_team * m.beg > 0 && g_team * m.end < 0));
-    }
     return ret;
 }
 
@@ -251,10 +247,6 @@ std::vector<Move> gen_all_quiet_moves()
             const auto moves = gen_pawn_<false>(p);
             ret.insert(ret.end(), moves.begin(), moves.end());
         }
-    }
-    // FIXME: DEBUGGING
-    for (const Move m : ret) {
-        assert(!(g_team * m.beg > 0 && g_team * m.end < 0));
     }
     return ret;
 }

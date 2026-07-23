@@ -3,6 +3,7 @@
 
 void move_preformance_test()
 {
+    assert(gen_all_moves().size() == 44);
     Timer t { 1000 };
     std::int64_t iterations = 0, id = 0, num = 0;
     while (!t.time_up()) {
