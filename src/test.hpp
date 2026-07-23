@@ -4,7 +4,7 @@
 void move_preformance_test()
 {
     Timer t { 1000 };
-    uint64_t iterations = 0, id = 0, num = 0;
+    std::int64_t iterations = 0, id = 0, num = 0;
     while (!t.time_up()) {
         MovePicker a { 1 };
         for (Move m = a.next(); m; m = a.next()) id += m.beg + m.end, num++;
@@ -18,8 +18,10 @@ void move_preformance_test()
     Timer t2 { 1000 };
     iterations = 0, id = 0, num = 0;
     while (!t2.time_up()) {
-        for (const Move m : gen_all_quiet_moves()) id += m.beg + m.end, num++;
-        for (const Move m : gen_all_capture_moves()) id += m.beg + m.end, num++;
+        for (const Move m : gen_all_moves()) {
+            id += m.beg, id += m.end;
+            num++;
+        }
         iterations++;
     }
     std::cout << "[MoveGen Generation 1 second]";

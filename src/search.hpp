@@ -123,8 +123,7 @@ VL search_q_(VL a, VL b, DEPTH depth)
     // search
     std::vector<Move> moves { };
     if (checking) {
-        moves = gen_all_quiet_moves();
-        history_sort(moves, g_team);
+        moves = gen_all_moves();
     } else {
         moves = gen_all_capture_moves();
         mvvlva_sort(moves);

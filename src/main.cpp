@@ -33,7 +33,7 @@ constexpr MATRIX TEST_MATRIX {
 
 int main()
 {
-    position_init(TEST_MATRIX, R);
+    position_init(INIT_MATRIX, R);
     history_init();
     killer_init();
     tt_init();

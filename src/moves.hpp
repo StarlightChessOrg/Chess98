@@ -106,8 +106,6 @@ std::vector<Move> gen_knight_(POS pos)
 }
 
 // rook moves
-// FIXME: it must have some bugs in rook generation
-//        search cannot run at all 'cause of its funny results
 template <bool G>
 std::vector<Move> gen_rook_(POS pos)
 {
@@ -126,16 +124,20 @@ std::vector<Move> gen_rook_(POS pos)
         if (teamcheck(bottom, G))
             ret.emplace_back(pos, bottom);
     } else {
-        for (POS p = pos - 1; p > left; p--) ret.emplace_back(pos, p);
-        if (!piece_on(top))
-            ret.emplace_back(pos, top);
-        for (POS p = pos + 1; p < right; p++) ret.emplace_back(pos, p);
-        if (!piece_on(right))
-            ret.emplace_back(pos, right);
-        for (POS p = pos - 9; p > top; p -= 9) ret.emplace_back(pos, p);
+        for (int p = int(pos) - 1; p > left; --p)
+            ret.emplace_back(pos, POS(p));
         if (!piece_on(left))
             ret.emplace_back(pos, left);
-        for (POS p = pos + 9; p < bottom; p += 9) ret.emplace_back(pos, p);
+        for (int p = int(pos) + 1; p < right; ++p)
+            ret.emplace_back(pos, POS(p));
+        if (!piece_on(right))
+            ret.emplace_back(pos, right);
+        for (int p = int(pos) - 9; p > top; p -= 9)
+            ret.emplace_back(pos, POS(p));
+        if (!piece_on(top))
+            ret.emplace_back(pos, top);
+        for (int p = int(pos) + 9; p < bottom; p += 9)
+            ret.emplace_back(pos, POS(p));
         if (!piece_on(bottom))
             ret.emplace_back(pos, bottom);
     }
@@ -143,8 +145,6 @@ std::vector<Move> gen_rook_(POS pos)
 }
 
 // cannon moves
-// FIXME: and the bugs in rook move generation may affect cannon
-//        i'll fix it
 template <bool G>
 std::vector<Move> gen_cannon_(POS pos)
 {
@@ -257,6 +257,16 @@ std::vector<Move> gen_all_quiet_moves()
         assert(!(g_team * m.beg > 0 && g_team * m.end < 0));
     }
     return ret;
+}
+
+// generate all moves
+// TODO: implement a high-performance gen_all_moves
+std::vector<Move> gen_all_moves()
+{
+    std::vector<Move> quiets = gen_all_quiet_moves();
+    std::vector<Move> captures = gen_all_capture_moves();
+    quiets.insert(quiets.end(),captures.begin(), captures.end());
+    return quiets;
 }
 
 // the move picker to generate moves step-by-step

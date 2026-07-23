@@ -76,7 +76,7 @@ constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
 constexpr int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
 constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
-constexpr int get_bit_on_(PREGEN_DATA d, UINT32 i) { return (d >> i) & 1; }
+constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
 
 // timer
 struct Timer {
