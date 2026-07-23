@@ -15,9 +15,11 @@ SEARCH_RET search()
 {
     const Timer timer { 1000 };
     VL vl { -INF };
-    for (DEPTH depth = 0; !timer.time_up_3xless(); depth++) {
+    for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
         if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
-        vl = search_vl_(depth, -INF, INF, false);
+        vl = search_vl_(depth, -INF, INF, NODE_PV);
+        // DEBUG
+        std::cout << "depth: " << int(depth) << std::endl;
     }
     const Move move = tt_get_move();
     return { move, vl };
@@ -58,15 +60,15 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
         VL vl { -INF };
         if (is_cut) {
             if (vlbest == -INF) {
-                vl = -search_vl_(depth - 1, -b, -a, true);
+                vl = -search_vl_(depth - 1, -b, -a, NODE_PV);
             } else {
-                vl = -search_vl_(depth - 1, -INF, -a, true);
+                vl = -search_vl_(depth - 1, -INF, -a, NODE_CUT);
                 if (a < vl && vl < b) {
-                    vl = -search_vl_(depth - 1, -b, -a, false);
+                    vl = -search_vl_(depth - 1, -b, -a, NODE_PV);
                 }
             }
         } else {
-            vl = -search_vl_(depth - 1, -INF, -a, false);
+            vl = -search_vl_(depth - 1, -INF, -a, NODE_PV);
         }
         position_undo(), distance_--;
         if (vl > vlbest) {
@@ -98,6 +100,8 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
 // search quiescence
 VL search_q_(VL a, VL b, DEPTH depth)
 {
+    // DEBUG
+    return evaluate();
     if (distance_ == Q_MAX_DISTANCE || depth == 0) return evaluate();
     VL vlbest { -INF };
 
