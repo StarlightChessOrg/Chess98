@@ -7,7 +7,9 @@ void move_preformance_test()
     std::int64_t iterations = 0, id = 0, num = 0;
     while (!t.time_up()) {
         MovePicker a { 1 };
-        for (Move m = a.next(); m; m = a.next()) id += m.beg + m.end, num++;
+        for (Move m = a.next(); m; m = a.next()) {
+            id += m.beg, id += m.end, num++;
+        }
         iterations++;
     }
     std::cout << "[MovePicker Generation 1 second]";

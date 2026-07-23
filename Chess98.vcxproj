@@ -152,17 +152,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="base.hpp" />
-    <ClInclude Include="evaluate.hpp" />
-    <ClInclude Include="heuristic.hpp" />
-    <ClInclude Include="moves.hpp" />
-    <ClInclude Include="position.hpp" />
-    <ClInclude Include="search.hpp" />
-    <ClInclude Include="test.hpp" />
-    <ClInclude Include="ucci.hpp" />
+    <ClInclude Include="src/base.hpp" />
+    <ClInclude Include="src/evaluate.hpp" />
+    <ClInclude Include="src/heuristic.hpp" />
+    <ClInclude Include="src/moves.hpp" />
+    <ClInclude Include="src/position.hpp" />
+    <ClInclude Include="src/search.hpp" />
+    <ClInclude Include="src/test.hpp" />
+    <ClInclude Include="src/ucci.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="src/main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
