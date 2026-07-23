@@ -37,9 +37,8 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
 
     // checking validation
     const bool checking = in_check();
-    if (checking) {
-        g_history_checkings.emplace_back(checking);
-    } else {
+    g_history_checkings.emplace_back(checking);
+    if (!checking) {
         // futility pruning
         const VL vl = evaluate();
         if (depth <= 2 && vl - FP_MARGIN * depth >= b) return vl;
@@ -92,7 +91,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
     }
 
     // end
-    if (checking) g_history_checkings.pop_back();
+    g_history_checkings.pop_back();
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
@@ -104,8 +103,8 @@ VL search_q_(VL a, VL b, DEPTH depth)
 
     // checking validation
     const bool checking = in_check();
+    g_history_checkings.emplace_back(true);
     if (checking) {
-        g_history_checkings.emplace_back(true);
         depth = std::min(depth, Q_CHECKING_DEPTH);
     } else {
         // delta pruning
@@ -142,6 +141,6 @@ VL search_q_(VL a, VL b, DEPTH depth)
     }
 
     // end
-    if (checking) g_history_checkings.pop_back();
+    g_history_checkings.pop_back();
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }

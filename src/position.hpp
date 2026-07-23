@@ -44,6 +44,7 @@ void position_init(const MATRIX& board, TEAM team)
     g_hashkey = 0;
     g_board = board;
     g_team = team;
+    if (team == B) g_hashkey ^= SIDE_KEY;
     // init king pos first in order to keep it in the 1st position
     for (int i = 0; i < 90; i++) {
         if (board[i] == R_KING) {
@@ -135,6 +136,11 @@ void position_move(Move move)
     history_moves_.emplace_back(move);
     history_captures_.emplace_back(g_board[move.end]);
     history_hashkeys_.emplace_back(g_hashkey);
+    // hash
+    g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
+    g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
+    g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.end];
+    g_hashkey ^= SIDE_KEY;
     // pos list tracking (core part to avoid 90-square scanning)
     if (g_team == R) {
         pos_list_r_[pos_pid_r_[move.beg]] = move.end;
@@ -161,9 +167,6 @@ void position_move(Move move)
     bl10_items_[move.beg % 9] &= ~(1 << (move.beg / 9));
     bl9_items_[move.beg / 9] &= ~(1 << (move.beg % 9));
     // global updates
-    g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
-    g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
-    g_hashkey ^= SIDE_KEY;
     g_board[move.end] = g_board[move.beg];
     g_board[move.beg] = 0;
     g_team = -g_team;
@@ -180,6 +183,8 @@ void position_undo()
     history_moves_.pop_back();
     history_captures_.pop_back();
     history_hashkeys_.pop_back();
+    // hash
+    g_hashkey = hashkey;
     // maintain the tracking
     if (g_team == R) {
         pos_list_b_[pos_pid_b_[move.end]] = move.beg;
@@ -204,7 +209,6 @@ void position_undo()
     // global updates undo
     g_board[move.beg] = g_board[move.end];
     g_board[move.end] = captured;
-    g_hashkey = hashkey;
     g_team = -g_team;
 }
 

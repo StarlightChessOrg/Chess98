@@ -27,8 +27,8 @@ constexpr MATRIX TEST_MATRIX {
     R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, R_BISHOP, R_ADVISOR, R_KING,
-    R_ADVISOR, R_BISHOP, 0, 0
+    R_ROOK, R_KNIGHT, R_BISHOP, R_ADVISOR, R_KING,
+    R_ADVISOR, R_BISHOP, R_KNIGHT, 0
 };
 
 int main()
