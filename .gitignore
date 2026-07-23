@@ -10,3 +10,4 @@
 # Temp Files
 **/*.tmp*
 **/__pycache__
+**/*.vcxproj.user
