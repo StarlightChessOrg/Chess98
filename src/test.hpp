@@ -130,5 +130,5 @@ void move_preformance_test()
 
 void search_test()
 {
-    (void)search();
+    search();
 }

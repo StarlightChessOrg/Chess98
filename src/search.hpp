@@ -11,35 +11,21 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null = false);
 VL search_q_(VL a, VL b, DEPTH depth);
 void mark_checking_move_(bool checking);
 bool null_okay_();
+VL q_capture_gain_(Move move);
+bool left_in_check_();
 
 // search for best move and vl
 SEARCH_RET search()
 {
     const Timer timer { 1000 };
     VL vl { -INF };
-
     for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
-        // max depth and the stop command
-        if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
-
         vl = search_vl_(depth, -INF, INF, NODE_PV);
+        if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
+        std::cout << int(depth) << " " << timer.duration() << std::endl;
     }
-
     const Move move = tt_get_move();
     return { move, vl };
-}
-
-// check if the null move pruning can be used
-// TODO: implement a safer detection
-bool null_okay_()
-{
-    for (const POS p : get_pos_list()) {
-        const int t = std::abs(piece_on(p));
-        if (t == R_ROOK || t == R_CANNON || t == R_KNIGHT || t == R_PAWN) {
-            return true;
-        }
-    }
-    return false;
 }
 
 // search for the best vl
@@ -122,21 +108,6 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
-// rough capture gain for delta pruning (SEE weights scaled toward eval units)
-inline VL q_capture_gain_(Move move)
-{
-    return VL(WEIGHTS[std::size_t(std::abs(piece_on(move.end)))] * 12);
-}
-
-// true if the side that just moved left their king in check
-inline bool left_in_check_()
-{
-    g_team = -g_team;
-    const bool bad = in_check();
-    g_team = -g_team;
-    return bad;
-}
-
 // search quiescence (search-side reductions only; evaluate left as-is)
 VL search_q_(VL a, VL b, DEPTH depth)
 {
@@ -195,4 +166,32 @@ void mark_checking_move_(bool checking)
     if (checking && !g_history_checkings.empty()) {
         g_history_checkings.back() = true;
     }
+}
+
+// check if the null move pruning can be used
+// TODO: implement a safer detection
+bool null_okay_()
+{
+    for (const POS p : get_pos_list()) {
+        const int t = std::abs(piece_on(p));
+        if (t == R_ROOK || t == R_CANNON || t == R_KNIGHT || t == R_PAWN) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// rough capture gain for delta pruning (SEE weights scaled toward eval units)
+VL q_capture_gain_(Move move)
+{
+    return VL(WEIGHTS[std::size_t(std::abs(piece_on(move.end)))] * 12);
+}
+
+// true if the side that just moved left their king in check
+bool left_in_check_()
+{
+    g_team = -g_team;
+    const bool bad = in_check();
+    g_team = -g_team;
+    return bad;
 }
