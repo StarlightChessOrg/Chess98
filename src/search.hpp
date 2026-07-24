@@ -9,9 +9,10 @@ std::uint64_t nodes_ab_ { 0 };
 std::uint64_t nodes_q_ { 0 };
 
 SEARCH_RET search();
-VL search_vl_(DEPTH depth, VL a, VL b, bool CUT);
+VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null = false);
 VL search_q_(VL a, VL b, DEPTH depth);
 void mark_checking_move_(bool checking);
+bool null_okay_();
 
 // search for best move and vl
 SEARCH_RET search()
@@ -43,9 +44,19 @@ SEARCH_RET search()
     return { move, vl };
 }
 
+// enough attacking material to avoid obvious zugzwang (king/advisors/bishops only)
+bool null_okay_()
+{
+    for (const POS p : get_pos_list()) {
+        const int t = std::abs(piece_on(p));
+        if (t == R_ROOK || t == R_CANNON || t == R_KNIGHT || t == R_PAWN) return true;
+    }
+    return false;
+}
+
 // search for the best vl
 // PVS: PV = first full-window + scout null-window + research; CUT = null-window only
-VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
+VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
 {
     nodes_ab_++;
     if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE);
@@ -61,12 +72,26 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
     // tt vl
     const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
     if (vlhash != INVALID_VL) return vlhash;
+
     if (!checking) {
         // futility pruning
-        // TODO: |DEBUG|
         const VL vl = evaluate();
         if (depth <= 2 && vl - FP_MARGIN * depth >= b) return vl;
-        // TODO: null move pruning
+
+        // null move pruning (CUT nodes only; no consecutive nulls)
+        if (is_cut && !ban_null && depth >= NULL_MOVE_MIN_DEPTH && null_okay_()) {
+            const DEPTH r = DEPTH(NULL_MOVE_R + depth / 6);
+            const DEPTH nd = depth > r + 1 ? DEPTH(depth - 1 - r) : DEPTH(0);
+            position_do_null();
+            distance_++;
+            const VL vlnull = -search_vl_(nd, -b, -b + 1, NODE_CUT, true);
+            distance_--;
+            position_undo_null();
+            if (vlnull >= b) {
+                tt_set(g_hashkey, BETA, depth, Move { }, vlnull);
+                return vlnull;
+            }
+        }
     }
 
     // repeat status validation
@@ -78,13 +103,13 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
         position_move(move), distance_++;
         VL vl { -INF };
         if (is_cut) {
-            vl = -search_vl_(depth - 1, -b, -b + 1, NODE_CUT);
+            vl = -search_vl_(depth - 1, -b, -b + 1, NODE_CUT, ban_null);
         } else if (vlbest == -INF) {
-            vl = -search_vl_(depth - 1, -b, -a, NODE_PV);
+            vl = -search_vl_(depth - 1, -b, -a, NODE_PV, false);
         } else {
-            vl = -search_vl_(depth - 1, -a - 1, -a, NODE_CUT);
+            vl = -search_vl_(depth - 1, -a - 1, -a, NODE_CUT, false);
             if (a < vl && vl < b) {
-                vl = -search_vl_(depth - 1, -b, -a, NODE_PV);
+                vl = -search_vl_(depth - 1, -b, -a, NODE_PV, false);
             }
         }
         position_undo(), distance_--;

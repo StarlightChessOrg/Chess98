@@ -24,6 +24,8 @@ UINT16 get_bl9(POS pos);
 bool face_king_();
 void position_move(Move move);
 void position_undo();
+void position_do_null();
+void position_undo_null();
 bool in_check();
 bool legal_move(Move move);
 POS get_protector(POS pos);
@@ -171,6 +173,19 @@ void position_move(Move move)
     g_board[move.end] = g_board[move.beg];
     g_board[move.beg] = 0;
     g_team = -g_team;
+}
+
+// null move: pass the turn (no piece change; hash side-bit only)
+void position_do_null()
+{
+    g_hashkey ^= SIDE_KEY;
+    g_team = -g_team;
+}
+
+void position_undo_null()
+{
+    g_team = -g_team;
+    g_hashkey ^= SIDE_KEY;
 }
 
 // undo move

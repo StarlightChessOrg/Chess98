@@ -359,7 +359,7 @@ int side_pst_(TEAM team, const SideStat& me, const SideStat& opp, int phase)
 VL evaluate()
 {
     // TODO: |DEBUG|
-    return 0;
+    // return 0;
     using namespace eval_detail_;
     const SideStat red = collect_(R);
     const SideStat black = collect_(B);
