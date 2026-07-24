@@ -17,6 +17,14 @@ This project is being refactored now...
 - [x] move picker
 - [x] basic evaluation
 - [x] search
+- [ ] search: filter self-check in main search (not only qsearch)
+- [ ] search: store root bestmove (do not rely only on tt_get_move)
+- [ ] search: LMR (late move reductions)
+- [ ] search: check extensions
+- [ ] search: aspiration windows at root
+- [ ] search: IID when no TT move
+- [ ] search: countermove / continuation history
+- [ ] search: ProbCut / singular extensions (later)
 - [ ] ucci
 
 ## Progress
