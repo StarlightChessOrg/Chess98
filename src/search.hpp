@@ -36,7 +36,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
     VL vlbest { -INF };
     Move movebest { };
 
-    // checking validation first (TT hit must not skip perpetual-check marking)
+    // checking validation
     const bool checking = in_check();
     mark_checking_move_(checking);
 
@@ -161,6 +161,7 @@ VL search_q_(VL a, VL b, DEPTH depth)
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
+// mark the previous move as checking move or not
 void mark_checking_move_(bool checking)
 {
     if (checking && !g_history_checkings.empty()) {
