@@ -37,9 +37,12 @@ int main()
     history_init();
     killer_init();
     tt_init();
-    // test code
+
     search_test();
-    move_preformance_test();
-    system("pause");
+    // move_preformance_test();
+
+    const SEARCH_RET ret = search_alphabeta();
+    std::cout << "[alphabeta] best move: " << move_to_ucimove(ret.first)
+              << " vl: " << ret.second << std::endl;
     return 0;
 }

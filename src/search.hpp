@@ -34,8 +34,9 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
     Move movebest { };
 
     // tt vl
-    const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
-    if (vlhash != INVALID_VL) return vlhash;
+    // DEBUG
+    // const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
+    // if (vlhash != INVALID_VL) return vlhash;
 
     // checking validation
     const bool checking = in_check();
@@ -89,7 +90,8 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut)
         }
         if (movetype != ALPHA) killer_set(movebest, depth);
         history_set(movebest, g_team, depth);
-        tt_set(g_hashkey, movetype, depth, movebest, vlbest);
+        // DEBUG
+        // tt_set(g_hashkey, movetype, depth, movebest, vlbest);
     }
 
     // end
