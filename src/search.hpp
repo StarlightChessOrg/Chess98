@@ -5,8 +5,6 @@
 STATE g_searchstop { 0 };
 DEPTH g_maxdepth = { 20 };
 DEPTH distance_ { 0 };
-std::uint64_t nodes_ab_ { 0 };
-std::uint64_t nodes_q_ { 0 };
 
 SEARCH_RET search();
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null = false);
@@ -19,48 +17,35 @@ SEARCH_RET search()
 {
     const Timer timer { 1000 };
     VL vl { -INF };
-    std::uint64_t total_ab = 0, total_q = 0;
+
     for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
+        // max depth and the stop command
         if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
-        nodes_ab_ = nodes_q_ = 0;
+
         vl = search_vl_(depth, -INF, INF, NODE_PV);
-        total_ab += nodes_ab_;
-        total_q += nodes_q_;
-        // TODO: |DEBUG|
-        std::cout << "depth: " << int(depth)
-                  << " ab: " << nodes_ab_
-                  << " q: " << nodes_q_
-                  << " sum: " << (nodes_ab_ + nodes_q_)
-                  << " total: " << (total_ab + total_q)
-                  << " time_ms: " << timer.duration()
-                  << std::endl;
     }
-    const auto all = total_ab + total_q;
-    std::cout << "total ab: " << total_ab << " q: " << total_q
-              << " all: " << all
-              << " nps: " << (timer.duration() > 0 ? all * 1000 / timer.duration() : 0)
-              << std::endl;
+
     const Move move = tt_get_move();
     return { move, vl };
 }
 
-// enough attacking material to avoid obvious zugzwang (king/advisors/bishops only)
+// check if the null move pruning can be used
+// TODO: implement a safer detection
 bool null_okay_()
 {
     for (const POS p : get_pos_list()) {
         const int t = std::abs(piece_on(p));
-        if (t == R_ROOK || t == R_CANNON || t == R_KNIGHT || t == R_PAWN) return true;
+        if (t == R_ROOK || t == R_CANNON || t == R_KNIGHT || t == R_PAWN) {
+            return true;
+        }
     }
     return false;
 }
 
 // search for the best vl
-// PVS: PV = first full-window + scout null-window + research; CUT = null-window only
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
 {
-    nodes_ab_++;
     if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE);
-    if (is_cut) a = b - 1; // force zero-width window (beta-1, beta)
     const VL original_alpha = a;
     VL vlbest { -INF };
     Move movebest { };
@@ -155,9 +140,6 @@ inline bool left_in_check_()
 // search quiescence (search-side reductions only; evaluate left as-is)
 VL search_q_(VL a, VL b, DEPTH depth)
 {
-    // TODO: |DEBUG|
-    return evaluate();
-    nodes_q_++;
     if (distance_ >= Q_MAX_DISTANCE || depth <= 0) return evaluate();
     VL vlbest { -INF };
 

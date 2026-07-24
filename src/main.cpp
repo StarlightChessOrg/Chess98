@@ -37,7 +37,6 @@ int main()
     history_init();
     killer_init();
     tt_init();
-    // test
     search_test();
     return 0;
 }
