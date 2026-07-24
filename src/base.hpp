@@ -66,8 +66,9 @@ constexpr MovePickerStatus STATUS_GOOD_CAPTURES = 1;
 constexpr MovePickerStatus STATUS_KILLER = 2;
 constexpr MovePickerStatus STATUS_QUIET = 3;
 constexpr MovePickerStatus STATUS_BAD_CAPTURES = 4;
-constexpr DEPTH Q_MAX_DISTANCE = 64;
-constexpr DEPTH Q_CHECKING_DEPTH = 8;
+constexpr DEPTH Q_MAX_DISTANCE = 8;   // quiescence ply cap (search-side; keep small)
+constexpr DEPTH Q_CHECKING_DEPTH = 4;
+constexpr VL Q_DELTA_MARGIN = 80;     // stand-pat + capture gain futility
 constexpr bool NODE_PV = false;
 constexpr bool NODE_CUT = true;
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };

@@ -1,5 +1,5 @@
-#include "test.hpp"
 #include "ucci.hpp"
+#include "test.hpp"
 
 constexpr MATRIX INIT_MATRIX {
     B_ROOK, B_KNIGHT, B_BISHOP, B_ADVISOR, B_KING,
@@ -37,12 +37,7 @@ int main()
     history_init();
     killer_init();
     tt_init();
-
+    // test
     search_test();
-    // move_preformance_test();
-
-    const SEARCH_RET ret = search_alphabeta();
-    std::cout << "[alphabeta] best move: " << move_to_ucimove(ret.first)
-              << " vl: " << ret.second << std::endl;
     return 0;
 }

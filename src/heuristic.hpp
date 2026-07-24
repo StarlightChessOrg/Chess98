@@ -6,8 +6,8 @@ std::array<std::array<UINT32, 90>, 90> history_table_r_ { };
 std::array<std::array<UINT32, 90>, 90> history_table_b_ { };
 std::array<std::array<Move, 2>, 128> killer_table_ { };
 std::vector<TTEntry> tt_table_ { };
-UINT8 tt_size_ { 0 };
-UINT8 tt_mask_ { 0 };
+int tt_size_ { 0 };
+std::uint32_t tt_mask_ { 0 };
 
 // init the history table
 void history_init()
@@ -54,13 +54,13 @@ std::array<Move, 2> killer_get(DEPTH d)
     return killer_table_[d];
 }
 
-// init the tt
-void tt_init(int _size = 8)
+// init the tt (_size is log2 of entry count, e.g. 16 -> 65536)
+void tt_init(int _size = 20)
 {
     tt_table_.clear();
     tt_table_.resize(1ll << _size);
     tt_size_ = _size;
-    tt_mask_ = (1 << _size) - 1;
+    tt_mask_ = (std::uint32_t(1) << _size) - 1;
 }
 
 // set a tt entry

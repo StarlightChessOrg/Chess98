@@ -1,20 +1,26 @@
 ﻿#pragma once
 #include "search.hpp"
 
-// alpha-beta + history + killer (MovePicker; no TT/PVS/qsearch)
+// plain alpha-beta baseline: optional TT only (no PVS/qsearch/killer/history/MovePicker)
 DEPTH test_ply_ { 0 };
 std::uint64_t ab_nodes_ { 0 };
 std::uint64_t ab_nodes_total_ { 0 };
+bool ab_use_tt_ { false };
 
 VL alphabeta_vl_(DEPTH depth, VL a, VL b)
 {
     ab_nodes_++;
     if (depth == 0) return evaluate();
+
+    if (ab_use_tt_) {
+        const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
+        if (vlhash != INVALID_VL) return vlhash;
+    }
+
     const VL original_alpha = a;
     VL vlbest { -INF };
     Move movebest { };
-    MovePicker mp { depth };
-    for (Move m = mp.next(); m; m = mp.next()) {
+    for (const Move m : gen_all_moves()) {
         position_move(m), test_ply_++;
         const VL vl = -alphabeta_vl_(depth - 1, -b, -a);
         position_undo(), test_ply_--;
@@ -25,14 +31,17 @@ VL alphabeta_vl_(DEPTH depth, VL a, VL b)
             if (vl >= b) break;
         }
     }
-    if (movebest) {
-        if (vlbest > original_alpha) killer_set(movebest, depth); // fail-high / exact
-        history_set(movebest, g_team, depth);
+
+    if (vlbest == -INF) vlbest = VL(-INF + test_ply_);
+    if (ab_use_tt_ && movebest) {
+        HASH_FLAG flag = EXACT;
+        if (vlbest >= b) flag = BETA;
+        else if (vlbest <= original_alpha) flag = ALPHA;
+        tt_set(g_hashkey, flag, depth, movebest, vlbest);
     }
-    return vlbest != -INF ? vlbest : VL(-INF + test_ply_);
+    return vlbest;
 }
 
-// iterative deepening alpha-beta + history + killer
 SEARCH_RET search_alphabeta()
 {
     const Timer timer { 1000 };
@@ -44,10 +53,8 @@ SEARCH_RET search_alphabeta()
         Move depth_best { };
         VL depth_vl { -INF };
         VL a = -INF, b = INF;
-        ab_nodes_ = 0;
-        MovePicker mp { depth };
         ab_nodes_ = 1; // root
-        for (Move m = mp.next(); m; m = mp.next()) {
+        for (const Move m : gen_all_moves()) {
             position_move(m), test_ply_ = 1;
             const VL vl = -alphabeta_vl_(depth - 1, -b, -a);
             position_undo(), test_ply_ = 0;
@@ -59,10 +66,9 @@ SEARCH_RET search_alphabeta()
         }
         ab_nodes_total_ += ab_nodes_;
         if (depth_best) {
-            killer_set(depth_best, depth);
-            history_set(depth_best, g_team, depth);
             movebest = depth_best;
             vlbest = depth_vl;
+            if (ab_use_tt_) tt_set(g_hashkey, EXACT, depth, movebest, vlbest);
         }
         std::cout << "alphabeta depth: " << int(depth)
                   << " nodes: " << ab_nodes_
@@ -74,6 +80,37 @@ SEARCH_RET search_alphabeta()
               << " nps: " << (timer.duration() > 0 ? ab_nodes_total_ * 1000 / timer.duration() : 0)
               << std::endl;
     return { movebest, vlbest };
+}
+
+void alphabeta_tt_compare()
+{
+    for (const bool use_tt : { false, true }) {
+        ab_use_tt_ = use_tt;
+        position_init(
+            {
+                B_ROOK, B_KNIGHT, B_BISHOP, B_ADVISOR, B_KING,
+                B_ADVISOR, B_BISHOP, B_KNIGHT, B_ROOK,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, B_CANNON, 0, 0, 0, 0, 0, B_CANNON, 0,
+                B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN,
+                0, R_CANNON, 0, 0, 0, 0, 0, R_CANNON, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0,
+                R_ROOK, R_KNIGHT, R_BISHOP, R_ADVISOR, R_KING,
+                R_ADVISOR, R_BISHOP, R_KNIGHT, R_ROOK
+            },
+            R);
+        history_init();
+        killer_init();
+        tt_init();
+        std::cout << "===== alphabeta TT " << (use_tt ? "ON" : "OFF")
+                  << " =====" << std::endl;
+        const SEARCH_RET ret = search_alphabeta();
+        std::cout << "[alphabeta] best: " << move_to_ucimove(ret.first)
+                  << " vl: " << ret.second << std::endl;
+    }
 }
 
 void move_preformance_test()
@@ -102,7 +139,7 @@ void move_preformance_test()
         }
         iterations++;
     }
-    std::cout << "[MoveGen Generation 1 second]";
+    std::cout << "[Normal Generation 1 second]";
     std::cout << " iterations: " << iterations;
     std::cout << " num: " << num;
     std::cout << " id: " << id;

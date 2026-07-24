@@ -132,10 +132,11 @@ void position_move(Move move)
     assert(move && g_board[move.beg] * g_team > 0);
     assert(g_board[move.end] * g_team <= 0);
     assert(!pos_list_r_.empty() && !pos_list_b_.empty());
-    // maintain the history
+    // maintain the history (checkings aligned with moves; set by search if move gives check)
     history_moves_.emplace_back(move);
     history_captures_.emplace_back(g_board[move.end]);
     history_hashkeys_.emplace_back(g_hashkey);
+    g_history_checkings.emplace_back(false);
     // hash
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
@@ -183,6 +184,7 @@ void position_undo()
     history_moves_.pop_back();
     history_captures_.pop_back();
     history_hashkeys_.pop_back();
+    g_history_checkings.pop_back();
     // hash
     g_hashkey = hashkey;
     // maintain the tracking
@@ -215,7 +217,7 @@ void position_undo()
 // judge whether current position is in check (include face-kings)
 bool in_check()
 {
-    // get king pos
+    // get king pos%
     const POS pos = g_team == R ? pos_list_r_[0] : pos_list_b_[0];
     // is attacked by a pawn (judging directly without validating team is ok)
     if (abs(piece_on(pos - 9 * g_team)) == R_PAWN) return true;
@@ -392,7 +394,7 @@ POS get_protector(POS pos)
 bool is_repeat()
 {
     const size_t n = history_hashkeys_.size();
-    if (n < 4) return false;
+    if (n < 4 || g_history_checkings.size() != n) return false;
     for (size_t i = n; i-- > 0; ) {
         if (history_hashkeys_[i] == g_hashkey) {
             if (n - i < 4) return false;
