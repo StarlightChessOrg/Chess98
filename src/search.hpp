@@ -7,8 +7,8 @@ DEPTH g_maxdepth = { 20 };
 DEPTH distance_ { 0 };
 
 SEARCH_RET search();
-VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null = false);
-VL search_q_(VL a, VL b, DEPTH depth);
+VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking);
+VL search_q_(VL a, VL b, DEPTH depth, bool checking);
 void mark_checking_move_(bool checking);
 bool null_okay_();
 VL q_capture_gain_(Move move);
@@ -20,7 +20,7 @@ SEARCH_RET search()
     const Timer timer { 1000 };
     VL vl { -INF };
     for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
-        vl = search_vl_(depth, -INF, INF, NODE_PV);
+        vl = search_vl_(depth, -INF, INF, NODE_PV, false, in_check());
         if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
         std::cout << int(depth) << " " << timer.duration() << std::endl;
     }
@@ -29,16 +29,12 @@ SEARCH_RET search()
 }
 
 // search for the best vl
-VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
+VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking)
 {
-    if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE);
+    if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE, checking);
     const VL original_alpha = a;
     VL vlbest { -INF };
     Move movebest { };
-
-    // checking validation
-    const bool checking = in_check();
-    mark_checking_move_(checking);
 
     // tt vl
     const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
@@ -55,7 +51,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
             const DEPTH nd = depth > r + 1 ? DEPTH(depth - 1 - r) : DEPTH(0);
             position_do_null();
             distance_++;
-            const VL vlnull = -search_vl_(nd, -b, -b + 1, NODE_CUT, true);
+            const VL vlnull = -search_vl_(nd, -b, -b + 1, NODE_CUT, true, in_check());
             distance_--;
             position_undo_null();
             if (vlnull >= b) {
@@ -70,20 +66,48 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
 
     // search
     MovePicker mp { depth };
-    for (Move move = mp.next(); move; move = mp.next()) {
+    int move_num { 1 };
+    for (Move move = mp.next(); move; move = mp.next(), move_num++) {
+        const PTYPE capture = piece_on(move.end);
+
         position_move(move), distance_++;
-        VL vl { -INF };
-        if (is_cut) {
-            vl = -search_vl_(depth - 1, -b, -b + 1, NODE_CUT, ban_null);
-        } else if (vlbest == -INF) {
-            vl = -search_vl_(depth - 1, -b, -a, NODE_PV, false);
-        } else {
-            vl = -search_vl_(depth - 1, -a - 1, -a, NODE_CUT, false);
-            if (a < vl && vl < b) {
-                vl = -search_vl_(depth - 1, -b, -a, NODE_PV, false);
-            }
+
+        // checking validation
+        const bool gives_check = in_check();
+        mark_checking_move_(gives_check);
+
+        // lmr
+        const DEPTH normal_depth = DEPTH(depth - 1);
+        DEPTH reduction { 0 };
+        const bool c1 = !checking && !capture && !gives_check;
+        const bool c2 = depth >= LMR_MIN_DEPTH && move_num >= LMR_MIN_MOVES;
+        if (c1 && c2) {
+            reduction = LMR_BASE;
+            if (depth >= 6) reduction++;
+            if (move_num >= 6) reduction++;
+            if (is_cut) reduction++;
+            if (reduction > normal_depth) reduction = normal_depth;
         }
+        const DEPTH lmr_depth = normal_depth - reduction;
+
+        // pvs
+        VL vl { -INF };
+        if (!is_cut && vlbest == -INF) {
+            vl = -search_vl_(normal_depth, -b, -a, NODE_PV, false, gives_check);
+        } else if (is_cut) {
+            vl = -search_vl_(lmr_depth, -b, -b + 1, NODE_CUT, ban_null, gives_check);
+            if (reduction && vl >= b)
+                vl = -search_vl_(normal_depth, -b, -b + 1, NODE_CUT, ban_null, gives_check);
+        } else {
+            vl = -search_vl_(lmr_depth, -a - 1, -a, NODE_CUT, false, gives_check);
+            if (reduction && vl > a)
+                vl = -search_vl_(normal_depth, -a - 1, -a, NODE_CUT, false, gives_check);
+            if (a < vl && vl < b)
+                vl = -search_vl_(normal_depth, -b, -a, NODE_PV, false, gives_check);
+        }
+
         position_undo(), distance_--;
+
         if (vl > vlbest) {
             movebest = move;
             vlbest = vl;
@@ -109,14 +133,11 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null)
 }
 
 // search quiescence (search-side reductions only; evaluate left as-is)
-VL search_q_(VL a, VL b, DEPTH depth)
+VL search_q_(VL a, VL b, DEPTH depth, bool checking)
 {
     if (distance_ >= Q_MAX_DISTANCE || depth <= 0) return evaluate();
     VL vlbest { -INF };
 
-    // checking validation
-    const bool checking = in_check();
-    mark_checking_move_(checking);
     if (checking) {
         depth = std::min(depth, Q_CHECKING_DEPTH);
     } else {
@@ -149,7 +170,9 @@ VL search_q_(VL a, VL b, DEPTH depth)
             position_undo(), distance_--;
             continue;
         }
-        const VL vl = -search_q_(-b, -a, depth - 1);
+        const bool gives_check = in_check();
+        mark_checking_move_(gives_check);
+        const VL vl = -search_q_(-b, -a, depth - 1, gives_check);
         position_undo(), distance_--;
         if (vl > vlbest) {
             vlbest = vl;
