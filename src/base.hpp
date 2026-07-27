@@ -96,9 +96,9 @@ struct Timer {
     {
         return std::chrono::steady_clock::now() - beg >= limit;
     }
-    bool time_up_3xless() const
+    bool time_up_2xless() const
     {
-        return std::chrono::steady_clock::now() - beg >= limit / 3;
+        return std::chrono::steady_clock::now() - beg >= limit / 2;
     }
     int duration() const
     {

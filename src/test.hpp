@@ -44,7 +44,7 @@ SEARCH_RET search_alphabeta()
     const Timer timer { 1000 };
     Move movebest { };
     VL vlbest { -INF };
-    for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
+    for (DEPTH depth = 1; !timer.time_up_2xless(); depth++) {
         if (depth > g_maxdepth) break;
         Move depth_best { };
         VL depth_vl { -INF };

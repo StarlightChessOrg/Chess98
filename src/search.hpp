@@ -3,7 +3,8 @@
 #include "moves.hpp"
 
 STATE g_searchstop { 0 };
-DEPTH g_maxdepth = { 20 };
+DEPTH g_maxdepth { 20 };
+int g_searchduration { 1000 };
 DEPTH distance_ { 0 };
 
 SEARCH_RET search();
@@ -17,9 +18,9 @@ bool left_in_check_();
 // search for best move and vl
 SEARCH_RET search()
 {
-    const Timer timer { 1000 };
+    const Timer timer { g_searchduration };
     VL vl { -INF };
-    for (DEPTH depth = 1; !timer.time_up_3xless(); depth++) {
+    for (DEPTH depth = 1; !timer.time_up_2xless(); depth++) {
         vl = search_vl_(depth, -INF, INF, NODE_PV, false, in_check());
         if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
         std::cout << int(depth) << " " << timer.duration() << std::endl;
