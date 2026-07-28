@@ -67,8 +67,9 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
 
     // search
     MovePicker mp { depth };
-    int move_num { 1 };
+    int move_num { 0 };
     for (Move move = mp.next(); move; move = mp.next(), move_num++) {
+        assert(abs(g_board[move.end]) != R_KING && g_board[move.beg] != 0);
         const PTYPE capture = piece_on(move.end);
 
         position_move(move), distance_++;
@@ -77,7 +78,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
         const bool gives_check = in_check();
         mark_checking_move_(gives_check);
 
-        // lmr
+        // check extension temporarily disabled
         const DEPTH normal_depth = DEPTH(depth - 1);
         DEPTH reduction { 0 };
         const bool c1 = !checking && !capture && !gives_check;
@@ -160,6 +161,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
         mvvlva_sort(moves);
     }
     for (const Move move : moves) {
+        if (abs(piece_on(move.end)) == R_KING) continue;
         if (!checking) {
             // delta: even winning the piece for free cannot raise alpha
             if (vlbest + q_capture_gain_(move) + Q_DELTA_MARGIN <= a) continue;

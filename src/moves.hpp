@@ -257,7 +257,7 @@ std::vector<Move> gen_all_moves()
 {
     std::vector<Move> quiets = gen_all_quiet_moves();
     std::vector<Move> captures = gen_all_capture_moves();
-    quiets.insert(quiets.end(),captures.begin(), captures.end());
+    quiets.insert(quiets.end(), captures.begin(), captures.end());
     return quiets;
 }
 
@@ -282,20 +282,21 @@ Move MovePicker::next()
 {
     if (status == STATUS_TT) {
         tt_move = tt_get_move(), status++;
-        return tt_move ? tt_move : next();
+        if (!tt_move || abs(piece_on(tt_move.end)) == R_KING) return next();
+        return tt_move;
     } else if (status == STATUS_GOOD_CAPTURES) {
         if (!generated) {
             moves = gen_all_capture_moves();
-            mvvlva_sort(moves), generated = true;
+            mvvlva_sort(moves);
+            generated = true;
         }
         if (i < moves.size()) {
-            if (moves[i] == tt_move) return (i++, next());
-            if (see_ge(moves[i], 0)) {
-                return moves[i++];
-            } else {
-                bad_captures.emplace_back(moves[i++]);
-                return next();
-            }
+            Move m = moves[i++];
+            if (m == tt_move) return next();
+            if (abs(piece_on(m.end)) == R_KING) return next();
+            if (see_ge(m, 0)) return m;
+            bad_captures.emplace_back(m);
+            return next();
         } else {
             generated = i = 0, status++;
             return next();
@@ -305,7 +306,7 @@ Move MovePicker::next()
             killers = killer_get(depth), generated = true;
         }
         if (i < killers.size()) {
-            if (legal_move(killers[i++])) {
+            if (legal_move(killers[i++]) && abs(piece_on(killers[size_t(i - 1)].end)) != R_KING) {
                 return killers[size_t(i - 1)];
             } else {
                 return next();
@@ -321,8 +322,8 @@ Move MovePicker::next()
         }
         if (i < moves.size()) {
             Move m = moves[i++];
-            bool c = m == tt_move || m == killers[0] || m == killers[1];
-            return c ? (i++, next()) : m;
+            const bool skip = m == tt_move || m == killers[0] || m == killers[1];
+            return skip ? next() : m;
         } else {
             generated = i = 0, status++;
             return next();

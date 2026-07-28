@@ -113,21 +113,16 @@ Move tt_get_move()
     return entry.move;
 }
 
-// culculate whether a move is good enough via SEE
-bool see_ge(Move move, VL threshold)
+// rough SEE: reject only if victim < attacker and the square is protected
+bool see_ge(Move move, VL /*threshold*/)
 {
-    VL vl = 0;
-    int count = 0;
-    vl += WEIGHTS[abs(piece_on(move.end))];
+    const VL victim = WEIGHTS[std::size_t(std::abs(piece_on(move.end)))];
+    const VL attacker = WEIGHTS[std::size_t(std::abs(piece_on(move.beg)))];
+    if (victim >= attacker) return true;
     position_move(move);
-    count++;
-    for (POS p = get_protector(move.end); p < 90; p = get_protector(p)) {
-        vl += WEIGHTS[abs(piece_on(move.end))] * ((count % 2) ? -1 : 1);
-        position_move(Move(p, move.end));
-        count++;
-    }
-    for (int i = 0; i < count; i++) position_undo();
-    return vl >= threshold;
+    const bool protected_ = get_protector(move.end) < 90;
+    position_undo();
+    return !protected_;
 }
 
 // sort the moves via MVV-LVA

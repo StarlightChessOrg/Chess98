@@ -132,7 +132,7 @@ bool face_king_()
 void position_move(Move move)
 {
     assert(move && g_board[move.beg] * g_team > 0);
-    assert(g_board[move.end] * g_team <= 0);
+    assert(g_board[move.end] * g_team <= 0 && abs(g_board[move.end]) != R_KING);
     assert(!pos_list_r_.empty() && !pos_list_b_.empty());
     // maintain the history (checkings aligned with moves; set by search if move gives check)
     history_moves_.emplace_back(move);
@@ -232,12 +232,14 @@ void position_undo()
 // judge whether current position is in check (include face-kings)
 bool in_check()
 {
-    // get king pos%
+    // get king pos
     const POS pos = g_team == R ? pos_list_r_[0] : pos_list_b_[0];
-    // is attacked by a pawn (judging directly without validating team is ok)
-    if (abs(piece_on(pos - 9 * g_team)) == R_PAWN) return true;
-    if (abs(piece_on(pos - 1)) == R_PAWN) return true;
-    if (abs(piece_on(pos + 1)) == R_PAWN) return true;
+    assert(pos % 9 >= 3 && pos % 9 <= 5);
+    assert((g_team == R && pos / 9 >= 7) || (g_team == B && pos / 9 <= 2));
+    // is attacked by an enemy pawn
+    if (piece_on(pos - 9 * g_team) * g_team == B_PAWN) return true;
+    if (piece_on(pos - 1) * g_team == B_PAWN) return true;
+    if (piece_on(pos + 1) * g_team == B_PAWN) return true;
     // is attacked by a knight
     if (!piece_on(pos - 10)) {
         if (piece_on(pos - 19) * g_team == -R_KNIGHT) return true;
@@ -264,7 +266,7 @@ bool in_check()
     if (piece_on(bottom) * g_team == -R_ROOK) return true;
     const auto [left2, right2] = cannon_9(get_bl9(pos), pos);
     const auto [top2, bottom2] = cannon_10(get_bl10(pos), pos);
-    if (left < 90 && piece_on(left) * g_team == -R_CANNON)
+    if (left < 90 && piece_on(left2) * g_team == -R_CANNON)
         return true;
     if (right2 < 90 && piece_on(right2) * g_team == -R_CANNON)
         return true;
@@ -338,6 +340,8 @@ bool legal_move(Move move)
 }
 
 // calculate whether a pos can be attacked by a current team piece
+// if a piece has multi protectors, then return one of them
+// and the it must be the last one to return a king that protects the piece
 POS get_protector(POS pos)
 {
     // pawn protector
@@ -393,14 +397,14 @@ POS get_protector(POS pos)
     const bool c1 = g_team == R && pos / 9 > 6 && pos % 9 > 2 && pos % 9 < 5;
     const bool c2 = g_team == B && pos / 9 < 3 && pos % 9 > 2 && pos % 9 < 5;
     if ((c1) || (c2)) {
-        if (piece_on(pos - 9) * g_team == R_KING) return pos - 9;
-        if (piece_on(pos + 9) * g_team == R_KING) return pos + 9;
-        if (piece_on(pos - 1) * g_team == R_KING) return pos - 1;
-        if (piece_on(pos + 1) * g_team == R_KING) return pos + 1;
         if (piece_on(pos - 10) * g_team == R_ADVISOR) return pos - 10;
         if (piece_on(pos - 8) * g_team == R_ADVISOR) return pos - 8;
         if (piece_on(pos + 10) * g_team == R_ADVISOR) return pos + 10;
         if (piece_on(pos + 8) * g_team == R_ADVISOR) return pos + 8;
+        if (piece_on(pos - 9) * g_team == R_KING) return pos - 9;
+        if (piece_on(pos + 9) * g_team == R_KING) return pos + 9;
+        if (piece_on(pos - 1) * g_team == R_KING) return pos - 1;
+        if (piece_on(pos + 1) * g_team == R_KING) return pos + 1;
     }
     return INVALID_POS;
 }
