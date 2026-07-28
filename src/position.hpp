@@ -236,6 +236,7 @@ bool in_check()
     const POS pos = g_team == R ? pos_list_r_[0] : pos_list_b_[0];
     assert(pos % 9 >= 3 && pos % 9 <= 5);
     assert((g_team == R && pos / 9 >= 7) || (g_team == B && pos / 9 <= 2));
+    assert(std::abs(piece_on(pos)) == R_KING);
     // is attacked by an enemy pawn
     if (piece_on(pos - 9 * g_team) * g_team == B_PAWN) return true;
     if (piece_on(pos - 1) * g_team == B_PAWN) return true;
@@ -285,7 +286,24 @@ bool legal_move(Move move)
     // piece not exists or opposite, or same-team attack
     if (g_team * piece_on(move.end) > 0 || p * g_team <= 0) return false;
     // specific piece legal judge
-    if (abs(p) == R_BISHOP) { // elephant eyes
+    if (abs(p) == R_KING) {
+        const int d = int(move.end) - int(move.beg);
+        if (d != 1 && d != -1 && d != 9 && d != -9) return false;
+        if (move.end % 9 < 3 || move.end % 9 > 5) return false;
+        if (p == R_KING && move.end / 9 < 7) return false;
+        if (p == B_KING && move.end / 9 > 2) return false;
+    } else if (abs(p) == R_ADVISOR) {
+        const int d = int(move.end) - int(move.beg);
+        if (d != 10 && d != -10 && d != 8 && d != -8) return false;
+        if (move.end != 13 && move.end != 76
+            && !(move.end % 9 >= 3 && move.end % 9 <= 5
+                && ((p == R_ADVISOR && move.end / 9 >= 7)
+                    || (p == B_ADVISOR && move.end / 9 <= 2))))
+            return false;
+        // must stay in own palace (no black advisor to 76 / red to 13)
+        if (p == R_ADVISOR && move.end / 9 < 7) return false;
+        if (p == B_ADVISOR && move.end / 9 > 2) return false;
+    } else if (abs(p) == R_BISHOP) { // elephant eyes
         const int d = move.end - move.beg;
         if (d == 20) {
             if (piece_on(move.beg + 10)) return false;

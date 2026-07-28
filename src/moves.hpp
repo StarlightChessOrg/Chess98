@@ -23,7 +23,7 @@ std::vector<Move> gen_king_(POS pos)
 template <bool G>
 std::vector<Move> gen_advisor_(POS pos)
 {
-    if (pos == 13 || pos == 76) { // black center
+    if (pos == 13 || pos == 76) { // center
         std::vector<Move> ret { };
         ret.reserve(4);
         if (teamcheck(pos - 10, G))
@@ -37,7 +37,7 @@ std::vector<Move> gen_advisor_(POS pos)
         return ret;
     } else if (pos < 24 && teamcheck(13, G)) { // black corner
         return { Move(pos, 13) };
-    } else if (teamcheck(76, G)) { // red corner
+    } else if (pos > 65 && teamcheck(76, G)) { // red corner
         return { Move(pos, 76) };
     }
     return { };
@@ -282,7 +282,8 @@ Move MovePicker::next()
 {
     if (status == STATUS_TT) {
         tt_move = tt_get_move(), status++;
-        if (!tt_move || abs(piece_on(tt_move.end)) == R_KING) return next();
+        if (!tt_move || abs(piece_on(tt_move.end)) == R_KING || !legal_move(tt_move))
+            return next();
         return tt_move;
     } else if (status == STATUS_GOOD_CAPTURES) {
         if (!generated) {
