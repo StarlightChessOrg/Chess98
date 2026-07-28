@@ -17,7 +17,8 @@ std::array<UINT16, 10> bl9_items_ { };
 
 void position_init(const MATRIX& board, TEAM team);
 std::vector<POS> get_pos_list();
-bool teamcheck(POS p, bool G);
+template <GENTYPE G>
+bool targetchk(POS p);
 PTYPE piece_on(POS p);
 UINT16 get_bl10(POS pos);
 UINT16 get_bl9(POS pos);
@@ -87,10 +88,19 @@ std::vector<POS> get_pos_list()
 }
 
 // return team differences based on wheter you want to gen captures or not
-bool teamcheck(POS p, bool G)
+template <GENTYPE G>
+bool targetchk(POS p)
 {
     if (p >= 90) return false;
-    return G ? g_team * g_board[p] < 0 : !g_board[p];
+    const PTYPE target = g_board[p];
+    if (std::abs(target) == R_KING) return false;
+    if constexpr (G == CAPTURE) {
+        return target * g_team < 0;
+    } else if constexpr (G == QUIET) {
+        return target == 0;
+    } else {
+        return target * g_team <= 0;
+    }
 }
 
 // get piece on pos

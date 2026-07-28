@@ -35,6 +35,7 @@ using SEARCH_RET = std::pair<Move, VL>;
 using TRICK_RET = std::pair<bool, VL>;
 using MATRIX = std::array<PTYPE, 90>;
 using PREGEN_TABLE = std::array<std::array<PREGEN_DATA, 1024>, 10>;
+using GENTYPE = std::uint8_t;
 
 constexpr POS INVALID_POS = 100;
 constexpr HASH_FLAG EXACT = 0;
@@ -76,13 +77,16 @@ constexpr int LMR_MIN_MOVES = 3;
 constexpr DEPTH LMR_BASE = 1;
 constexpr bool NODE_PV = false;
 constexpr bool NODE_CUT = true;
+constexpr GENTYPE QUIET = 0;
+constexpr GENTYPE CAPTURE = 1;
+constexpr GENTYPE ALL = 2;
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
-
 constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
 constexpr int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
 constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
 constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
+
 
 // timer
 struct Timer {

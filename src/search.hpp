@@ -69,7 +69,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
     MovePicker mp { depth };
     int move_num { 0 };
     for (Move move = mp.next(); move; move = mp.next(), move_num++) {
-        assert(abs(g_board[move.end]) != R_KING && g_board[move.beg] != 0);
+        assert(std::abs(g_board[move.end]) != R_KING && g_board[move.beg] != 0);
         const PTYPE capture = piece_on(move.end);
 
         position_move(move), distance_++;

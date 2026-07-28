@@ -26,12 +26,16 @@ void history_set(Move move, TEAM team, DEPTH depth)
     }
 }
 
-// sort moves via history table
+// sort moves via history table (stable tie-break on squares)
 void history_sort(std::vector<Move>& moves, TEAM team)
 {
     const auto& t = team == R ? history_table_r_ : history_table_b_;
     std::sort(moves.begin(), moves.end(), [&](Move a, Move b) {
-        return t[a.beg][a.end] > t[b.beg][b.end];
+        const UINT32 ha = t[a.beg][a.end];
+        const UINT32 hb = t[b.beg][b.end];
+        if (ha != hb) return ha > hb;
+        if (a.beg != b.beg) return a.beg < b.beg;
+        return a.end < b.end;
     });
 }
 
@@ -125,14 +129,18 @@ bool see_ge(Move move, VL /*threshold*/)
     return !protected_;
 }
 
-// sort the moves via MVV-LVA
+// sort the moves via MVV-LVA (stable tie-break on squares)
 void mvvlva_sort(std::vector<Move>& move_list)
 {
     std::sort(move_list.begin(), move_list.end(), [](Move a, Move b) {
-        const VL a_beg = WEIGHTS[abs(piece_on(a.beg))];
-        const VL a_end = WEIGHTS[abs(piece_on(a.end))];
-        const VL b_beg = WEIGHTS[abs(piece_on(b.beg))];
-        const VL b_end = WEIGHTS[abs(piece_on(b.end))];
-        return a_beg - a_end < b_beg - b_end;
+        const VL a_beg = WEIGHTS[std::size_t(std::abs(piece_on(a.beg)))];
+        const VL a_end = WEIGHTS[std::size_t(std::abs(piece_on(a.end)))];
+        const VL b_beg = WEIGHTS[std::size_t(std::abs(piece_on(b.beg)))];
+        const VL b_end = WEIGHTS[std::size_t(std::abs(piece_on(b.end)))];
+        const VL sa = VL(a_beg - a_end);
+        const VL sb = VL(b_beg - b_end);
+        if (sa != sb) return sa < sb;
+        if (a.beg != b.beg) return a.beg < b.beg;
+        return a.end < b.end;
     });
 }
