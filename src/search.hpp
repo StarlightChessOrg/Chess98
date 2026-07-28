@@ -161,7 +161,6 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
         mvvlva_sort(moves);
     }
     for (const Move move : moves) {
-        if (abs(piece_on(move.end)) == R_KING) continue;
         if (!checking) {
             // delta: even winning the piece for free cannot raise alpha
             if (vlbest + q_capture_gain_(move) + Q_DELTA_MARGIN <= a) continue;
