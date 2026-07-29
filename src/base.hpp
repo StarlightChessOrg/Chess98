@@ -63,10 +63,8 @@ constexpr VL INVALID_VL = -31000;
 constexpr VL FP_MARGIN = 120;
 constexpr HASH SIDE_KEY = 7655453740479314502;
 constexpr MovePickerStatus STATUS_TT = 0;
-constexpr MovePickerStatus STATUS_GOOD_CAPTURES = 1;
-constexpr MovePickerStatus STATUS_KILLER = 2;
-constexpr MovePickerStatus STATUS_QUIET = 3;
-constexpr MovePickerStatus STATUS_BAD_CAPTURES = 4;
+constexpr MovePickerStatus STATUS_KILLER = 1;
+constexpr MovePickerStatus STATUS_MOVES = 2;
 constexpr DEPTH Q_MAX_DISTANCE = 8;
 constexpr DEPTH Q_CHECKING_DEPTH = 4;
 constexpr VL Q_DELTA_MARGIN = 80;
@@ -119,8 +117,8 @@ struct Move {
     std::uint8_t end { 0 };
     Move() = default;
     Move(int beg, int end) : beg(beg), end(end) { }
-    bool operator==(Move m) { return beg == m.beg && end == m.end; }
-    bool operator!=(Move m) { return beg != m.beg || end != m.end; }
+    bool operator==(Move m) const { return beg == m.beg && end == m.end; }
+    bool operator!=(Move m) const { return beg != m.beg || end != m.end; }
     operator bool() { return beg != end; }
     operator int() { return beg * 100 + end; }
 };

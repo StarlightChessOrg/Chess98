@@ -236,8 +236,7 @@ std::vector<Move> gen_all_moves()
     return gen_moves_<ALL>();
 }
 
-// Staged move picker (no SEE split):
-// TT -> captures (MVV-LVA) -> killers -> quiets (history)
+// move picker
 class MovePicker {
     DEPTH depth { 0 };
     MovePickerStatus status { STATUS_TT };
@@ -248,32 +247,17 @@ class MovePicker {
     bool generated { false };
 
 public:
-    explicit MovePicker(DEPTH d) : depth(d) { }
+    MovePicker(DEPTH d) : depth(d) { }
     Move next();
 };
 
+// get next move
 Move MovePicker::next()
 {
     if (status == STATUS_TT) {
         tt_move = tt_get_move();
-        status = STATUS_GOOD_CAPTURES;
-        if (tt_move && legal_move(tt_move)) return tt_move;
-        return next();
-    } else if (status == STATUS_GOOD_CAPTURES) {
-        if (!generated) {
-            moves = gen_all_capture_moves();
-            mvvlva_sort(moves);
-            generated = true;
-            i = 0;
-        }
-        while (i < moves.size()) {
-            Move m = moves[i++];
-            if (m == tt_move) continue;
-            return m;
-        }
-        generated = false;
-        i = 0;
         status = STATUS_KILLER;
+        if (tt_move && legal_move(tt_move)) return tt_move;
         return next();
     } else if (status == STATUS_KILLER) {
         if (!generated) {
@@ -284,29 +268,32 @@ Move MovePicker::next()
         while (i < killers.size()) {
             Move m = killers[i++];
             if (!m || m == tt_move) continue;
-            if (piece_on(m.end)) continue; // captures already yielded
+            if (piece_on(m.end)) continue;
             if (!legal_move(m)) continue;
             return m;
         }
         generated = false;
         i = 0;
-        status = STATUS_QUIET;
+        status = STATUS_MOVES;
         return next();
-    } else if (status == STATUS_QUIET) {
+    } else if (status == STATUS_MOVES) {
         if (!generated) {
-            moves = gen_all_quiet_moves();
-            history_sort(moves, g_team);
+            moves = gen_all_capture_moves();
+            mvvlva_sort(moves);
+            std::vector<Move> quiets = gen_all_quiet_moves();
+            history_sort(quiets, g_team);
+            moves.insert(moves.end(), quiets.begin(), quiets.end());
             generated = true;
             i = 0;
         }
         while (i < moves.size()) {
             Move m = moves[i++];
-            if (m == tt_move || m == killers[0] || m == killers[1]) continue;
+            if (m == tt_move) continue;
+            if (!piece_on(m.end) && (m == killers[0] || m == killers[1]))
+                continue;
             return m;
         }
-        status = STATUS_BAD_CAPTURES;
         return Move { };
     }
-
     return Move { };
 }
