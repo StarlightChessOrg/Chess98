@@ -17,19 +17,13 @@ This project is being refactored now...
 - [x] move picker
 - [x] basic evaluation
 - [x] search
-- [ ] search: filter self-check in main search (not only qsearch)
-- [x] search: LMR (late move reductions)
-- [ ] search: check extensions (temporarily disabled)
-- [ ] search: IID when no TT move
-- [ ] search: countermove / continuation history
-- [ ] search: ProbCut / singular extensions (later)
 - [ ] ucci
 
 ## Progress
 
 The progress is measured under MSVC Release Compilation:
 
-- position: from shit to excellence
+- position: enhanced position structure
 - heuristic: the simplified styles
-- movegen: 239017 -> 847821 ~3x faster than it used to be
+- movegen: 239017 -> 1292404 ~5.4x faster than it used to be
 - movepicker: more optimized than the past all-in-one move generation
