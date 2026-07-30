@@ -99,14 +99,17 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
             vl = -search_vl_(normal_depth, -b, -a, NODE_PV, false, gives_check);
         } else if (is_cut) {
             vl = -search_vl_(lmr_depth, -b, -b + 1, NODE_CUT, ban_null, gives_check);
-            if (reduction && vl >= b)
+            if (reduction && vl >= b) {
                 vl = -search_vl_(normal_depth, -b, -b + 1, NODE_CUT, ban_null, gives_check);
+            }
         } else {
             vl = -search_vl_(lmr_depth, -a - 1, -a, NODE_CUT, false, gives_check);
-            if (reduction && vl > a)
+            if (reduction && vl > a) {
                 vl = -search_vl_(normal_depth, -a - 1, -a, NODE_CUT, false, gives_check);
-            if (a < vl && vl < b)
+            }
+            if (a < vl && vl < b) {
                 vl = -search_vl_(normal_depth, -b, -a, NODE_PV, false, gives_check);
+            }
         }
 
         position_undo(), distance_--;
@@ -199,13 +202,7 @@ void mark_checking_move_(bool checking)
 // TODO: implement a safer detection
 bool null_okay_()
 {
-    for (const POS p : get_pos_list()) {
-        const int t = std::abs(piece_on(p));
-        if (t == R_ROOK || t == R_CANNON || t == R_KNIGHT || t == R_PAWN) {
-            return true;
-        }
-    }
-    return false;
+    return get_pos_list().size() > 8;
 }
 
 // rough capture gain for delta pruning (SEE weights scaled toward eval units)
