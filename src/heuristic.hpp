@@ -48,6 +48,7 @@ void killer_init()
 // set a killer move for a depth to the table
 void killer_set(Move move, DEPTH d)
 {
+    if (move == killer_table_[d][0]) return;
     killer_table_[d][1] = killer_table_[d][0];
     killer_table_[d][0] = move;
 }

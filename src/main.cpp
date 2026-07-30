@@ -37,6 +37,7 @@ int main()
     history_init();
     killer_init();
     tt_init();
+    move_preformance_test();
     search_test();
     return 0;
 }

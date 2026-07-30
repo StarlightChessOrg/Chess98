@@ -236,77 +236,41 @@ std::vector<Move> gen_all_moves()
     return gen_moves_<ALL>();
 }
 
-// Staged move picker (no SEE split):
-// TT -> captures (MVV-LVA) -> killers -> quiets (history)
+// move picker
 class MovePicker {
-    DEPTH depth { 0 };
-    MovePickerStatus status { STATUS_TT };
-    Move tt_move { };
-    std::array<Move, 2> killers { };
+    std::array<Move, 3> starts { };
     std::vector<Move> moves { };
-    std::size_t i { 0 };
-    bool generated { false };
+    int i { 0 };
 
 public:
-    explicit MovePicker(DEPTH d) : depth(d) { }
-    Move next();
-};
-
-Move MovePicker::next()
-{
-    if (status == STATUS_TT) {
-        tt_move = tt_get_move();
-        status = STATUS_GOOD_CAPTURES;
-        if (tt_move && legal_move(tt_move)) return tt_move;
-        return next();
-    } else if (status == STATUS_GOOD_CAPTURES) {
-        if (!generated) {
-            moves = gen_all_capture_moves();
-            mvvlva_sort(moves);
-            generated = true;
-            i = 0;
-        }
-        while (i < moves.size()) {
-            Move m = moves[i++];
-            if (m == tt_move) continue;
-            return m;
-        }
-        generated = false;
-        i = 0;
-        status = STATUS_KILLER;
-        return next();
-    } else if (status == STATUS_KILLER) {
-        if (!generated) {
-            killers = killer_get(depth);
-            generated = true;
-            i = 0;
-        }
-        while (i < killers.size()) {
-            Move m = killers[i++];
-            if (!m || m == tt_move) continue;
-            if (piece_on(m.end)) continue; // captures already yielded
-            if (!legal_move(m)) continue;
-            return m;
-        }
-        generated = false;
-        i = 0;
-        status = STATUS_QUIET;
-        return next();
-    } else if (status == STATUS_QUIET) {
-        if (!generated) {
-            moves = gen_all_quiet_moves();
-            history_sort(moves, g_team);
-            generated = true;
-            i = 0;
-        }
-        while (i < moves.size()) {
-            Move m = moves[i++];
-            if (m == tt_move || m == killers[0] || m == killers[1]) continue;
-            return m;
-        }
-        status = STATUS_BAD_CAPTURES;
-        return Move { };
+    MovePicker(DEPTH depth)
+    {
+        const auto killers = killer_get(depth);
+        starts[0] = tt_get_move();
+        starts[1] = killers[0] != starts[0] ? killers[0] : Move { };
+        starts[2] = killers[1] != starts[0] ? killers[1] : Move { };
     }
 
-    return Move { };
-}
+    Move next()
+    {
+        if (i == 0) { // tt
+            return starts[0] ? (i++, starts[0]) : (i++, next());
+        } else if (i > 0) { // killer
+            if (i == 3) {
+                moves = gen_all_moves();
+                //  history_sort(moves, g_team);
+                return moves.empty() ? Move { } : (i = -1, next());
+            }
+            if (starts[i] && starts[i] != starts[0] && legal_move(starts[i])) {
+                return starts[i++];
+            } else {
+                return (i++, next());
+            }
+        } else if (size_t(-i - 1) < moves.size()) { // normal
+            const Move m = moves[size_t(-i - 1)];
+            const bool c = m != starts[0] && m != starts[1] && m != starts[2];
+            return c ? (i--, m) : (i--, next());
+        }
+        return Move { };
+    }
+};

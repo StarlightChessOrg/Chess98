@@ -293,8 +293,9 @@ bool in_check()
 bool legal_move(Move move)
 {
     const PTYPE p = piece_on(move.beg);
-    // piece not exists or opposite, or same-team attack
+    // piece not exists or opposite, or same-team attack, or eat the king
     if (g_team * piece_on(move.end) > 0 || p * g_team <= 0) return false;
+    if (std::abs(piece_on(move.end)) == R_KING) return false;
     // specific piece legal judge
     if (abs(p) == R_KING) {
         const int d = int(move.end) - int(move.beg);
@@ -368,8 +369,7 @@ bool legal_move(Move move)
 }
 
 // calculate whether a pos can be attacked by a current team piece
-// if a piece has multi protectors, then return one of them
-// and the it must be the last one to return a king that protects the piece
+// if a piece has multi protectors, return the least valuable one (LVA order)
 POS get_protector(POS pos)
 {
     // pawn protector
@@ -377,6 +377,24 @@ POS get_protector(POS pos)
     if ((pos / 9 < 5 && g_team == R) || (pos / 9 > 4 && g_team == B)) {
         if (piece_on(pos - 1) * g_team == R_PAWN) return pos - 1;
         if (piece_on(pos + 1) * g_team == R_PAWN) return pos + 1;
+    }
+    // advisor protector
+    const bool c1 = g_team == R && pos / 9 > 6 && pos % 9 > 2 && pos % 9 < 5;
+    const bool c2 = g_team == B && pos / 9 < 3 && pos % 9 > 2 && pos % 9 < 5;
+    if ((c1) || (c2)) {
+        if (piece_on(pos - 10) * g_team == R_ADVISOR) return pos - 10;
+        if (piece_on(pos - 8) * g_team == R_ADVISOR) return pos - 8;
+        if (piece_on(pos + 10) * g_team == R_ADVISOR) return pos + 10;
+        if (piece_on(pos + 8) * g_team == R_ADVISOR) return pos + 8;
+    }
+    // bishop protector
+    if (g_team == R && pos / 9 > 4 || g_team == B && pos / 9 < 5) {
+        if (!piece_on(pos - 10) && piece_on(pos - 20) * g_team == R_BISHOP)
+            return pos - 20;
+        if (!piece_on(pos - 8) && piece_on(pos - 16) * g_team == R_BISHOP)
+            return pos - 16;
+        if (piece_on(pos + 20) * g_team == R_BISHOP) return pos + 20;
+        if (piece_on(pos + 16) * g_team == R_BISHOP) return pos + 16;
     }
     // knight protector
     if (!piece_on(pos - 10)) {
@@ -395,13 +413,9 @@ POS get_protector(POS pos)
         if (piece_on(pos - 17) * g_team == R_KNIGHT) return pos - 17;
         if (piece_on(pos - 7) * g_team == R_KNIGHT) return pos - 7;
     }
-    // rook or cannon protector
+    // cannon then rook (LVA: cannon cheaper than rook)
     const auto [left, right] = rook_9(get_bl9(pos), pos);
     const auto [top, bottom] = rook_10(get_bl10(pos), pos);
-    if (piece_on(left) * g_team == R_ROOK) return left;
-    if (piece_on(right) * g_team == R_ROOK) return right;
-    if (piece_on(top) * g_team == R_ROOK) return top;
-    if (piece_on(bottom) * g_team == R_ROOK) return bottom;
     const auto [left2, right2] = cannon_9(get_bl9(pos), pos);
     const auto [top2, bottom2] = cannon_10(get_bl10(pos), pos);
     if (left < 90 && piece_on(left2) * g_team == R_CANNON)
@@ -412,23 +426,12 @@ POS get_protector(POS pos)
         return top2;
     if (bottom2 < 90 && piece_on(bottom2) * g_team == R_CANNON)
         return bottom2;
-    // bishop protector
-    if (g_team == R && pos / 9 > 4 || g_team == B && pos / 9 < 5) {
-        if (!piece_on(pos - 10) && piece_on(pos - 20) * g_team == R_BISHOP)
-            return pos - 20;
-        if (!piece_on(pos - 8) && piece_on(pos - 16) * g_team == R_BISHOP)
-            return pos - 16;
-        if (piece_on(pos + 20) * g_team == R_BISHOP) return pos + 20;
-        if (piece_on(pos + 16) * g_team == R_BISHOP) return pos + 16;
-    }
-    // king or advisor protector
-    const bool c1 = g_team == R && pos / 9 > 6 && pos % 9 > 2 && pos % 9 < 5;
-    const bool c2 = g_team == B && pos / 9 < 3 && pos % 9 > 2 && pos % 9 < 5;
+    if (piece_on(left) * g_team == R_ROOK) return left;
+    if (piece_on(right) * g_team == R_ROOK) return right;
+    if (piece_on(top) * g_team == R_ROOK) return top;
+    if (piece_on(bottom) * g_team == R_ROOK) return bottom;
+    // king protector (last)
     if ((c1) || (c2)) {
-        if (piece_on(pos - 10) * g_team == R_ADVISOR) return pos - 10;
-        if (piece_on(pos - 8) * g_team == R_ADVISOR) return pos - 8;
-        if (piece_on(pos + 10) * g_team == R_ADVISOR) return pos + 10;
-        if (piece_on(pos + 8) * g_team == R_ADVISOR) return pos + 8;
         if (piece_on(pos - 9) * g_team == R_KING) return pos - 9;
         if (piece_on(pos + 9) * g_team == R_KING) return pos + 9;
         if (piece_on(pos - 1) * g_team == R_KING) return pos - 1;
