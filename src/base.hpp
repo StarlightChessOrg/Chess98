@@ -81,7 +81,6 @@ constexpr int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
 constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
 constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
 
-
 // timer
 struct Timer {
     std::chrono::steady_clock::time_point beg { };

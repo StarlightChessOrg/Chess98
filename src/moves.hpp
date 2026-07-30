@@ -237,40 +237,49 @@ std::vector<Move> gen_all_moves()
 }
 
 // move picker
-// move picker
+// tt -> killer -> capture -> quiet
 class MovePicker {
     std::array<Move, 3> starts { };
     std::vector<Move> moves { };
     int i { 0 };
 
+    static void order_rest_(std::vector<Move>& moves)
+    {
+        auto mid = std::partition(moves.begin(), moves.end(), [](Move m) {
+            return piece_on(m.end) != 0;
+        });
+        mvvlva_sort(moves.begin(), mid);
+        history_sort(mid, moves.end(), g_team); 
+    }
+
 public:
     MovePicker(DEPTH depth)
     {
         const auto killers = killer_get(depth);
+        const bool c1 = killers[0] && killers[0] != starts[0];
+        const bool c2 = killers[0] && killers[0] != starts[0];
         starts[0] = tt_get_move();
-        starts[1] = killers[0] != starts[0] ? killers[0] : Move { };
-        starts[2] = killers[1] != starts[0] ? killers[1] : Move { };
+        starts[1] = c1 && legal_move(killers[0]) ? killers[0] : Move { };
+        starts[2] = c2 && legal_move(killers[1]) ? killers[1] : Move { };
     }
 
     Move next()
     {
-        if (i == 0) { // tt
-            return starts[0] ? (i++, starts[0]) : (i++, next());
-        } else if (i > 0) { // killer
-            if (i == 3) {
-                moves = gen_all_moves();
-                // history_sort(moves, g_team);
-                return moves.empty() ? Move { } : (i = -1, next());
-            }
-            if (starts[i] && starts[i] != starts[0] && legal_move(starts[i])) {
-                return starts[i++];
-            } else {
-                return (i++, next());
-            }
-        } else if (size_t(-i - 1) < moves.size()) { // normal
-            const Move m = moves[size_t(-i - 1)];
-            const bool c = m != starts[0] && m != starts[1] && m != starts[2];
-            return c ? (i--, m) : (i--, next());
+        if (i >= 0 && i < 3) {
+            const Move m = starts[size_t(i++)];
+            return m ? m : next();
+        }
+        if (i == 3) {
+            moves = gen_all_moves();
+            order_rest_(moves);
+            i = -1;
+            return next();
+        }
+        const int idx = -i - 1;
+        if (idx < int(moves.size())) {
+            const Move m = moves[size_t(idx)];
+            const bool c = m == starts[0] || m == starts[1] || m == starts[2];
+            return (i--, c) ? next() : m;
         }
         return Move { };
     }
