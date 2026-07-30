@@ -28,7 +28,6 @@ using TEAM = std::int8_t;
 using DEPTH = std::uint8_t;
 using VL = std::int16_t;
 using HASH = std::int64_t;
-using MovePickerStatus = std::uint8_t;
 using PREGEN_DATA = std::uint8_t;
 using HASH_FLAG = std::int8_t;
 using SEARCH_RET = std::pair<Move, VL>;
@@ -60,12 +59,9 @@ constexpr TEAM B = -1;
 constexpr VL INF = 30000;
 constexpr VL BAN = 20000;
 constexpr VL INVALID_VL = -31000;
-constexpr VL FP_MARGIN = 120;
 constexpr HASH SIDE_KEY = 7655453740479314502;
-constexpr MovePickerStatus STATUS_TT = 0;
-constexpr MovePickerStatus STATUS_KILLER = 1;
-constexpr MovePickerStatus STATUS_MOVES = 2;
 constexpr DEPTH Q_MAX_DISTANCE = 8;
+constexpr VL FP_MARGIN = 120;
 constexpr DEPTH Q_CHECKING_DEPTH = 4;
 constexpr VL Q_DELTA_MARGIN = 80;
 constexpr DEPTH NULL_MOVE_R = 2;
@@ -73,11 +69,11 @@ constexpr DEPTH NULL_MOVE_MIN_DEPTH = 3;
 constexpr DEPTH LMR_MIN_DEPTH = 3;
 constexpr int LMR_MIN_MOVES = 3;
 constexpr DEPTH LMR_BASE = 1;
-constexpr bool NODE_PV = false;
-constexpr bool NODE_CUT = true;
 constexpr GENTYPE QUIET = 0;
 constexpr GENTYPE CAPTURE = 1;
 constexpr GENTYPE ALL = 2;
+constexpr bool NODE_PV = false;
+constexpr bool NODE_CUT = true;
 constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
 constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
@@ -119,8 +115,8 @@ struct Move {
     Move(int beg, int end) : beg(beg), end(end) { }
     bool operator==(Move m) const { return beg == m.beg && end == m.end; }
     bool operator!=(Move m) const { return beg != m.beg || end != m.end; }
-    operator bool() { return beg != end; }
-    operator int() { return beg * 100 + end; }
+    operator bool() const { return beg != end; }
+    operator int() const { return beg * 100 + end; }
 };
 
 // tt entry

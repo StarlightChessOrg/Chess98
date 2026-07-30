@@ -259,7 +259,7 @@ public:
         } else if (i > 0) { // killer
             if (i == 3) {
                 moves = gen_all_moves();
-                //  history_sort(moves, g_team);
+                // history_sort(moves, g_team);
                 return moves.empty() ? Move { } : (i = -1, next());
             }
             if (starts[i] && starts[i] != starts[0] && legal_move(starts[i])) {

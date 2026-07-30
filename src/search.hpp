@@ -41,6 +41,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
     const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
     if (vlhash != INVALID_VL) return vlhash;
 
+    // non-checking available tricks
     if (!checking) {
         // futility pruning
         const VL vl = evaluate();
