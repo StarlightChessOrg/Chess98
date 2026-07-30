@@ -237,6 +237,7 @@ std::vector<Move> gen_all_moves()
 }
 
 // move picker
+// move picker
 class MovePicker {
     std::array<Move, 3> starts { };
     std::vector<Move> moves { };
