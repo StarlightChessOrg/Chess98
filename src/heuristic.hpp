@@ -6,7 +6,7 @@ std::array<std::array<UINT32, 90>, 90> history_table_r_ { };
 std::array<std::array<UINT32, 90>, 90> history_table_b_ { };
 std::array<std::array<Move, 2>, 128> killer_table_ { };
 std::vector<TTEntry> tt_table_ { };
-int tt_size_ { 0 };
+std::uint32_t tt_size_ { 0 };
 std::uint32_t tt_mask_ { 0 };
 
 // init the history table
