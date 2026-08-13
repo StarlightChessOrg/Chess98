@@ -212,19 +212,6 @@ void position_move(Move move)
     g_team = -g_team;
 }
 
-// null move: pass the turn (no piece change; hash side-bit only)
-void position_do_null()
-{
-    g_hashkey ^= SIDE_KEY;
-    g_team = -g_team;
-}
-
-void position_undo_null()
-{
-    g_team = -g_team;
-    g_hashkey ^= SIDE_KEY;
-}
-
 // undo move
 void position_undo()
 {
@@ -267,6 +254,19 @@ void position_undo()
     g_board[move.beg] = g_board[move.end];
     g_board[move.end] = captured;
     g_team = -g_team;
+}
+
+// null move: pass the turn (no piece change; hash side-bit only)
+void position_do_null()
+{
+    g_hashkey ^= SIDE_KEY;
+    g_team = -g_team;
+}
+
+void position_undo_null()
+{
+    g_team = -g_team;
+    g_hashkey ^= SIDE_KEY;
 }
 
 // judge whether current position is in check (include face-kings)
