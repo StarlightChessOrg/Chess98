@@ -329,16 +329,7 @@ std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
     return get_bl_banner_points<false, false>(bl10, p);
 }
 
-// ============================================================================
-// piece-square tables (red perspective), pure data for the evaluation
-//
-// board index: pos = row * 9 + col, row 0 = black home rank (top),
-// row 9 = red home rank (bottom). red pieces index the tables directly,
-// black pieces use the vertical mirror (89 - pos). values include material,
-// mg/eg pairs are tapered by game phase (only R/N/C feed the phase).
-// ============================================================================
-
-// material baselines: A 120, B 120, N 270, C 300, R 600, P 30~180
+// evaluation
 constexpr std::array<VL, 8> PIECE_VALUE_ { 0, 0, 120, 120, 270, 600, 300, 30 };
 
 constexpr std::array<VL, 90> PST_ADVISOR_ {
@@ -367,7 +358,7 @@ constexpr std::array<VL, 90> PST_BISHOP_ {
     0, 0, 120, 0, 0, 0, 120, 0, 0
 };
 
-constexpr std::array<VL, 90> PST_PAWN_MG_ {
+constexpr std::array<VL, 90> PST_PAWN_ {
     70, 70, 80, 120, 150, 120, 80, 70, 70,
     80, 80, 90, 130, 160, 130, 90, 80, 80,
     70, 75, 85, 120, 150, 120, 85, 75, 70,
@@ -380,20 +371,7 @@ constexpr std::array<VL, 90> PST_PAWN_MG_ {
     0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-constexpr std::array<VL, 90> PST_PAWN_EG_ {
-    80, 80, 95, 140, 170, 140, 95, 80, 80,
-    95, 95, 105, 150, 180, 150, 105, 95, 95,
-    85, 90, 100, 140, 170, 140, 100, 90, 85,
-    70, 75, 85, 105, 120, 105, 85, 75, 70,
-    60, 65, 75, 90, 100, 90, 75, 65, 60,
-    35, 40, 40, 45, 55, 45, 40, 40, 35,
-    30, 30, 35, 40, 45, 40, 35, 30, 30,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-constexpr std::array<VL, 90> PST_KNIGHT_MG_ {
+constexpr std::array<VL, 90> PST_KNIGHT_ {
     250, 255, 260, 265, 260, 265, 260, 255, 250,
     255, 265, 275, 280, 275, 280, 275, 265, 255,
     260, 275, 285, 290, 285, 290, 285, 275, 260,
@@ -406,20 +384,7 @@ constexpr std::array<VL, 90> PST_KNIGHT_MG_ {
     240, 260, 270, 280, 270, 280, 270, 260, 240
 };
 
-constexpr std::array<VL, 90> PST_KNIGHT_EG_ {
-    260, 265, 270, 270, 270, 270, 270, 265, 260,
-    265, 270, 275, 278, 278, 278, 275, 270, 265,
-    268, 275, 280, 282, 282, 282, 280, 275, 268,
-    270, 278, 282, 285, 285, 285, 282, 278, 270,
-    270, 278, 282, 285, 285, 285, 282, 278, 270,
-    270, 278, 282, 285, 285, 285, 282, 278, 270,
-    268, 275, 280, 282, 282, 282, 280, 275, 268,
-    265, 272, 278, 280, 280, 280, 278, 272, 265,
-    262, 270, 275, 278, 278, 278, 275, 270, 262,
-    260, 268, 272, 275, 275, 275, 272, 268, 260
-};
-
-constexpr std::array<VL, 90> PST_ROOK_MG_ {
+constexpr std::array<VL, 90> PST_ROOK_ {
     610, 620, 620, 630, 640, 630, 620, 620, 610,
     615, 625, 625, 635, 645, 635, 625, 625, 615,
     610, 620, 620, 630, 640, 630, 620, 620, 610,
@@ -432,20 +397,7 @@ constexpr std::array<VL, 90> PST_ROOK_MG_ {
     590, 600, 600, 610, 615, 610, 600, 600, 590
 };
 
-constexpr std::array<VL, 90> PST_ROOK_EG_ {
-    600, 605, 605, 610, 615, 610, 605, 605, 600,
-    600, 605, 605, 610, 615, 610, 605, 605, 600,
-    600, 605, 605, 610, 615, 610, 605, 605, 600,
-    600, 605, 605, 610, 615, 610, 605, 605, 600,
-    598, 602, 602, 608, 612, 608, 602, 602, 598,
-    598, 602, 602, 608, 612, 608, 602, 602, 598,
-    595, 600, 600, 605, 610, 605, 600, 600, 595,
-    595, 600, 600, 605, 610, 605, 600, 600, 595,
-    595, 600, 600, 605, 610, 605, 600, 600, 595,
-    590, 595, 595, 600, 605, 600, 595, 595, 590
-};
-
-constexpr std::array<VL, 90> PST_CANNON_MG_ {
+constexpr std::array<VL, 90> PST_CANNON_ {
     300, 300, 305, 310, 315, 310, 305, 300, 300,
     300, 300, 305, 310, 315, 310, 305, 300, 300,
     295, 295, 300, 305, 315, 305, 300, 295, 295,
@@ -458,48 +410,17 @@ constexpr std::array<VL, 90> PST_CANNON_MG_ {
     285, 290, 290, 295, 295, 295, 290, 290, 285
 };
 
-constexpr std::array<VL, 90> PST_CANNON_EG_ {
-    295, 295, 298, 300, 302, 300, 298, 295, 295,
-    295, 295, 298, 300, 302, 300, 298, 295, 295,
-    292, 292, 295, 298, 300, 298, 295, 292, 292,
-    292, 292, 295, 298, 300, 298, 295, 292, 292,
-    290, 290, 292, 295, 298, 295, 292, 290, 290,
-    290, 290, 292, 295, 298, 295, 292, 290, 290,
-    290, 290, 292, 295, 298, 295, 292, 290, 290,
-    288, 288, 290, 292, 295, 292, 290, 288, 288,
-    288, 288, 290, 292, 295, 292, 290, 288, 288,
-    285, 285, 288, 290, 292, 290, 288, 285, 285
-};
-
-// phase weights: only majors feed the game phase (2R+2N+2C per side -> 32)
-constexpr int PHASE_W_ROOK_ = 4;
-constexpr int PHASE_W_KNIGHT_ = 2;
-constexpr int PHASE_W_CANNON_ = 2;
-constexpr int PHASE_MAX_TOTAL_ = 32;
-
-constexpr int eval_tid_(TEAM team) { return team == R ? 0 : 1; }
-
-constexpr int phase_w_(int abs_type)
-{
-    switch (abs_type) {
-    case R_ROOK: return PHASE_W_ROOK_;
-    case R_KNIGHT: return PHASE_W_KNIGHT_;
-    case R_CANNON: return PHASE_W_CANNON_;
-    default: return 0;
-    }
-}
-
-// tapered pst pair {mg, eg} of one piece; pos is the board square
-std::pair<int, int> pst_of_(TEAM team, int abs_type, POS pos)
+// pst of one piece; pos is the board square (red minus black is applied by caller)
+VL pst_of_(TEAM team, PTYPE abs_type, POS pos)
 {
     const POS sq = team == R ? pos : POS(89 - pos);
     switch (abs_type) {
-    case R_ADVISOR: return { PST_ADVISOR_[sq], PST_ADVISOR_[sq] };
-    case R_BISHOP: return { PST_BISHOP_[sq], PST_BISHOP_[sq] };
-    case R_KNIGHT: return { PST_KNIGHT_MG_[sq], PST_KNIGHT_EG_[sq] };
-    case R_ROOK: return { PST_ROOK_MG_[sq], PST_ROOK_EG_[sq] };
-    case R_CANNON: return { PST_CANNON_MG_[sq], PST_CANNON_EG_[sq] };
-    case R_PAWN: return { PST_PAWN_MG_[sq], PST_PAWN_EG_[sq] };
-    default: return { 0, 0 };
+    case R_ADVISOR: return PST_ADVISOR_[sq];
+    case R_BISHOP: return PST_BISHOP_[sq];
+    case R_KNIGHT: return PST_KNIGHT_[sq];
+    case R_ROOK: return PST_ROOK_[sq];
+    case R_CANNON: return PST_CANNON_[sq];
+    case R_PAWN: return PST_PAWN_[sq];
+    default: return 0;
     }
 }

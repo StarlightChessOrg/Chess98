@@ -4,6 +4,7 @@
 MATRIX g_board { };
 TEAM g_team { };
 HASH g_hashkey { };
+VL g_evaluation { };
 std::vector<bool> g_history_checkings { };
 std::vector<Move> history_moves_ { };
 std::vector<PTYPE> history_captures_ { };
@@ -14,12 +15,6 @@ std::array<PID, 90> pos_pid_r_ { };
 std::array<PID, 90> pos_pid_b_ { };
 std::array<UINT16, 9> bl10_items_ { };
 std::array<UINT16, 10> bl9_items_ { };
-
-// incremental evaluation accumulators (derived position state, like the
-// hash key), index 0 = red, 1 = black; maintained by the move/undo code
-std::array<int, 2> eval_mg_ { };
-std::array<int, 2> eval_eg_ { };
-int eval_phase_ { 0 };
 
 void position_init(const MATRIX& board, TEAM team);
 std::vector<POS> get_pos_list();
@@ -39,38 +34,22 @@ POS get_protector(POS pos);
 bool is_repeat();
 
 // reset the evaluation accumulators
-void eval_reset_()
-{
-    eval_mg_ = { };
-    eval_eg_ = { };
-    eval_phase_ = 0;
-}
+void eval_reset_() { g_evaluation = 0; }
 
 void eval_add_piece_(TEAM team, PTYPE p, POS pos)
 {
-    const auto [mg, eg] = pst_of_(team, std::abs(p), pos);
-    const int id = eval_tid_(team);
-    eval_mg_[id] += mg;
-    eval_eg_[id] += eg;
-    eval_phase_ += phase_w_(std::abs(p));
+    g_evaluation = VL(g_evaluation + team * pst_of_(team, std::abs(p), pos));
 }
 
 void eval_remove_piece_(TEAM team, PTYPE p, POS pos)
 {
-    const auto [mg, eg] = pst_of_(team, std::abs(p), pos);
-    const int id = eval_tid_(team);
-    eval_mg_[id] -= mg;
-    eval_eg_[id] -= eg;
-    eval_phase_ -= phase_w_(std::abs(p));
+    g_evaluation = VL(g_evaluation - team * pst_of_(team, std::abs(p), pos));
 }
 
 void eval_slide_piece_(TEAM team, PTYPE p, POS from, POS to)
 {
-    const auto a = pst_of_(team, std::abs(p), from);
-    const auto b = pst_of_(team, std::abs(p), to);
-    const int id = eval_tid_(team);
-    eval_mg_[id] += b.first - a.first;
-    eval_eg_[id] += b.second - a.second;
+    g_evaluation = VL(g_evaluation
+        + team * (pst_of_(team, std::abs(p), to) - pst_of_(team, std::abs(p), from)));
 }
 
 // init global position

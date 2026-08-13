@@ -4,7 +4,7 @@
 // ============================================================================
 // hand-crafted evaluation (policy layer)
 //
-//   eval = tapered(pst_mg, pst_eg)        <- incremental accumulators
+//   eval = incremental PST (eval_vl_, red minus black)
 //        + mobility (rook/cannon/knight, bitline based)
 //        + open-file rooks
 //        - hanging-piece threats (attacked and not defended)
@@ -12,11 +12,10 @@
 //          knight, river-crossing momentum, ...)
 //        + tempo
 //
-// the pst tables live in base.hpp (static data); the accumulators
-// eval_mg_/eval_eg_/eval_phase_ live in position.hpp and are maintained in
-// O(1) by position_init / position_move / position_undo. all dynamic terms
-// are computed from the piece lists (no 90-square scan). scores are
-// red - black until the final side-to-move flip.
+// the pst tables live in base.hpp; eval_vl_ lives in position.hpp and is
+// maintained in O(1) by position_init / position_move / position_undo.
+// dynamic terms are computed from the piece lists. scores are red - black
+// until the final side-to-move flip.
 // ============================================================================
 
 namespace eval_detail_ {
@@ -303,11 +302,7 @@ int shape_bonus_(TEAM team, const SideInfo& me, const SideInfo& opp)
 VL evaluate()
 {
     using namespace eval_detail_;
-    // tapered piece-square score from the incremental accumulators
-    const int phase = std::min(eval_phase_, PHASE_MAX_TOTAL_);
-    const int mg = eval_mg_[0] - eval_mg_[1];
-    const int eg = eval_eg_[0] - eval_eg_[1];
-    int vl = (mg * phase + eg * (PHASE_MAX_TOTAL_ - phase)) / PHASE_MAX_TOTAL_;
+    int vl = g_evaluation;
     // dynamic terms
     SideInfo red = collect_side_(R);
     SideInfo black = collect_side_(B);
