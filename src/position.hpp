@@ -15,6 +15,12 @@ std::array<PID, 90> pos_pid_b_ { };
 std::array<UINT16, 9> bl10_items_ { };
 std::array<UINT16, 10> bl9_items_ { };
 
+// incremental evaluation accumulators (derived position state, like the
+// hash key), index 0 = red, 1 = black; maintained by the move/undo code
+std::array<int, 2> eval_mg_ { };
+std::array<int, 2> eval_eg_ { };
+int eval_phase_ { 0 };
+
 void position_init(const MATRIX& board, TEAM team);
 std::vector<POS> get_pos_list();
 template <GENTYPE G>
@@ -31,6 +37,41 @@ bool in_check();
 bool legal_move(Move move);
 POS get_protector(POS pos);
 bool is_repeat();
+
+// reset the evaluation accumulators
+void eval_reset_()
+{
+    eval_mg_ = { };
+    eval_eg_ = { };
+    eval_phase_ = 0;
+}
+
+void eval_add_piece_(TEAM team, PTYPE p, POS pos)
+{
+    const auto [mg, eg] = pst_of_(team, std::abs(p), pos);
+    const int id = eval_tid_(team);
+    eval_mg_[id] += mg;
+    eval_eg_[id] += eg;
+    eval_phase_ += phase_w_(std::abs(p));
+}
+
+void eval_remove_piece_(TEAM team, PTYPE p, POS pos)
+{
+    const auto [mg, eg] = pst_of_(team, std::abs(p), pos);
+    const int id = eval_tid_(team);
+    eval_mg_[id] -= mg;
+    eval_eg_[id] -= eg;
+    eval_phase_ -= phase_w_(std::abs(p));
+}
+
+void eval_slide_piece_(TEAM team, PTYPE p, POS from, POS to)
+{
+    const auto a = pst_of_(team, std::abs(p), from);
+    const auto b = pst_of_(team, std::abs(p), to);
+    const int id = eval_tid_(team);
+    eval_mg_[id] += b.first - a.first;
+    eval_eg_[id] += b.second - a.second;
+}
 
 // init global position
 void position_init(const MATRIX& board, TEAM team)
@@ -79,6 +120,11 @@ void position_init(const MATRIX& board, TEAM team)
     history_captures_.reserve(256);
     history_hashkeys_.reserve(256);
     g_history_checkings.reserve(256);
+    // evaluation accumulators from scratch
+    eval_reset_();
+    for (POS i = 0; i < 90; i++) {
+        if (board[i]) eval_add_piece_(board[i] > 0 ? R : B, board[i], i);
+    }
 }
 
 // get all live pieces of current team
@@ -138,7 +184,6 @@ bool face_king_()
 }
 
 // do move
-// FIXME: big problems in the tracking of board
 void position_move(Move move)
 {
     assert(move && g_board[move.beg] * g_team > 0);
@@ -149,6 +194,9 @@ void position_move(Move move)
     history_captures_.emplace_back(g_board[move.end]);
     history_hashkeys_.emplace_back(g_hashkey);
     g_history_checkings.emplace_back(false);
+    // evaluation incremental tracking
+    eval_slide_piece_(g_team, g_board[move.beg], move.beg, move.end);
+    if (g_board[move.end]) eval_remove_piece_(TEAM(-g_team), g_board[move.end], move.end);
     // hash
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.beg] + 7)][move.beg];
     g_hashkey ^= HASH_KEYS[size_t(g_board[move.end] + 7)][move.end];
@@ -210,6 +258,9 @@ void position_undo()
     history_captures_.pop_back();
     history_hashkeys_.pop_back();
     g_history_checkings.pop_back();
+    // evaluation incremental undo (g_team is still the victim side here)
+    eval_slide_piece_(TEAM(-g_team), g_board[move.end], move.end, move.beg);
+    if (captured) eval_add_piece_(g_team, captured, move.end);
     // hash
     g_hashkey = hashkey;
     // maintain the tracking

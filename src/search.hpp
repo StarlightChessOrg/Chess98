@@ -205,10 +205,10 @@ bool null_okay_()
     return get_pos_list().size() > 8;
 }
 
-// rough capture gain for delta pruning (SEE weights scaled toward eval units)
+// rough capture gain for delta pruning (eval-scale material values)
 VL q_capture_gain_(Move move)
 {
-    return VL(WEIGHTS[std::size_t(std::abs(piece_on(move.end)))] * 12);
+    return PIECE_VALUE_[std::size_t(std::abs(piece_on(move.end)))];
 }
 
 // true if the side that just moved left their king in check
