@@ -8,6 +8,8 @@ constexpr const char* START_FEN_
 
 std::vector<Move> g_banmoves { };
 std::thread search_thread_ { };
+UINT32 opt_duration_max_ { 1000 };
+DEPTH opt_depth_max_ { 20 };
 
 void ucci_loop();
 void ucci_hello_(bool uci);
@@ -61,7 +63,11 @@ void ucci_hello_(bool uci)
     g_uci = uci;
     std::cout << "id name Chess98" << std::endl;
     std::cout << "id author Chess98" << std::endl;
-    // options reserved: hash / threads / batch / usemillisec / ...
+    const char* prefix = uci ? "option name " : "option ";
+    std::cout << prefix << "search duration max type spin default "
+              << opt_duration_max_ << " min 1 max 86400000" << std::endl;
+    std::cout << prefix << "search depth max type spin default "
+              << int(opt_depth_max_) << " min 1 max 64" << std::endl;
     std::cout << (uci ? "uciok" : "ucciok") << std::endl;
 }
 
@@ -118,10 +124,27 @@ void ucci_banmoves_(const std::string& line)
 void ucci_setoption_(const std::string& line)
 {
     std::istringstream in(line);
-    std::string tok, name;
-    in >> tok >> tok >> name; // setoption name <id>
-    if (name == "newgame") ucci_newgame_();
-    // reserved: hash / threads / batch / ...
+    std::string tok;
+    in >> tok; // setoption
+    if (!(in >> tok)) return;
+    if (tok == "name" && !(in >> tok)) return;
+    std::string name = tok;
+    while (in >> tok && tok != "value") {
+        name += ' ';
+        name += tok;
+    }
+    int vl { 0 };
+    const bool has_vl = tok == "value" && bool(in >> vl);
+    if (name == "newgame") {
+        ucci_newgame_();
+        return;
+    }
+    if (!has_vl) return;
+    if (name == "search duration max") {
+        opt_duration_max_ = UINT32(std::clamp(vl, 1, 86400000));
+    } else if (name == "search depth max") {
+        opt_depth_max_ = DEPTH(std::clamp(vl, 1, 64));
+    }
 }
 
 void ucci_go_(const std::string& line)
@@ -173,18 +196,16 @@ void ucci_go_(const std::string& line)
         inc = g_team == R ? winc : binc;
     }
 
-    g_maxdepth = 20;
-    g_searchduration = 1000;
-    if (depth >= 0) g_maxdepth = DEPTH(std::min(std::max(depth, 1), 64));
-    if (infinite) {
-        g_searchduration = 86400000;
-        if (depth < 0) g_maxdepth = 64;
-    } else if (movetime >= 0) {
-        g_searchduration = UINT32(std::max(movetime, 1));
+    g_maxdepth = opt_depth_max_;
+    g_searchduration = opt_duration_max_;
+    if (depth >= 0) {
+        g_maxdepth = DEPTH(std::min(std::max(depth, 1), int(opt_depth_max_)));
+    }
+    if (movetime >= 0) {
+        g_searchduration = UINT32(std::min(std::max(movetime, 1), int(opt_duration_max_)));
     } else if (time_left >= 0) {
-        g_searchduration = UINT32(std::max(time_left / 30 + inc, 20));
-    } else if (depth >= 0) {
-        g_searchduration = 3600000;
+        const int slice = std::max(time_left / 30 + inc, 20);
+        g_searchduration = UINT32(std::min(slice, int(opt_duration_max_)));
     }
 
     ucci_stop_join_();
