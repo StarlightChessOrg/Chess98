@@ -1,15 +1,16 @@
-#pragma once
+﻿#pragma once
 #include "evaluate.hpp"
 #include "moves.hpp"
 
 STATE g_searchstop { 0 };
 DEPTH g_maxdepth { 20 };
-int g_searchduration { 1000 };
+UINT32 g_searchduration { 1000 };
 DEPTH distance_ { 0 };
 
 SEARCH_RET search();
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking);
 VL search_q_(VL a, VL b, DEPTH depth, bool checking);
+
 void mark_checking_move_(bool checking);
 bool null_okay_();
 VL q_capture_gain_(Move move);
@@ -68,7 +69,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
 
     // search
     MovePicker mp { depth };
-    int move_num { 0 };
+    UINT8 move_num { 0 };
     for (Move move = mp.next(); move; move = mp.next(), move_num++) {
         assert(std::abs(g_board[move.end]) != R_KING && g_board[move.beg] != 0);
         const PTYPE capture = piece_on(move.end);
@@ -79,7 +80,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
         const bool gives_check = in_check();
         mark_checking_move_(gives_check);
 
-        // check extension temporarily disabled
+        // lmr
         const DEPTH normal_depth = DEPTH(depth - 1);
         DEPTH reduction { 0 };
         const bool c1 = !checking && !capture && !gives_check;
@@ -147,6 +148,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     if (checking) {
         depth = std::min(depth, Q_CHECKING_DEPTH);
     } else {
+        // stand-pat
         const VL vl = evaluate();
         if (vl >= b) return vl;
         vlbest = vl;
@@ -156,7 +158,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     // repeat status validation
     if (is_repeat()) return -INF;
 
-    // search: all moves if in check, else captures only
+    // moves
     std::vector<Move> moves { };
     if (checking) {
         moves = gen_all_moves();
@@ -164,15 +166,16 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
         moves = gen_all_capture_moves();
         mvvlva_sort(moves);
     }
+
+    // search
     for (const Move move : moves) {
         if (!checking) {
-            // delta: even winning the piece for free cannot raise alpha
             if (vlbest + q_capture_gain_(move) + Q_DELTA_MARGIN <= a) continue;
-            // SEE: skip losing exchanges
             if (!see_ge(move, 0)) continue;
         }
+
         position_move(move), distance_++;
-        if (left_in_check_()) { // illegal / self-check
+        if (left_in_check_()) {
             position_undo(), distance_--;
             continue;
         }
@@ -180,6 +183,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
         mark_checking_move_(gives_check);
         const VL vl = -search_q_(-b, -a, depth - 1, gives_check);
         position_undo(), distance_--;
+
         if (vl > vlbest) {
             vlbest = vl;
             a = std::max(a, vl);
@@ -189,6 +193,8 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
 
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
+
+/****** utils ******/
 
 // mark the previous move as checking move or not
 void mark_checking_move_(bool checking)

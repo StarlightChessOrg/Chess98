@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -86,7 +86,7 @@ struct Timer {
     std::chrono::steady_clock::time_point beg { };
     std::chrono::milliseconds limit { };
     Timer() : beg(std::chrono::steady_clock::now()) { }
-    Timer(int _limit)
+    Timer(UINT32 _limit)
         : beg(std::chrono::steady_clock::now())
         , limit(std::chrono::milliseconds(_limit)) { }
     bool time_up() const

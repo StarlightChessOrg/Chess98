@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>..\.build\msvc-debug\</OutDir>
-    <IntDir>..\.build\msvc-debug\</IntDir>
+    <OutDir>.build\msvc-debug\</OutDir>
+    <IntDir>.build\msvc-debug\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..\.build\msvc-debug\</OutDir>
-    <IntDir>..\.build\msvc-debug\</IntDir>
+    <OutDir>.build\msvc-debug\</OutDir>
+    <IntDir>.build\msvc-debug\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..\.build\msvc-release\</OutDir>
-    <IntDir>..\.build\msvc-release\</IntDir>
+    <OutDir>.build\msvc-release\</OutDir>
+    <IntDir>.build\msvc-release\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>..\.build\msvc-release\</OutDir>
-    <IntDir>..\.build\msvc-release\</IntDir>
+    <OutDir>.build\msvc-release\</OutDir>
+    <IntDir>.build\msvc-release\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

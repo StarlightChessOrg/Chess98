@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "base.hpp"
 
 MATRIX g_board { };
