@@ -1,10 +1,9 @@
-#pragma once
+﻿#pragma once
 #include "search.hpp"
 #include <sstream>
 #include <thread>
 
-constexpr const char* START_FEN_
-    = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
+const std::string START_FEN_ = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
 
 std::vector<Move> g_banmoves { };
 std::thread search_thread_ { };
