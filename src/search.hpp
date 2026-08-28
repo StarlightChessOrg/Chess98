@@ -6,6 +6,7 @@ STATE g_searchstop { 0 };
 DEPTH g_maxdepth { 20 };
 UINT32 g_searchduration { 1000 };
 DEPTH distance_ { 0 };
+bool g_uci { false };
 
 SEARCH_RET search();
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking);
@@ -23,8 +24,13 @@ SEARCH_RET search()
     VL vl { -INF };
     for (DEPTH depth = 1; !timer.time_up_2xless(); depth++) {
         vl = search_vl_(depth, -INF, INF, NODE_PV, false, in_check());
-        if (depth > g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
-        std::cout << int(depth) << " " << timer.duration() << std::endl;
+        const Move pv = tt_get_move();
+        std::cout << "info depth " << int(depth) << " score ";
+        if (g_uci) std::cout << "cp ";
+        std::cout << vl << " time " << timer.duration();
+        if (pv) std::cout << " pv " << move_to_ucimove(pv);
+        std::cout << std::endl;
+        if (depth >= g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
     }
     const Move move = tt_get_move();
     return { move, vl };

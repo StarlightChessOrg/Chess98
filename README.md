@@ -17,7 +17,7 @@ This project is being refactored now...
 - [x] move picker
 - [x] basic evaluation
 - [x] search
-- [ ] ucci
+- [x] ucci
 
 ## Progress
 
