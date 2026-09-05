@@ -1,7 +1,8 @@
-#include "ucci.hpp"
+﻿#include "ucci.hpp"
+#include "test.hpp"
 
 int main()
 {
-    ucci_loop();
+    minmax_example();
     return 0;
 }

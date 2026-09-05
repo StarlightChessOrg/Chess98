@@ -1,99 +1,6 @@
 ﻿#pragma once
 #include "search.hpp"
 
-// plain alpha-beta baseline: optional TT only (no PVS/qsearch/killer/history/MovePicker)
-DEPTH test_ply_ { 0 };
-bool ab_use_tt_ { false };
-
-VL alphabeta_vl_(DEPTH depth, VL a, VL b)
-{
-    if (depth == 0) return evaluate();
-
-    if (ab_use_tt_) {
-        const VL vlhash = tt_get_vl(g_hashkey, depth, a, b);
-        if (vlhash != INVALID_VL) return vlhash;
-    }
-
-    const VL original_alpha = a;
-    VL vlbest { -INF };
-    Move movebest { };
-    for (const Move m : gen_all_moves()) {
-        position_move(m), test_ply_++;
-        const VL vl = -alphabeta_vl_(depth - 1, -b, -a);
-        position_undo(), test_ply_--;
-        if (vl > vlbest) {
-            movebest = m;
-            vlbest = vl;
-            a = std::max(a, vl);
-            if (vl >= b) break;
-        }
-    }
-
-    if (vlbest == -INF) vlbest = VL(-INF + test_ply_);
-    if (ab_use_tt_ && movebest) {
-        HASH_FLAG flag = EXACT;
-        if (vlbest >= b) flag = BETA;
-        else if (vlbest <= original_alpha) flag = ALPHA;
-        tt_set(g_hashkey, flag, depth, movebest, vlbest);
-    }
-    return vlbest;
-}
-
-SEARCH_RET search_alphabeta()
-{
-    const Timer timer { 1000 };
-    Move movebest { };
-    VL vlbest { -INF };
-    for (DEPTH depth = 1; !timer.time_up_2xless(); depth++) {
-        if (depth > g_maxdepth) break;
-        Move depth_best { };
-        VL depth_vl { -INF };
-        VL a = -INF, b = INF;
-        for (const Move m : gen_all_moves()) {
-            position_move(m), test_ply_ = 1;
-            const VL vl = -alphabeta_vl_(depth - 1, -b, -a);
-            position_undo(), test_ply_ = 0;
-            if (vl > depth_vl) {
-                depth_vl = vl;
-                depth_best = m;
-                a = std::max(a, vl);
-            }
-        }
-        if (depth_best) {
-            movebest = depth_best;
-            vlbest = depth_vl;
-            if (ab_use_tt_) tt_set(g_hashkey, EXACT, depth, movebest, vlbest);
-        }
-    }
-    return { movebest, vlbest };
-}
-
-void alphabeta_tt_compare()
-{
-    for (const bool use_tt : { false, true }) {
-        ab_use_tt_ = use_tt;
-        position_init(
-            {
-                B_ROOK, B_KNIGHT, B_BISHOP, B_ADVISOR, B_KING,
-                B_ADVISOR, B_BISHOP, B_KNIGHT, B_ROOK,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, B_CANNON, 0, 0, 0, 0, 0, B_CANNON, 0,
-                B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN, 0, B_PAWN,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN, 0, R_PAWN,
-                0, R_CANNON, 0, 0, 0, 0, 0, R_CANNON, 0,
-                0, 0, 0, 0, 0, 0, 0, 0, 0,
-                R_ROOK, R_KNIGHT, R_BISHOP, R_ADVISOR, R_KING,
-                R_ADVISOR, R_BISHOP, R_KNIGHT, R_ROOK
-            },
-            R);
-        history_init();
-        killer_init();
-        tt_init();
-        (void)search_alphabeta();
-    }
-}
 
 void move_preformance_test()
 {
@@ -128,7 +35,42 @@ void move_preformance_test()
     std::cout << std::endl;
 }
 
-void search_test()
+// pure minimax: random leaf, no qsearch / alphabeta / tt
+std::int64_t minmax_nodes_ { 0 };
+DEPTH test_ply_ { 0 };
+
+VL minmax_vl_(DEPTH depth)
 {
-    search();
+    minmax_nodes_++;
+    if (depth == 0) {
+        static std::uint32_t rng = 1;
+        rng = rng * 1664525u + 1013904223u + std::uint32_t(g_hashkey);
+        return VL(std::int16_t(rng));
+    }
+    VL vlbest { -INF };
+    for (const Move m : gen_all_moves()) {
+        position_move(m), test_ply_++;
+        const VL vl = -minmax_vl_(DEPTH(depth - 1));
+        position_undo(), test_ply_--;
+        if (vl > vlbest) vlbest = vl;
+    }
+    if (vlbest == -INF) vlbest = VL(-INF + test_ply_);
+    return vlbest;
+}
+
+void minmax_example()
+{
+    position_init(fen_to_matrix("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w"), R);
+    minmax_nodes_ = 0;
+    test_ply_ = 0;
+    const DEPTH depth = 5;
+    const Timer timer { };
+    const VL vl = minmax_vl_(depth);
+    volatile VL keep_vl = vl;
+    volatile std::int64_t keep_nodes = minmax_nodes_;
+    std::cout << "minmax depth " << int(depth);
+    std::cout << " vl " << int(keep_vl);
+    std::cout << " nodes " << keep_nodes;
+    std::cout << " time " << timer.duration();
+    std::cout << std::endl;
 }

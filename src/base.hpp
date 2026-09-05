@@ -85,12 +85,10 @@ constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
 
 // timer
 struct Timer {
-    std::chrono::steady_clock::time_point beg;
-    std::chrono::milliseconds limit;
+    std::chrono::steady_clock::time_point beg { };
+    std::chrono::milliseconds limit { };
     Timer() : beg(std::chrono::steady_clock::now()) { }
-    Timer(UINT32 _limit)
-        : beg(std::chrono::steady_clock::now())
-        , limit(std::chrono::milliseconds(_limit)) { }
+    Timer(UINT32 _limit): beg(std::chrono::steady_clock::now()), limit(_limit) { }
     bool time_up() const
     {
         return std::chrono::steady_clock::now() - beg >= limit;
@@ -126,15 +124,21 @@ struct MoveList {
     std::array<Move, 128> v;
 
     MoveList() = default;
-    void push(Move m) {
+    void push(Move m)
+    {
         assert(m && i < 128);
         v[i++] = m;
     }
-    void push(const MoveList& o) {
+    void concat(const MoveList& o)
+    {
         assert(i + o.i <= 128);
         std::memcpy(v.data() + i, o.v.data(), sizeof(Move) * o.i);
         i += o.i;
     }
+    Move* begin() { return v.data(); }
+    Move* end() { return v.data() + i; }
+    const Move* begin() const { return v.data(); }
+    const Move* end() const { return v.data() + i; }
 };
 
 // tt entry
@@ -434,12 +438,19 @@ VL pst_of_(TEAM team, PTYPE abs_type, POS pos)
 {
     const POS sq = team == R ? pos : POS(89 - pos);
     switch (abs_type) {
-    case R_ADVISOR: return PST_ADVISOR_[sq];
-    case R_BISHOP: return PST_BISHOP_[sq];
-    case R_KNIGHT: return PST_KNIGHT_[sq];
-    case R_ROOK: return PST_ROOK_[sq];
-    case R_CANNON: return PST_CANNON_[sq];
-    case R_PAWN: return PST_PAWN_[sq];
-    default: return 0;
+    case R_ADVISOR:
+        return PST_ADVISOR_[sq];
+    case R_BISHOP:
+        return PST_BISHOP_[sq];
+    case R_KNIGHT:
+        return PST_KNIGHT_[sq];
+    case R_ROOK:
+        return PST_ROOK_[sq];
+    case R_CANNON:
+        return PST_CANNON_[sq];
+    case R_PAWN:
+        return PST_PAWN_[sq];
+    default:
+        return 0;
     }
 }
