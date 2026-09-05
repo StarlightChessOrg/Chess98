@@ -9,6 +9,6 @@ int main()
     history_init();
     killer_init();
     // END
-    move_preformance_test();
+    ucci_loop();
     return 0;
 }
