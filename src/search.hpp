@@ -42,7 +42,9 @@ SEARCH_RET search()
     Move move = tt_get_move();
     if (!playable(move)) {
         move = Move { };
-        for (const Move m : gen_all_moves()) {
+        MoveList fallback { };
+        gen_all_moves(fallback);
+        for (const Move m : fallback) {
             if (playable(m)) {
                 move = m;
                 break;
@@ -186,9 +188,9 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     // moves
     MoveList moves { };
     if (checking) {
-        moves = gen_all_moves();
+        gen_all_moves(moves);
     } else {
-        moves = gen_all_capture_moves();
+        gen_all_capture_moves(moves);
         mvvlva_sort(moves);
     }
 

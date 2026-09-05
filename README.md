@@ -21,7 +21,7 @@ Chess98的新版本
 
 The progress is measured under MSVC Release Compilation:
 
-- position: enhanced position structure
-- heuristic: the simplified styles
-- movegen: 239017 -> 1292404 ~5.4x faster than it used to be
-- movepicker: more optimized than the past all-in-one move generation
+- position: enhanced the performance and the api
+- heuristic: applied a more simple interfaces
+- movegen: 239017 -> 7822573 ~32.7x faster than old version
+- movepicker: never run a move generation logic in your search

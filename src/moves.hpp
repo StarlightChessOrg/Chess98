@@ -4,224 +4,201 @@
 
 // king moves
 template <GENTYPE G>
-MoveList gen_king_(POS pos)
+void gen_king_(POS pos, MoveList& out)
 {
-    MoveList ret { };
     if ((2 < pos && pos < 15 || 65 < pos && pos < 78) && targetchk<G>(pos + 9))
-        ret.push(Move(pos, pos + 9));
+        out.push(Move(pos, pos + 9));
     if ((11 < pos && pos < 24 || 74 < pos && pos < 87) && targetchk<G>(pos - 9))
-        ret.push(Move(pos, pos - 9));
+        out.push(Move(pos, pos - 9));
     if ((pos % 9 == 4 || pos % 9 == 5) && targetchk<G>(pos - 1))
-        ret.push(Move(pos, pos - 1));
+        out.push(Move(pos, pos - 1));
     if ((pos % 9 == 4 || pos % 9 == 3) && targetchk<G>(pos + 1))
-        ret.push(Move(pos, pos + 1));
-    return ret;
+        out.push(Move(pos, pos + 1));
 }
 
 // advisor moves
 template <GENTYPE G>
-MoveList gen_advisor_(POS pos)
+void gen_advisor_(POS pos, MoveList& out)
 {
     if (pos == 13 || pos == 76) { // center
-        MoveList ret { };
         if (targetchk<G>(pos - 10))
-            ret.push(Move(pos, pos - 10));
+            out.push(Move(pos, pos - 10));
         if (targetchk<G>(pos - 8))
-            ret.push(Move(pos, pos - 8));
+            out.push(Move(pos, pos - 8));
         if (targetchk<G>(pos + 10))
-            ret.push(Move(pos, pos + 10));
+            out.push(Move(pos, pos + 10));
         if (targetchk<G>(pos + 8))
-            ret.push(Move(pos, pos + 8));
-        return ret;
+            out.push(Move(pos, pos + 8));
     } else if (pos < 24 && targetchk<G>(13)) { // black corner
-        MoveList ret { };
-        ret.push(Move(pos, 13));
-        return ret;
+        out.push(Move(pos, 13));
     } else if (pos > 65 && targetchk<G>(76)) { // red corner
-        MoveList ret { };
-        ret.push(Move(pos, 76));
-        return ret;
+        out.push(Move(pos, 76));
     }
-    return { };
 }
 
 // bishop moves
 template <GENTYPE G>
-MoveList gen_bishop_(POS pos)
+void gen_bishop_(POS pos, MoveList& out)
 {
-    MoveList ret { };
     if (pos / 9 == 0 || pos / 9 == 5 || pos / 9 == 7 || pos / 9 == 3) {
         if (!piece_on(pos + 10) && targetchk<G>(pos + 16))
-            ret.push(Move(pos, pos + 16));
+            out.push(Move(pos, pos + 16));
         if (!piece_on(pos + 12) && targetchk<G>(pos + 20))
-            ret.push(Move(pos, pos + 20));
+            out.push(Move(pos, pos + 20));
     }
     if (pos / 9 == 4 || pos / 9 == 9 || pos / 9 == 7 || pos / 9 == 3) {
         if (!piece_on(pos - 10) && targetchk<G>(pos - 16))
-            ret.push(Move(pos, pos - 16));
+            out.push(Move(pos, pos - 16));
         if (!piece_on(pos - 12) && targetchk<G>(pos - 20))
-            ret.push(Move(pos, pos - 20));
+            out.push(Move(pos, pos - 20));
     }
-    return ret;
 }
 
 // knight moves
 template <GENTYPE G>
-MoveList gen_knight_(POS pos)
+void gen_knight_(POS pos, MoveList& out)
 {
-    MoveList ret { };
     if (pos > 17 && !piece_on(pos - 9)) {
         if (pos % 9 != 0 && targetchk<G>(pos - 19)) {
-            ret.push(Move(pos, pos - 19));
+            out.push(Move(pos, pos - 19));
         }
         if (pos % 9 != 8 && targetchk<G>(pos - 17)) {
-            ret.push(Move(pos, pos - 17));
+            out.push(Move(pos, pos - 17));
         }
     }
     if (pos < 72 && !piece_on(pos + 9)) {
         if (pos % 9 != 8 && targetchk<G>(pos + 19)) {
-            ret.push(Move(pos, pos + 19));
+            out.push(Move(pos, pos + 19));
         }
         if (pos % 9 != 0 && targetchk<G>(pos + 17)) {
-            ret.push(Move(pos, pos + 17));
+            out.push(Move(pos, pos + 17));
         }
     }
     if (pos % 9 > 1 && !piece_on(pos - 1)) {
         if (pos / 9 != 0 && targetchk<G>(pos - 11)) {
-            ret.push(Move(pos, pos - 11));
+            out.push(Move(pos, pos - 11));
         }
         if (pos / 9 != 9 && targetchk<G>(pos + 7)) {
-            ret.push(Move(pos, pos + 7));
+            out.push(Move(pos, pos + 7));
         }
     }
     if (pos % 9 < 7 && !piece_on(pos + 1)) {
         if (pos / 9 != 9 && targetchk<G>(pos + 11)) {
-            ret.push(Move(pos, pos + 11));
+            out.push(Move(pos, pos + 11));
         }
         if (pos / 9 != 0 && targetchk<G>(pos - 7)) {
-            ret.push(Move(pos, pos - 7));
+            out.push(Move(pos, pos - 7));
         }
     }
-    return ret;
 }
 
 // rook moves
 template <GENTYPE G>
-MoveList gen_rook_(POS pos)
+void gen_rook_(POS pos, MoveList& out)
 {
-    MoveList ret { };
     const auto [left, right] = rook_9(get_bl9(pos), pos);
     const auto [top, bottom] = rook_10(get_bl10(pos), pos);
     if constexpr (G != CAPTURE) {
         for (int p = int(pos) - 1; p > int(left); --p)
-            ret.push(Move(pos, POS(p)));
-        if (!piece_on(left)) ret.push(Move(pos, left));
+            out.push(Move(pos, POS(p)));
+        if (!piece_on(left)) out.push(Move(pos, left));
 
         for (int p = int(pos) + 1; p < int(right); ++p)
-            ret.push(Move(pos, POS(p)));
-        if (!piece_on(right)) ret.push(Move(pos, right));
+            out.push(Move(pos, POS(p)));
+        if (!piece_on(right)) out.push(Move(pos, right));
 
         for (int p = int(pos) - 9; p > int(top); p -= 9)
-            ret.push(Move(pos, POS(p)));
-        if (!piece_on(top)) ret.push(Move(pos, top));
+            out.push(Move(pos, POS(p)));
+        if (!piece_on(top)) out.push(Move(pos, top));
 
         for (int p = int(pos) + 9; p < int(bottom); p += 9)
-            ret.push(Move(pos, POS(p)));
-        if (!piece_on(bottom)) ret.push(Move(pos, bottom));
+            out.push(Move(pos, POS(p)));
+        if (!piece_on(bottom)) out.push(Move(pos, bottom));
     }
     if constexpr (G != QUIET) {
-        if (targetchk<CAPTURE>(left)) ret.push(Move(pos, left));
-        if (targetchk<CAPTURE>(right)) ret.push(Move(pos, right));
-        if (targetchk<CAPTURE>(top)) ret.push(Move(pos, top));
-        if (targetchk<CAPTURE>(bottom)) ret.push(Move(pos, bottom));
+        if (targetchk<CAPTURE>(left)) out.push(Move(pos, left));
+        if (targetchk<CAPTURE>(right)) out.push(Move(pos, right));
+        if (targetchk<CAPTURE>(top)) out.push(Move(pos, top));
+        if (targetchk<CAPTURE>(bottom)) out.push(Move(pos, bottom));
     }
-    return ret;
 }
 
 // cannon moves
 template <GENTYPE G>
-MoveList gen_cannon_(POS pos)
+void gen_cannon_(POS pos, MoveList& out)
 {
     if constexpr (G == QUIET) {
-        return gen_rook_<QUIET>(pos);
+        gen_rook_<QUIET>(pos, out);
+        return;
     }
-    MoveList ret { };
     const auto bl9 = get_bl9(pos), bl10 = get_bl10(pos);
     const auto [left, right] = cannon_9(bl9, pos);
     const auto [top, bottom] = cannon_10(bl10, pos);
     if (left < INVALID_POS && targetchk<CAPTURE>(left))
-        ret.push(Move(pos, left));
+        out.push(Move(pos, left));
     if (right < INVALID_POS && targetchk<CAPTURE>(right))
-        ret.push(Move(pos, right));
+        out.push(Move(pos, right));
     if (top < INVALID_POS && targetchk<CAPTURE>(top))
-        ret.push(Move(pos, top));
+        out.push(Move(pos, top));
     if (bottom < INVALID_POS && targetchk<CAPTURE>(bottom))
-        ret.push(Move(pos, bottom));
+        out.push(Move(pos, bottom));
     if constexpr (G == ALL) {
-        ret.concat(gen_rook_<QUIET>(pos));
+        gen_rook_<QUIET>(pos, out);
     }
-    return ret;
 }
 
 // pawn moves
 template <GENTYPE G>
-MoveList gen_pawn_(POS pos)
+void gen_pawn_(POS pos, MoveList& out)
 {
-    MoveList ret { };
     const int target = pos - 9 * g_team;
     if (0 <= target && target < 90 && targetchk<G>(target))
-        ret.push(Move(pos, target));
+        out.push(Move(pos, target));
     if ((pos / 9 < 5 && g_team == R) || (pos / 9 > 4 && g_team == B)) {
         if (pos % 9 != 0 && targetchk<G>(pos - 1))
-            ret.push(Move(pos, pos - 1));
+            out.push(Move(pos, pos - 1));
         if (pos % 9 != 8 && targetchk<G>(pos + 1))
-            ret.push(Move(pos, pos + 1));
+            out.push(Move(pos, pos + 1));
     }
-    return ret;
 }
 
 // gen moves
 template <GENTYPE G>
-MoveList gen_moves_()
+void gen_moves_(MoveList& out)
 {
-    MoveList ret { };
     for (const POS p : get_pos_list()) {
         const PTYPE t = std::abs(piece_on(p));
         if (t == R_KING) {
-            ret.concat(gen_king_<G>(p));
+            gen_king_<G>(p, out);
         } else if (t == R_ADVISOR) {
-            ret.concat(gen_advisor_<G>(p));
+            gen_advisor_<G>(p, out);
         } else if (t == R_BISHOP) {
-            ret.concat(gen_bishop_<G>(p));
+            gen_bishop_<G>(p, out);
         } else if (t == R_KNIGHT) {
-            ret.concat(gen_knight_<G>(p));
+            gen_knight_<G>(p, out);
         } else if (t == R_ROOK) {
-            ret.concat(gen_rook_<G>(p));
+            gen_rook_<G>(p, out);
         } else if (t == R_CANNON) {
-            ret.concat(gen_cannon_<G>(p));
+            gen_cannon_<G>(p, out);
         } else if (t == R_PAWN) {
-            ret.concat(gen_pawn_<G>(p));
+            gen_pawn_<G>(p, out);
         }
     }
-    return ret;
 }
 
-// generate all capture moves
-MoveList gen_all_capture_moves()
+void gen_all_capture_moves(MoveList& out)
 {
-    return gen_moves_<CAPTURE>();
+    gen_moves_<CAPTURE>(out);
 }
 
-// generate all quiet moves
-MoveList gen_all_quiet_moves()
+void gen_all_quiet_moves(MoveList& out)
 {
-    return gen_moves_<QUIET>();
+    gen_moves_<QUIET>(out);
 }
 
-// generate all moves
-MoveList gen_all_moves()
+void gen_all_moves(MoveList& out)
 {
-    return gen_moves_<ALL>();
+    gen_moves_<ALL>(out);
 }
 
 // move picker
@@ -256,7 +233,8 @@ public:
             return m ? m : next();
         }
         if (i == 3) {
-            moves = gen_all_moves();
+            moves.i = 0;
+            gen_all_moves(moves);
             order_rest_(moves);
             i = -1;
             return next();

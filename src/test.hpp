@@ -4,7 +4,9 @@
 
 void move_preformance_test()
 {
-    assert(gen_all_moves().size() == 44);
+    MoveList start { };
+    gen_all_moves(start);
+    assert(start.size() == 44);
     Timer t { 1000 };
     std::int64_t iterations = 0, id = 0, num = 0;
     while (!t.time_up()) {
@@ -21,8 +23,11 @@ void move_preformance_test()
     std::cout << std::endl;
     Timer t2 { 1000 };
     iterations = 0, id = 0, num = 0;
+    MoveList ml { };
     while (!t2.time_up()) {
-        for (const Move m : gen_all_moves()) {
+        ml.i = 0;
+        gen_all_moves(ml);
+        for (const Move m : ml) {
             id += m.beg, id += m.end;
             num++;
         }
@@ -48,7 +53,9 @@ VL minmax_vl_(DEPTH depth)
         return VL(std::int16_t(rng));
     }
     VL vlbest { -INF };
-    for (const Move m : gen_all_moves()) {
+    MoveList root { };
+    gen_all_moves(root);
+    for (const Move m : root) {
         position_move(m), test_ply_++;
         const VL vl = -minmax_vl_(DEPTH(depth - 1));
         position_undo(), test_ply_--;

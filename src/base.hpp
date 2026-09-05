@@ -6,7 +6,6 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -128,12 +127,6 @@ struct MoveList {
     {
         assert(m && i < 128);
         v[i++] = m;
-    }
-    void concat(const MoveList& o)
-    {
-        assert(i + o.i <= 128);
-        std::memcpy(v.data() + i, o.v.data(), sizeof(Move) * o.i);
-        i += o.i;
     }
     int size() const { return i; }
     Move& operator[](std::size_t idx) { return v[idx]; }
