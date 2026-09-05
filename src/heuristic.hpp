@@ -40,7 +40,7 @@ void history_sort(It first, It last, TEAM team)
     });
 }
 
-void history_sort(std::vector<Move>& moves, TEAM team)
+void history_sort(MoveList& moves, TEAM team)
 {
     history_sort(moves.begin(), moves.end(), team);
 }
@@ -155,7 +155,7 @@ void mvvlva_sort(It first, It last)
     });
 }
 
-void mvvlva_sort(std::vector<Move>& move_list)
+void mvvlva_sort(MoveList& move_list)
 {
     mvvlva_sort(move_list.begin(), move_list.end());
 }

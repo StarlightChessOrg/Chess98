@@ -135,6 +135,9 @@ struct MoveList {
         std::memcpy(v.data() + i, o.v.data(), sizeof(Move) * o.i);
         i += o.i;
     }
+    int size() const { return i; }
+    Move& operator[](std::size_t idx) { return v[idx]; }
+    const Move& operator[](std::size_t idx) const { return v[idx]; }
     Move* begin() { return v.data(); }
     Move* end() { return v.data() + i; }
     const Move* begin() const { return v.data(); }

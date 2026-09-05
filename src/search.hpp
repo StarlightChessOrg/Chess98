@@ -184,7 +184,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     if (is_repeat()) return -INF;
 
     // moves
-    std::vector<Move> moves { };
+    MoveList moves { };
     if (checking) {
         moves = gen_all_moves();
     } else {
