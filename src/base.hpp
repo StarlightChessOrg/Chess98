@@ -6,6 +6,7 @@
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -14,6 +15,7 @@
 #include <vector>
 
 struct Move;
+struct MoveList;
 struct Timer;
 struct TTEntry;
 
@@ -83,8 +85,8 @@ constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
 
 // timer
 struct Timer {
-    std::chrono::steady_clock::time_point beg { };
-    std::chrono::milliseconds limit { };
+    std::chrono::steady_clock::time_point beg;
+    std::chrono::milliseconds limit;
     Timer() : beg(std::chrono::steady_clock::now()) { }
     Timer(UINT32 _limit)
         : beg(std::chrono::steady_clock::now())
@@ -118,13 +120,30 @@ struct Move {
     operator int() const { return beg * 100 + end; }
 };
 
+// move list
+struct MoveList {
+    std::uint8_t i { 0 };
+    std::array<Move, 128> v;
+
+    MoveList() = default;
+    void push(Move m) {
+        assert(m && i < 128);
+        v[i++] = m;
+    }
+    void push(const MoveList& o) {
+        assert(i + o.i <= 128);
+        std::memcpy(v.data() + i, o.v.data(), sizeof(Move) * o.i);
+        i += o.i;
+    }
+};
+
 // tt entry
 struct TTEntry {
     HASH key { 0 };
     HASH_FLAG flag { 0 };
     VL vl { 0 };
     DEPTH depth { 0 };
-    Move move { };
+    Move move;
 };
 
 // hash keys for zobrist hashing

@@ -32,7 +32,23 @@ SEARCH_RET search()
         std::cout << std::endl;
         if (depth >= g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
     }
-    const Move move = tt_get_move();
+    auto playable = [](Move m) -> bool {
+        if (!m || !legal_move(m)) return false;
+        position_move(m);
+        const bool bad = left_in_check_();
+        position_undo();
+        return !bad;
+    };
+    Move move = tt_get_move();
+    if (!playable(move)) {
+        move = Move { };
+        for (const Move m : gen_all_moves()) {
+            if (playable(m)) {
+                move = m;
+                break;
+            }
+        }
+    }
     return { move, vl };
 }
 
@@ -63,10 +79,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
             const VL vlnull = -search_vl_(nd, -b, -b + 1, NODE_CUT, true, in_check());
             distance_--;
             position_undo_null();
-            if (vlnull >= b) {
-                tt_set(g_hashkey, BETA, depth, Move { }, vlnull);
-                return vlnull;
-            }
+            if (vlnull >= b) return vlnull;
         }
     }
 
@@ -76,11 +89,17 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
     // search
     MovePicker mp { depth };
     UINT8 move_num { 0 };
-    for (Move move = mp.next(); move; move = mp.next(), move_num++) {
+    for (Move move = mp.next(); move; move = mp.next()) {
         assert(std::abs(g_board[move.end]) != R_KING && g_board[move.beg] != 0);
+        if (!legal_move(move)) continue;
         const PTYPE capture = piece_on(move.end);
 
         position_move(move), distance_++;
+        if (left_in_check_()) {
+            position_undo(), distance_--;
+            continue;
+        }
+        move_num++;
 
         // checking validation
         const bool gives_check = in_check();

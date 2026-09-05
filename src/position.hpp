@@ -142,24 +142,19 @@ UINT16 get_bl9(POS pos) {
     return bl9_items_[pos / 9];
  }
 
-// judge face-kings
+// judge face-kings: same file and no piece strictly between
 bool face_king_()
 {
-    if (pos_list_r_[0] % 9 == pos_list_b_[0] % 9) {
-        switch (get_bl10(pos_list_r_[0])) {
-        case 0b1000000001:
-        case 0b1000000010:
-        case 0b1000000100:
-        case 0b0100000001:
-        case 0b0100000010:
-        case 0b0100000100:
-        case 0b0010000001:
-        case 0b0010000010:
-        case 0b0010000100:
-            return true;
-        }
+    if (pos_list_r_.empty() || pos_list_b_.empty()) return false;
+    const POS rk = pos_list_r_[0];
+    const POS bk = pos_list_b_[0];
+    if (rk % 9 != bk % 9) return false;
+    const int lo = int(std::min(rk, bk));
+    const int hi = int(std::max(rk, bk));
+    for (int p = lo + 9; p < hi; p += 9) {
+        if (piece_on(POS(p))) return false;
     }
-    return false;
+    return true;
 }
 
 // do move
@@ -319,7 +314,25 @@ bool in_check()
     return face_king_();
 }
 
-// judge whether a move is valid or not in situation (include in-check)
+// pieces strictly between two aligned squares (same file or same rank)
+int pieces_between_(POS a, POS b)
+{
+    int n = 0;
+    if (a % 9 == b % 9) {
+        const int step = a < b ? 9 : -9;
+        for (int p = int(a) + step; p != int(b); p += step) {
+            if (piece_on(POS(p))) ++n;
+        }
+    } else if (a / 9 == b / 9) {
+        const int step = a < b ? 1 : -1;
+        for (int p = int(a) + step; p != int(b); p += step) {
+            if (piece_on(POS(p))) ++n;
+        }
+    }
+    return n;
+}
+
+// judge whether a move is geometrically valid (not self-check)
 bool legal_move(Move move)
 {
     const PTYPE p = piece_on(move.beg);
@@ -344,55 +357,56 @@ bool legal_move(Move move)
         // must stay in own palace (no black advisor to 76 / red to 13)
         if (p == R_ADVISOR && move.end / 9 < 7) return false;
         if (p == B_ADVISOR && move.end / 9 > 2) return false;
-    } else if (abs(p) == R_BISHOP) { // elephant eyes
-        const int d = move.end - move.beg;
-        if (d == 20) {
-            if (piece_on(move.beg + 10)) return false;
-        } else if (d == 16) {
-            if (piece_on(move.beg + 8)) return false;
-        } else if (d == -20) {
-            if (piece_on(move.beg - 10)) return false;
-        } else if (piece_on(move.beg - 8)) {
+    } else if (abs(p) == R_BISHOP) {
+        const int d = int(move.end) - int(move.beg);
+        const int df = std::abs(int(move.end % 9) - int(move.beg % 9));
+        const int dr = std::abs(int(move.end / 9) - int(move.beg / 9));
+        if (df != 2 || dr != 2) return false;
+        POS eye { };
+        if (d == 20) eye = POS(move.beg + 10);
+        else if (d == 16) eye = POS(move.beg + 8);
+        else if (d == -20) eye = POS(move.beg - 10);
+        else if (d == -16) eye = POS(move.beg - 8);
+        else return false;
+        if (piece_on(eye)) return false;
+        if (p == R_BISHOP && move.end / 9 < 5) return false;
+        if (p == B_BISHOP && move.end / 9 > 4) return false;
+    } else if (abs(p) == R_KNIGHT) {
+        const int df = int(move.end % 9) - int(move.beg % 9);
+        const int dr = int(move.end / 9) - int(move.beg / 9);
+        const int adf = std::abs(df);
+        const int adr = std::abs(dr);
+        POS leg { };
+        if (adf == 1 && adr == 2) {
+            leg = POS(int(move.beg) + (dr > 0 ? 9 : -9));
+        } else if (adf == 2 && adr == 1) {
+            leg = POS(int(move.beg) + (df > 0 ? 1 : -1));
+        } else {
             return false;
         }
-    } else if (abs(p) == R_KNIGHT) { // knight legs
-        const int d = move.end - move.beg;
-        if (d == 17 || d == 15) {
-            if (piece_on(move.beg + 9)) return false;
-        } else if (d == -17 || d == -15) {
-            if (piece_on(move.beg - 9)) return false;
-        } else if (d == 10 || d == -6) {
-            if (piece_on(move.beg + 1)) return false;
-        } else if (piece_on(move.beg - 1)) {
-            return false;
-        }
-    } else if (abs(p) == R_CANNON) { // cannon moves
-        const int d = move.end - move.beg;
+        if (piece_on(leg)) return false;
+    } else if (abs(p) == R_CANNON) {
         if (move.beg % 9 != move.end % 9 && move.beg / 9 != move.end / 9)
-            return false; // not in the same col or same row
-        if (-9 < d && d < 9) { // horizontal move
-            const auto [left, right] = cannon_9(get_bl9(move.beg), move.beg);
-            const auto [left2, right2] = rook_9(get_bl9(move.end), move.end);
-            if (!(left2 < move.end && move.end < right2)) {
-                if (move.end != left && move.end != right) return false;
-            }
-        } else { // vertical move
-            const auto [up, down] = cannon_10(get_bl10(move.beg), move.beg);
-            const auto [up2, down2] = rook_10(get_bl10(move.end), move.end);
-            if (!(up2 < move.end && move.end < down2)) {
-                if (move.end != up && move.end != down) return false;
-            }
+            return false;
+        const int mid = pieces_between_(move.beg, move.end);
+        if (piece_on(move.end)) {
+            if (mid != 1) return false;
+        } else if (mid != 0) {
+            return false;
         }
-    } else if (abs(p) == R_ROOK) { // rook moves
-        const int d = move.end - move.beg;
-        if (move.beg % 9 != move.end % 9 || move.beg / 9 != move.end / 9)
-            return false; // not in the same col or same row
-        if (-9 < d && d < 9) { // horizontal move
-            const auto [left, right] = rook_9(get_bl9(move.beg), move.beg);
-            if (!(left < move.end && move.end < right)) return false;
-        } else { // vertical move
-            const auto [up, down] = rook_10(get_bl10(move.beg), move.beg);
-            if (!(up < move.end && move.end < down)) return false;
+    } else if (abs(p) == R_ROOK) {
+        if (move.beg % 9 != move.end % 9 && move.beg / 9 != move.end / 9)
+            return false;
+        if (pieces_between_(move.beg, move.end) != 0) return false;
+    } else if (abs(p) == R_PAWN) {
+        const int d = int(move.end) - int(move.beg);
+        if (d == -9 * g_team) {
+        } else if ((d == -1 || d == 1) && move.beg / 9 == move.end / 9) {
+            const bool crossed = (g_team == R && move.beg / 9 < 5)
+                || (g_team == B && move.beg / 9 > 4);
+            if (!crossed) return false;
+        } else {
+            return false;
         }
     }
     return true;

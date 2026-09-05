@@ -1,8 +1,6 @@
 # Chess98
 
-此项目正在进行重构...
-
-This project is being refactored now...
+Chess98的新版本
 
 ## TODO
 

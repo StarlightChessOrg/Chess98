@@ -249,18 +249,16 @@ class MovePicker {
             return piece_on(m.end) != 0;
         });
         mvvlva_sort(moves.begin(), mid);
-        history_sort(mid, moves.end(), g_team); 
+        history_sort(mid, moves.end(), g_team);
     }
 
 public:
     MovePicker(DEPTH depth)
     {
         const auto killers = killer_get(depth);
-        const bool c1 = killers[0] && killers[0] != starts[0];
-        const bool c2 = killers[0] && killers[0] != starts[0];
         starts[0] = tt_get_move();
-        starts[1] = c1 && legal_move(killers[0]) ? killers[0] : Move { };
-        starts[2] = c2 && legal_move(killers[1]) ? killers[1] : Move { };
+        starts[1] = killers[0] != starts[0] && legal_move(killers[0]) ? killers[0] : Move { };
+        starts[2] = killers[1] != starts[0] && legal_move(killers[1]) ? killers[1] : Move { };
     }
 
     Move next()

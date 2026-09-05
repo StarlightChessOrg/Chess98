@@ -77,6 +77,8 @@ void tt_init(int _size = 20)
 // set a tt entry
 void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
 {
+    assert(move && vl != INVALID_VL && !tt_table_.empty());
+    assert(flag == EXACT || flag == ALPHA || flag == BETA);
     TTEntry& e = tt_table_[hashkey & tt_mask_];
     if (e.key == 0) { // empty set
         e.key = hashkey;
