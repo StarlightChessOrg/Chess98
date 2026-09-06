@@ -19,9 +19,9 @@ Chess98的新版本
 
 ## Progress
 
-The progress is measured under MSVC Release Compilation:
+The progress is measured under Clang++ O3 Compilation:
 
 - position: enhanced the performance and the api
 - heuristic: applied a more simple interfaces
-- movegen: 239017 -> 7822573 ~32.7x faster than old version
+- movegen: 239017 -> 7928229 ~33.2x faster than old version
 - movepicker: never run a move generation logic in your search
