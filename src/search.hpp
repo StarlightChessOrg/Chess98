@@ -17,7 +17,8 @@ bool null_okay_();
 VL q_capture_gain_(Move move);
 bool left_in_check_();
 
-// search for best move and vl
+/// @brief 搜索主函数
+/// @return 搜索结果pair<Move, VL>
 SEARCH_RET search()
 {
     const Timer timer { g_searchduration };
@@ -54,7 +55,14 @@ SEARCH_RET search()
     return { move, vl };
 }
 
-// search for the best vl
+/// @brief 主要变例搜索
+/// @param depth 剩余的深度
+/// @param a 搜索的alpha边界，对于CUT节点是极窄窗口边界
+/// @param b 搜索的beta边界
+/// @param is_cut 是否是CUT节点
+/// @param ban_null 是否禁止空着裁剪
+/// @param checking 上一层的着法是否导致了当前层一方被将军
+/// @return 搜索分数
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking)
 {
     if (depth == 0) return search_q_(a, b, Q_MAX_DISTANCE, checking);
@@ -166,7 +174,12 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
     return vlbest != -INF ? vlbest : vlbest + distance_;
 }
 
-// search quiescence (search-side reductions only; evaluate left as-is)
+/// @brief 静态搜索
+/// @param a 搜索的alpha边界
+/// @param b 搜索的beta边界
+/// @param depth 静态搜索的剩余深度
+/// @param checking 上一层的着法是否导致了当前层一方被将军
+/// @return 静态搜索分数
 VL search_q_(VL a, VL b, DEPTH depth, bool checking)
 {
     if (distance_ >= Q_MAX_DISTANCE || depth <= 0) return evaluate();
@@ -191,7 +204,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
         gen_all_moves(moves);
     } else {
         gen_all_capture_moves(moves);
-        mvvlva_sort(moves);
+        mvvlva_sort(moves.begin(), moves.end());
     }
 
     // search
@@ -223,7 +236,8 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
 
 /****** utils ******/
 
-// mark the previous move as checking move or not
+/// @brief 标记
+/// @param checking 
 void mark_checking_move_(bool checking)
 {
     if (checking && !g_history_checkings.empty()) {
@@ -231,14 +245,12 @@ void mark_checking_move_(bool checking)
     }
 }
 
-// check if the null move pruning can be used
-// TODO: implement a safer detection
+/// @brief 判断空着裁剪的安全性
 bool null_okay_()
 {
     return get_pos_list().size() > 8;
 }
 
-// rough capture gain for delta pruning (eval-scale material values)
 VL q_capture_gain_(Move move)
 {
     return PIECE_VALUE_[std::size_t(std::abs(piece_on(move.end)))];

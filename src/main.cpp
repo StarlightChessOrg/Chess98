@@ -3,13 +3,14 @@
 
 int main()
 {
-    // INITIALIZE DO NOT REMOVE
-    position_init(fen_to_matrix("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w"), R);
-    tt_init();
+    // DO_NOT_REMOVE: THIS IS INITIALIZATION
+    position_init(fen_to_matrix(INIT_POS), R);
+    tt_init(12);
     history_init();
     killer_init();
-    // END
+    // END DO_NOT_REMOVE
     move_preformance_test();
+    minmax_example();
     ucci_loop();
     return 0;
 }

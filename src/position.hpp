@@ -52,7 +52,9 @@ void eval_slide_piece_(TEAM team, PTYPE p, POS from, POS to)
         + team * (pst_of_(team, std::abs(p), to) - pst_of_(team, std::abs(p), from)));
 }
 
-// init global position
+/// @brief 按照指定矩阵全局初始化棋盘
+/// @param board 位置矩阵
+/// @param team 当前行棋方
 void position_init(const MATRIX& board, TEAM team)
 {
     // variables init
@@ -106,13 +108,17 @@ void position_init(const MATRIX& board, TEAM team)
     }
 }
 
-// get all live pieces of current team
+/// @brief 获取包含当前行棋方所有棋子位置的列表
+/// @return 当前队伍棋子位置列表
 std::vector<POS> get_pos_list()
 {
     return g_team == R ? pos_list_r_ : pos_list_b_;
 }
 
-// return team differences based on wheter you want to gen captures or not
+/// @brief 获取当前队伍对指定位置步进是否符合某些规则（若越界则静默失败）
+/// @tparam G 具体规则，QUIET代表非吃子，CAPTURE代表吃子，ALL代表都可以
+/// @param p 指定位置
+/// @return 步进到给定的位置是否是合适的
 template <GENTYPE G>
 bool targetchk(POS p)
 {
@@ -128,36 +134,35 @@ bool targetchk(POS p)
     }
 }
 
-// get piece on pos
-PTYPE piece_on(POS p) { 
-    return p < 90 ? g_board[p] : 0; }
+/// @brief 获取指定位置一个棋子，若越界则静默返回0
+/// @param p 棋子位置
+/// @return 棋子PTYPE
+PTYPE piece_on(POS p){return p < 90 ? g_board[p] : 0;}
 
-// get bl10 from the table
-UINT16 get_bl10(POS pos) { 
-    return bl10_items_[pos % 9];
- }
+/// @brief 获取一个10格列的二进制码，上面只存储有无棋子的信息
+/// @param pos 获取第几行的列
+/// @return 一个16位二进制码，代表列
+UINT16 get_bl10(POS pos){return bl10_items_[pos % 9];}
 
-// get_bl9 from the table
-UINT16 get_bl9(POS pos) { 
-    return bl9_items_[pos / 9];
- }
+/// @brief 获取一个9格列的二进制码，上面只存储有无棋子的信息
+/// @param pos 获取第几行的列
+/// @return 一个16位二进制码，代表列
+UINT16 get_bl9(POS pos) { return bl9_items_[pos / 9]; }
 
-// judge face-kings: same file and no piece strictly between
+/// @brief 判断当前局面将帅是否对脸
+/// @return 将帅是否对脸
 bool face_king_()
 {
     if (pos_list_r_.empty() || pos_list_b_.empty()) return false;
     const POS rk = pos_list_r_[0];
     const POS bk = pos_list_b_[0];
-    if (rk % 9 != bk % 9) return false;
-    const int lo = int(std::min(rk, bk));
-    const int hi = int(std::max(rk, bk));
-    for (int p = lo + 9; p < hi; p += 9) {
-        if (piece_on(POS(p))) return false;
-    }
-    return true;
+    const auto [left, right] = rook_9(get_bl9(rk), rk);
+    const auto [top, bottom] = rook_10(get_bl10(rk), rk);
+    return bk == left || bk == right || bk == top || bk == bottom;
 }
 
-// do move
+/// @brief 进行步进
+/// @param move 步进着法
 void position_move(Move move)
 {
     assert(move && g_board[move.beg] * g_team > 0);
@@ -207,7 +212,7 @@ void position_move(Move move)
     g_team = -g_team;
 }
 
-// undo move
+/// @brief 撤销步进
 void position_undo()
 {
     assert(!history_moves_.empty());
@@ -251,20 +256,22 @@ void position_undo()
     g_team = -g_team;
 }
 
-// null move: pass the turn (no piece change; hash side-bit only)
+/// @brief 进行空着步进
 void position_do_null()
 {
     g_hashkey ^= SIDE_KEY;
     g_team = -g_team;
 }
 
+/// @brief 撤销空着步进
 void position_undo_null()
 {
     g_team = -g_team;
     g_hashkey ^= SIDE_KEY;
 }
 
-// judge whether current position is in check (include face-kings)
+/// @brief 判断当前队伍是否被将军
+/// @return 当前队伍是否被将军
 bool in_check()
 {
     // get king pos
@@ -332,7 +339,9 @@ int pieces_between_(POS a, POS b)
     return n;
 }
 
-// judge whether a move is geometrically valid (not self-check)
+/// @brief 判断一个着法在当前局面是否是合法着法
+/// @param move 要判断的着法
+/// @return 是否合法
 bool legal_move(Move move)
 {
     const PTYPE p = piece_on(move.beg);
@@ -364,10 +373,14 @@ bool legal_move(Move move)
         if (df != 2 || dr != 2) return false;
         POS eye { };
         if (d == 20) eye = POS(move.beg + 10);
-        else if (d == 16) eye = POS(move.beg + 8);
-        else if (d == -20) eye = POS(move.beg - 10);
-        else if (d == -16) eye = POS(move.beg - 8);
-        else return false;
+        else if (d == 16)
+            eye = POS(move.beg + 8);
+        else if (d == -20)
+            eye = POS(move.beg - 10);
+        else if (d == -16)
+            eye = POS(move.beg - 8);
+        else
+            return false;
         if (piece_on(eye)) return false;
         if (p == R_BISHOP && move.end / 9 < 5) return false;
         if (p == B_BISHOP && move.end / 9 > 4) return false;
@@ -412,8 +425,10 @@ bool legal_move(Move move)
     return true;
 }
 
-// calculate whether a pos can be attacked by a current team piece
-// if a piece has multi protectors, return the least valuable one (LVA order)
+/// @brief 判断一个位置是否能被当前队伍无损攻击，若有保护者则返回最弱的一个的位置
+/// @note 依赖内部写死的顺序进行判断
+/// @param pos 要验证的位置
+/// @return 最弱保护者的位置
 POS get_protector(POS pos)
 {
     // pawn protector
@@ -457,7 +472,7 @@ POS get_protector(POS pos)
         if (piece_on(pos - 17) * g_team == R_KNIGHT) return pos - 17;
         if (piece_on(pos - 7) * g_team == R_KNIGHT) return pos - 7;
     }
-    // cannon then rook (LVA: cannon cheaper than rook)
+    // 炮
     const auto [left, right] = rook_9(get_bl9(pos), pos);
     const auto [top, bottom] = rook_10(get_bl10(pos), pos);
     const auto [left2, right2] = cannon_9(get_bl9(pos), pos);
@@ -484,12 +499,13 @@ POS get_protector(POS pos)
     return INVALID_POS;
 }
 
-// repeat validation
+/// @brief 检测当前局面是否违规重复，包括长将和长捉
+/// @return 是否重复
 bool is_repeat()
 {
     const size_t n = history_hashkeys_.size();
     if (n < 4 || g_history_checkings.size() != n) return false;
-    for (size_t i = n; i-- > 0; ) {
+    for (size_t i = n; i-- > 0;) {
         if (history_hashkeys_[i] == g_hashkey) {
             if (n - i < 4) return false;
             for (size_t j = i; j < n; j += 2) // 己方着：i, i+2, ...

@@ -1,8 +1,11 @@
-#pragma once
+﻿#pragma once
 #include "heuristic.hpp"
 #include "position.hpp"
 
-// king moves
+/// @brief 生成当前队伍中帅的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_king_(POS pos, MoveList& out)
 {
@@ -16,7 +19,10 @@ void gen_king_(POS pos, MoveList& out)
         out.push(Move(pos, pos + 1));
 }
 
-// advisor moves
+/// @brief 生成当前队伍士的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_advisor_(POS pos, MoveList& out)
 {
@@ -36,7 +42,10 @@ void gen_advisor_(POS pos, MoveList& out)
     }
 }
 
-// bishop moves
+/// @brief 生成当前队伍中相的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_bishop_(POS pos, MoveList& out)
 {
@@ -54,7 +63,10 @@ void gen_bishop_(POS pos, MoveList& out)
     }
 }
 
-// knight moves
+/// @brief 生成当前队伍中马的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_knight_(POS pos, MoveList& out)
 {
@@ -92,7 +104,10 @@ void gen_knight_(POS pos, MoveList& out)
     }
 }
 
-// rook moves
+/// @brief 生成当前队伍中车的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_rook_(POS pos, MoveList& out)
 {
@@ -123,7 +138,10 @@ void gen_rook_(POS pos, MoveList& out)
     }
 }
 
-// cannon moves
+/// @brief 生成当前队伍中炮的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_cannon_(POS pos, MoveList& out)
 {
@@ -147,7 +165,10 @@ void gen_cannon_(POS pos, MoveList& out)
     }
 }
 
-// pawn moves
+/// @brief 生成当前队伍中兵的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param pos 棋子位置
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_pawn_(POS pos, MoveList& out)
 {
@@ -162,7 +183,9 @@ void gen_pawn_(POS pos, MoveList& out)
     }
 }
 
-// gen moves
+/// @brief 生成指定类型的着法
+/// @tparam G 生成类型，QUIET、CAPTURE或ALL
+/// @param out 着法列表，生成的着法追加在此列表中
 template <GENTYPE G>
 void gen_moves_(MoveList& out)
 {
@@ -186,23 +209,28 @@ void gen_moves_(MoveList& out)
     }
 }
 
+/// @brief 获取所有吃子着法
+/// @param out 着法列表，生成的着法追加在此列表中
 void gen_all_capture_moves(MoveList& out)
 {
     gen_moves_<CAPTURE>(out);
 }
 
+/// @brief 获取所有非吃子着法
+/// @param out 着法列表，生成的着法追加在此列表中
 void gen_all_quiet_moves(MoveList& out)
 {
     gen_moves_<QUIET>(out);
 }
 
+/// @brief 获取所有着法
+/// @param out 着法列表，生成的着法追加在此列表中
 void gen_all_moves(MoveList& out)
 {
     gen_moves_<ALL>(out);
 }
 
-// move picker
-// tt -> killer -> capture -> quiet
+/// @brief 着法生成器
 class MovePicker {
     std::array<Move, 3> starts { };
     MoveList moves { };

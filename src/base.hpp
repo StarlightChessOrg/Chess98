@@ -1,4 +1,5 @@
 ﻿#pragma once
+#define INIT_POS "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w"
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -75,14 +76,14 @@ constexpr GENTYPE CAPTURE = 1;
 constexpr GENTYPE ALL = 2;
 constexpr bool NODE_PV = false;
 constexpr bool NODE_CUT = true;
-constexpr std::array<VL, 8> WEIGHTS { 0, 30, 2, 2, 4, 10, 5, 1 };
+constexpr std::array<VL, 8> WEIGHTS { 0, 800, 120, 120, 270, 600, 300, 30 };
 constexpr void set_left_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n << 4; }
 constexpr void set_right_4bit_(PREGEN_DATA& d, UINT32 n) { d |= n; }
 constexpr int get_left_4bit(PREGEN_DATA d) { return d >> 4; }
 constexpr int get_right_4bit(PREGEN_DATA d) { return d & 0xF; }
 constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
 
-// timer
+/// @brief 计时器
 struct Timer {
     std::chrono::steady_clock::time_point beg { };
     std::chrono::milliseconds limit { };
@@ -105,7 +106,7 @@ struct Timer {
     }
 };
 
-// move
+/// @brief 着法
 struct Move {
     std::uint8_t beg { 0 };
     std::uint8_t end { 0 };
@@ -117,7 +118,7 @@ struct Move {
     operator int() const { return beg * 100 + end; }
 };
 
-// move list
+/// @brief 着法列表
 struct MoveList {
     std::uint8_t i { 0 };
     std::array<Move, 128> v;
@@ -137,7 +138,7 @@ struct MoveList {
     const Move* end() const { return v.data() + i; }
 };
 
-// tt entry
+/// @brief 置换表项目
 struct TTEntry {
     HASH key { 0 };
     HASH_FLAG flag { 0 };
@@ -146,8 +147,7 @@ struct TTEntry {
     Move move;
 };
 
-// hash keys for zobrist hashing
-// accessing: HASH_KEYS[size_t(piece + 7)][pos]
+/// @brief 全局预生成哈希表
 const std::array<std::array<HASH, 90>, 15> HASH_KEYS = []() {
     std::mt19937_64 rand_engine(2820795095);
     std::uniform_int_distribution<long long> gen_rand {
@@ -164,7 +164,7 @@ const std::array<std::array<HASH, 90>, 15> HASH_KEYS = []() {
     return ret;
 }();
 
-// pregen points for rook and cannon non-capture moves
+/// @brief 车的预生成着法行列掩码表
 const PREGEN_TABLE ROOK_PREGEN_ = []() {
     PREGEN_TABLE ret { };
     for (UINT32 pos = 0; pos < 10; pos++) {
@@ -187,7 +187,7 @@ const PREGEN_TABLE ROOK_PREGEN_ = []() {
     return ret;
 }();
 
-// pregen points for cannon capture moves
+/// @brief 炮吃子着法的预生成着法行列掩码表
 const PREGEN_TABLE CANNON_PREGEN_ = []() {
     PREGEN_TABLE ret { };
     for (UINT32 pos = 0; pos < 10; pos++) {
@@ -226,8 +226,10 @@ const PREGEN_TABLE CANNON_PREGEN_ = []() {
     return ret;
 }();
 
-// convert fen string to matrix
-MATRIX fen_to_matrix(const std::string& fen)
+/// @brief 将FEN转为内部棋盘矩阵
+/// @param fen 要转换的FEN字符串
+/// @return 棋盘矩阵
+MATRIX fen_to_matrix(std::string fen)
 {
     MATRIX m { };
     int i = 0;
@@ -248,7 +250,9 @@ MATRIX fen_to_matrix(const std::string& fen)
     return m;
 }
 
-// convert matrix to fen string
+/// @brief 将内部棋盘矩阵转换为FEN
+/// @param m 棋盘矩阵
+/// @return FEN字符串
 std::string matrix_to_fen(const MATRIX& m)
 {
     std::string s;
@@ -269,7 +273,9 @@ std::string matrix_to_fen(const MATRIX& m)
     return s;
 }
 
-// convert move to uci move string like "a0a1"
+/// @brief 将内部着法结构转化为着法字符串
+/// @param move 一个着法对象
+/// @return UCCI着法字符串
 std::string move_to_ucimove(Move move)
 {
     std::string s;
@@ -280,8 +286,10 @@ std::string move_to_ucimove(Move move)
     return s;
 }
 
-// convert uci move string like "a0a1" to move
-Move ucimove_to_move(const std::string& s)
+/// @brief 将UCCI着法字符串转化为内部着法结构
+/// @param s UCCI标准着法字符串
+/// @return 一个着法对象
+Move ucimove_to_move(std::string s)
 {
     if (s.size() != 4) return { };
     const int file0 = s[0] - 'a';

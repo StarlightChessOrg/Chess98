@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include "search.hpp"
 
-
 void move_preformance_test()
 {
     MoveList start { };
@@ -67,7 +66,8 @@ VL minmax_vl_(DEPTH depth)
 
 void minmax_example()
 {
-    position_init(fen_to_matrix("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w"), R);
+    position_init(
+        fen_to_matrix("rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w"), R);
     minmax_nodes_ = 0;
     test_ply_ = 0;
     const DEPTH depth = 5;

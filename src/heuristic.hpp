@@ -1,22 +1,29 @@
-#pragma once
+﻿#pragma once
 #include "base.hpp"
 #include "position.hpp"
 
+/// @brief 红方的历史表
 std::array<std::array<UINT32, 90>, 90> history_table_r_ { };
+/// @brief 黑方的历史表
 std::array<std::array<UINT32, 90>, 90> history_table_b_ { };
+/// @brief 杀手表
 std::array<std::array<Move, 2>, 128> killer_table_ { };
+/// @brief 置换表
 std::vector<TTEntry> tt_table_ { };
+/// @brief 置换表大小
 std::uint32_t tt_size_ { 0 };
-std::uint32_t tt_mask_ { 0 };
 
-// init the history table
+/// @brief 初始化历史表
 void history_init()
 {
     history_table_r_.fill({ });
     history_table_b_.fill({ });
 }
 
-// set a history weight to the table
+/// @brief 在历史表中增加分值
+/// @param move 历史表着法
+/// @param team 要设置的队伍
+/// @param depth 传入当前搜索的深度
 void history_set(Move move, TEAM team, DEPTH depth)
 {
     if (team == R) {
@@ -26,7 +33,11 @@ void history_set(Move move, TEAM team, DEPTH depth)
     }
 }
 
-// sort moves via history table (stable tie-break on squares)
+/// @brief 历史启发式排序
+/// @tparam It 迭代器类型，需满足随机访问迭代器要求
+/// @param first 待排序走法序列的begin迭代器
+/// @param last  待排序走法序列的end迭代器
+/// @param team  当前行棋方
 template <class It>
 void history_sort(It first, It last, TEAM team)
 {
@@ -40,46 +51,56 @@ void history_sort(It first, It last, TEAM team)
     });
 }
 
-void history_sort(MoveList& moves, TEAM team)
-{
-    history_sort(moves.begin(), moves.end(), team);
-}
-
-// init the killer table
+/// @brief 初始化杀手表
 void killer_init()
 {
     killer_table_.fill({ });
 }
 
-// set a killer move for a depth to the table
-void killer_set(Move move, DEPTH d)
+/// @brief 记录当前深度的杀手着法
+/// @param move 杀手着法
+/// @param depth 当前深度
+void killer_set(Move move, DEPTH depth)
 {
-    if (move == killer_table_[d][0]) return;
-    killer_table_[d][1] = killer_table_[d][0];
-    killer_table_[d][0] = move;
+    if (move == killer_table_[depth][0]) return;
+    killer_table_[depth][1] = killer_table_[depth][0];
+    killer_table_[depth][0] = move;
 }
 
-// get killer moves for a depth from the table
-std::array<Move, 2> killer_get(DEPTH d)
+/// @brief 获取当前深度的杀手着法，可能含有空着法
+/// @param depth 当前深度
+/// @return 杀手着法列表，若不足则补空着法
+std::array<Move, 2> killer_get(DEPTH depth)
 {
-    return killer_table_[d];
+    return killer_table_[depth];
 }
 
-// init the tt (_size is log2 of entry count, e.g. 16 -> 65536)
-void tt_init(int _size = 20)
+/// @brief 初始化置换表
+/// @param size 置换表大小
+void tt_init(int size = 20)
 {
     tt_table_.clear();
-    tt_table_.resize(1ll << _size);
-    tt_size_ = _size;
-    tt_mask_ = (std::uint32_t(1) << _size) - 1;
+    tt_table_.resize(1ll << size);
+    tt_size_ = size;
 }
 
-// set a tt entry
+/// @brief 获取一个根据局面哈希置换表项目
+/// @param hashkey 局面哈希
+/// @return 置换表项目
+TTEntry& tt_get_entry_(HASH hashkey) {
+    return tt_table_[hashkey & ((1ll << tt_size_) - 1)];
+}
+    /// @brief 设置置换表项目
+/// @param hashkey 当前局面的哈希值
+/// @param flag 要设置的项目的标签是alpha, beta还是exact
+/// @param depth 当前深度
+/// @param move 要设置的着法
+/// @param vl 要设置的分数
 void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
 {
     assert(move && vl != INVALID_VL && !tt_table_.empty());
     assert(flag == EXACT || flag == ALPHA || flag == BETA);
-    TTEntry& e = tt_table_[hashkey & tt_mask_];
+    TTEntry& e = tt_get_entry_(hashkey);
     if (e.key == 0) { // empty set
         e.key = hashkey;
         e.flag = flag;
@@ -102,10 +123,15 @@ void tt_set(HASH hashkey, HASH_FLAG flag, DEPTH depth, Move move, VL vl)
     }
 }
 
-// get a vl from the tt entry, return INVALID_VL if not found
+/// @brief 获取置换表分数，没有则返回INVALID_VL
+/// @param hashkey 局面哈希
+/// @param depth 局面深度
+/// @param alpha 局面alpha
+/// @param beta 局面beta
+/// @return 置换表分数或INVALID_VL
 VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 {
-    const TTEntry& e = tt_table_[hashkey & tt_mask_];
+    const TTEntry& e = tt_get_entry_(hashkey);
     if (e.key != hashkey || e.depth < depth) {
         return INVALID_VL;
     } else if (e.flag == EXACT) {
@@ -118,27 +144,34 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
     return INVALID_VL;
 }
 
-// get a move from the tt entry, return an empty move if not found
+/// @brief 获取置换表着法，没有则为空着法
+/// @return 置换表着法或空着法
 Move tt_get_move()
 {
-    const TTEntry& entry = tt_table_[g_hashkey & tt_mask_];
-    if (entry.key != g_hashkey) return { };
-    return entry.move;
+    const TTEntry& entry = tt_get_entry_(g_hashkey);
+    return entry.key == g_hashkey ? entry.move : Move{ };
 }
 
-// rough SEE: reject only if victim < attacker and the square is protected
-bool see_ge(Move move, VL /*threshold*/)
+/// @brief 判断一个着法的吃子评估划算值是否大于某个阈值
+/// @param move 着法
+/// @param threshold 阈值
+/// @return 是否大于这个阈值
+bool see_ge(Move move, VL threshold)
 {
     const VL victim = WEIGHTS[std::size_t(std::abs(piece_on(move.end)))];
     const VL attacker = WEIGHTS[std::size_t(std::abs(piece_on(move.beg)))];
     if (victim >= attacker) return true;
+    threshold = 0; // placeholder
     position_move(move);
     const bool protected_ = get_protector(move.end) < 90;
     position_undo();
     return !protected_;
 }
 
-// sort the moves via MVV-LVA (stable tie-break on squares)
+/// @brief 根据最小子吃最大子的原则对一个吃子着法列表进行排序
+/// @tparam It 可迭代对象
+/// @param first 
+/// @param last 
 template <class It>
 void mvvlva_sort(It first, It last)
 {
@@ -153,9 +186,4 @@ void mvvlva_sort(It first, It last)
         if (a.beg != b.beg) return a.beg < b.beg;
         return a.end < b.end;
     });
-}
-
-void mvvlva_sort(MoveList& move_list)
-{
-    mvvlva_sort(move_list.begin(), move_list.end());
 }
