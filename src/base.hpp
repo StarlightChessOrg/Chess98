@@ -38,6 +38,7 @@ using MATRIX = std::array<PTYPE, 90>;
 using PREGEN_TABLE = std::array<std::array<PREGEN_DATA, 1024>, 10>;
 using GENTYPE = std::uint8_t;
 
+constexpr auto START = "rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w";
 constexpr POS INVALID_POS = 100;
 constexpr HASH_FLAG EXACT = 0;
 constexpr HASH_FLAG ALPHA = 1;
@@ -86,24 +87,17 @@ constexpr int get_bit_on_(UINT32 d, UINT32 i) { return (d >> i) & 1; }
 /// @brief 计时器
 struct Timer {
     std::chrono::steady_clock::time_point beg { };
-    std::chrono::milliseconds limit { };
+    UINT32 limit { };
     Timer() : beg(std::chrono::steady_clock::now()) { }
-    Timer(UINT32 _limit): beg(std::chrono::steady_clock::now()), limit(_limit) { }
-    bool time_up() const
-    {
-        return std::chrono::steady_clock::now() - beg >= limit;
-    }
-    bool time_up_2xless() const
-    {
-        return std::chrono::steady_clock::now() - beg >= limit / 2;
-    }
-    int duration() const
+    Timer(UINT32 _limit) : beg(std::chrono::steady_clock::now()), limit(_limit) { }
+    UINT32 duration() const
     {
         using namespace std::chrono;
         const auto duration = steady_clock::now() - beg;
-        const auto ms = duration_cast<milliseconds>(duration).count();
-        return int(ms);
+        return int(duration_cast<milliseconds>(duration).count());
     }
+    bool time_up() const { return duration() >= limit; }
+    bool time_up_2xless() const { return duration() >= limit / 2; }
 };
 
 /// @brief 着法
@@ -304,8 +298,12 @@ Move ucimove_to_move(std::string s)
     return Move { beg, end };
 }
 
-// get the banner points for rook and cannon moves
-// return {left, right} for horizontal moves and {up, down} for vertical moves
+/// @brief 获取车或炮的障碍物/可吃子位置
+/// @tparam IS_9 是否是一个行，亦或是列
+/// @tparam IS_ROOK 是否是车，亦或是炮
+/// @param bl 行或列的掩码
+/// @param p 要检测的攻击发起对象的位置
+/// @return 获取到的障碍物/可吃子位置，不考虑队伍。first对应左/上，last对应右/下，无障碍物则为最远可达位置
 template <bool IS_9, bool IS_ROOK>
 std::pair<POS, POS> get_bl_banner_points(UINT16 bl, POS p)
 {
@@ -328,29 +326,35 @@ std::pair<POS, POS> get_bl_banner_points(UINT16 bl, POS p)
     }
 }
 
-// get the banner points for the rook and cannon non-capture moves
-// in the horizontal direction, return {left, right}
+/// @brief 获取指定位置的车在一个指定位行的障碍物位置
+/// @param bl9 指定的位行
+/// @param p 这个车在标准矩阵上的位置
+/// @return 障碍物位置表，first对应左，last对应右，若端点不存在障碍物则直接返回最远的可达位置
 std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 {
     return get_bl_banner_points<true, true>(bl9, p);
 }
 
-// get the banner points for the rook and cannon non-capture moves
-// in the vertical direction, return {up, down}
-std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
-{
+/// @brief 获取指定位置的车在一个指定位列的障碍物位置
+/// @param bl10 指定的位列
+/// @param p 这个车在标准矩阵上的位置
+/// @return 障碍物位置表，first对应上，last对应下，若端点不存在障碍物则直接返回最远的可达位置
+std::pair<POS, POS> rook_10(UINT16 bl10, POS p){
     return get_bl_banner_points<false, true>(bl10, p);
 }
 
-// get the banner points for the cannon capture moves
-// in the horizontal direction, return {left, right}
+/// @brief 获取指定位置的炮在一个指定位行的可吃子位置（不考虑队伍）
+/// @param bl9 指定的位行
+/// @param p 这个炮在标准矩阵上的位置
+/// @return 障碍物位置表，first对应左，last对应右，若端点不存在可吃子则直接返回最远的可达位置
 std::pair<POS, POS> cannon_9(UINT16 bl9, POS p)
 {
     return get_bl_banner_points<true, false>(bl9, p);
 }
-
-// get the banner points for the cannon capture moves
-// in the vertical direction, return {up, down}
+/// @brief 获取指定位置的炮在一个指定位列的可吃子位置（不考虑队伍）
+/// @param bl10 指定的位列
+/// @param p 这个炮在标准矩阵上的位置
+/// @return 障碍物位置表，first对应上，last对应下，若端点不存在可吃子则直接返回最远的可达位置
 std::pair<POS, POS> cannon_10(UINT16 bl10, POS p)
 {
     return get_bl_banner_points<false, false>(bl10, p);

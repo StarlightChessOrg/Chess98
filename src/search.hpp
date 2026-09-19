@@ -18,7 +18,7 @@ VL q_capture_gain_(Move move);
 bool left_in_check_();
 
 /// @brief 搜索主函数
-/// @return 搜索结果pair<Move, VL>
+/// @return 搜索结果，first为Move，last为vl
 SEARCH_RET search()
 {
     const Timer timer { g_searchduration };
