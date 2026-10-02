@@ -87,10 +87,11 @@ void tt_init(int size = 20)
 /// @brief 获取一个根据局面哈希置换表项目
 /// @param hashkey 局面哈希
 /// @return 置换表项目
-TTEntry& tt_get_entry_(HASH hashkey) {
+TTEntry& tt_get_entry_(HASH hashkey)
+{
     return tt_table_[hashkey & ((1ll << tt_size_) - 1)];
 }
-    /// @brief 设置置换表项目
+/// @brief 设置置换表项目
 /// @param hashkey 当前局面的哈希值
 /// @param flag 要设置的项目的标签是alpha, beta还是exact
 /// @param depth 当前深度
@@ -149,7 +150,7 @@ VL tt_get_vl(HASH hashkey, DEPTH depth, VL alpha, VL beta)
 Move tt_get_move()
 {
     const TTEntry& entry = tt_get_entry_(g_hashkey);
-    return entry.key == g_hashkey ? entry.move : Move{ };
+    return entry.key == g_hashkey ? entry.move : Move { };
 }
 
 /// @brief 判断一个着法的吃子评估划算值是否大于某个阈值
@@ -170,8 +171,8 @@ bool see_ge(Move move, VL threshold)
 
 /// @brief 根据最小子吃最大子的原则对一个吃子着法列表进行排序
 /// @tparam It 可迭代对象
-/// @param first 
-/// @param last 
+/// @param first begin迭代器
+/// @param last end迭代器
 template <class It>
 void mvvlva_sort(It first, It last)
 {

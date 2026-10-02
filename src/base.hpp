@@ -18,6 +18,7 @@ struct Move;
 struct MoveList;
 struct Timer;
 struct TTEntry;
+struct SearchData;
 
 using STATE = std::uint8_t;
 using UINT32 = std::uint32_t;
@@ -280,6 +281,23 @@ std::string move_to_ucimove(Move move)
     return s;
 }
 
+/// @brief 搜索信息
+struct SearchData {
+    DEPTH depth { 0 };
+    UINT32 time { 0 };
+    VL score { 0 };
+    Move move;
+
+    void print(bool uci) const
+    {
+        std::cout << "info depth " << int(depth) << " score ";
+        if (uci) std::cout << "cp ";
+        std::cout << score << " time " << time;
+        if (move) std::cout << " pv " << move_to_ucimove(move);
+        std::cout << std::endl;
+    }
+};
+
 /// @brief 将UCCI着法字符串转化为内部着法结构
 /// @param s UCCI标准着法字符串
 /// @return 一个着法对象
@@ -339,7 +357,8 @@ std::pair<POS, POS> rook_9(UINT16 bl9, POS p)
 /// @param bl10 指定的位列
 /// @param p 这个车在标准矩阵上的位置
 /// @return 障碍物位置表，first对应上，last对应下，若端点不存在障碍物则直接返回最远的可达位置
-std::pair<POS, POS> rook_10(UINT16 bl10, POS p){
+std::pair<POS, POS> rook_10(UINT16 bl10, POS p)
+{
     return get_bl_banner_points<false, true>(bl10, p);
 }
 

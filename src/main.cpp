@@ -1,5 +1,5 @@
-﻿#include "ucci.hpp"
-#include "test.hpp"
+﻿#include "test.hpp"
+#include "ucci.hpp"
 
 int main()
 {

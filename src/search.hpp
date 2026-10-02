@@ -6,16 +6,12 @@ STATE g_searchstop { 0 };
 DEPTH g_maxdepth { 20 };
 UINT32 g_searchduration { 1000 };
 DEPTH distance_ { 0 };
+
 bool g_uci { false };
 
 SEARCH_RET search();
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking);
 VL search_q_(VL a, VL b, DEPTH depth, bool checking);
-
-void mark_checking_move_(bool checking);
-bool null_okay_();
-VL q_capture_gain_(Move move);
-bool left_in_check_();
 
 /// @brief 搜索主函数
 /// @return 搜索结果，first为Move，last为vl
@@ -26,32 +22,10 @@ SEARCH_RET search()
     for (DEPTH depth = 1; !timer.time_up_2xless(); depth++) {
         vl = search_vl_(depth, -INF, INF, NODE_PV, false, in_check());
         const Move pv = tt_get_move();
-        std::cout << "info depth " << int(depth) << " score ";
-        if (g_uci) std::cout << "cp ";
-        std::cout << vl << " time " << timer.duration();
-        if (pv) std::cout << " pv " << move_to_ucimove(pv);
-        std::cout << std::endl;
+        SearchData { depth, timer.duration(), vl, pv }.print(g_uci);
         if (depth >= g_maxdepth || (g_searchstop ? g_searchstop-- : 0)) break;
     }
-    auto playable = [](Move m) -> bool {
-        if (!m || !legal_move(m)) return false;
-        position_move(m);
-        const bool bad = left_in_check_();
-        position_undo();
-        return !bad;
-    };
     Move move = tt_get_move();
-    if (!playable(move)) {
-        move = Move { };
-        MoveList fallback { };
-        gen_all_moves(fallback);
-        for (const Move m : fallback) {
-            if (playable(m)) {
-                move = m;
-                break;
-            }
-        }
-    }
     return { move, vl };
 }
 
@@ -111,11 +85,11 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
         }
         move_num++;
 
-        // checking validation
+        // 验证是否被将军
         const bool gives_check = in_check();
         mark_checking_move_(gives_check);
 
-        // lmr
+        // LMR剪枝
         const DEPTH normal_depth = DEPTH(depth - 1);
         DEPTH reduction { 0 };
         const bool c1 = !checking && !capture && !gives_check;
@@ -188,7 +162,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     if (checking) {
         depth = std::min(depth, Q_CHECKING_DEPTH);
     } else {
-        // stand-pat
+        // stand-pat 消水平线
         const VL vl = evaluate();
         if (vl >= b) return vl;
         vlbest = vl;
@@ -210,7 +184,8 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     // search
     for (const Move move : moves) {
         if (!checking) {
-            if (vlbest + q_capture_gain_(move) + Q_DELTA_MARGIN <= a) continue;
+            const VL gain = vlbest + PIECE_VALUE_[std::abs(piece_on(move.end))];
+            if (gain + Q_DELTA_MARGIN <= a) continue;
             if (!see_ge(move, 0)) continue;
         }
 
@@ -219,9 +194,11 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
             position_undo(), distance_--;
             continue;
         }
+
         const bool gives_check = in_check();
         mark_checking_move_(gives_check);
         const VL vl = -search_q_(-b, -a, depth - 1, gives_check);
+
         position_undo(), distance_--;
 
         if (vl > vlbest) {
@@ -232,35 +209,4 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
     }
 
     return vlbest != -INF ? vlbest : vlbest + distance_;
-}
-
-/****** utils ******/
-
-/// @brief 标记
-/// @param checking 
-void mark_checking_move_(bool checking)
-{
-    if (checking && !g_history_checkings.empty()) {
-        g_history_checkings.back() = true;
-    }
-}
-
-/// @brief 判断空着裁剪的安全性
-bool null_okay_()
-{
-    return get_pos_list().size() > 8;
-}
-
-VL q_capture_gain_(Move move)
-{
-    return PIECE_VALUE_[std::size_t(std::abs(piece_on(move.end)))];
-}
-
-// true if the side that just moved left their king in check
-bool left_in_check_()
-{
-    g_team = -g_team;
-    const bool bad = in_check();
-    g_team = -g_team;
-    return bad;
 }

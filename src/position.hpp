@@ -137,12 +137,12 @@ bool targetchk(POS p)
 /// @brief 获取指定位置一个棋子，若越界则静默返回0
 /// @param p 棋子位置
 /// @return 棋子PTYPE
-PTYPE piece_on(POS p){return p < 90 ? g_board[p] : 0;}
+PTYPE piece_on(POS p) { return p < 90 ? g_board[p] : 0; }
 
 /// @brief 获取一个10格列的二进制码，上面只存储有无棋子的信息
 /// @param pos 获取第几行的列
 /// @return 一个16位二进制码，代表列
-UINT16 get_bl10(POS pos){return bl10_items_[pos % 9];}
+UINT16 get_bl10(POS pos) { return bl10_items_[pos % 9]; }
 
 /// @brief 获取一个9格列的二进制码，上面只存储有无棋子的信息
 /// @param pos 获取第几行的列
@@ -515,4 +515,29 @@ bool is_repeat()
         if (history_captures_[i]) break;
     }
     return false;
+}
+
+/// @brief 刚刚的走法是否使得自己被将军
+/// @return 刚刚行棋方是否被将军
+bool left_in_check_()
+{
+    g_team = -g_team;
+    const bool bad = in_check();
+    g_team = -g_team;
+    return bad;
+}
+
+/// @brief 标记上一步是否为将军着法
+/// @param checking 是否为将军着法
+void mark_checking_move_(bool checking)
+{
+    if (checking && !g_history_checkings.empty()) {
+        g_history_checkings.back() = true;
+    }
+}
+
+/// @brief 判断空着裁剪的安全性
+bool null_okay_()
+{
+    return get_pos_list().size() > 8;
 }

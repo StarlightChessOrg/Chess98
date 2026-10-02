@@ -273,9 +273,11 @@ int shape_bonus_(TEAM team, const SideInfo& me, const SideInfo& opp)
 
     // 缺士怕双车，缺象怕炮
     if (opp.advisors == 0 && me.rooks >= 2) vl += 30;
-    else if (opp.advisors <= 1 && me.rooks >= 1) vl += 10;
+    else if (opp.advisors <= 1 && me.rooks >= 1)
+        vl += 10;
     if (opp.bishops == 0 && me.cannons >= 1) vl += 20;
-    else if (opp.bishops <= 1 && me.cannons >= 1) vl += 8;
+    else if (opp.bishops <= 1 && me.cannons >= 1)
+        vl += 8;
 
     // 窝心马：滞碍双士，严重扣分
     const POS heart = team == R ? POS(76) : POS(13);
