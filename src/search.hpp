@@ -5,9 +5,8 @@
 STATE g_searchstop { 0 };
 DEPTH g_maxdepth { 20 };
 UINT32 g_searchduration { 1000 };
-DEPTH distance_ { 0 };
-
 bool g_uci { false };
+DEPTH distance_ { 0 };
 
 SEARCH_RET search();
 VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking);
@@ -72,7 +71,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
 
     // search
     MovePicker mp { depth };
-    UINT8 move_num { 0 };
+    UINT8 move_num { 0 }; // 记录一个着法数量提供给LMR
     for (Move move = mp.next(); move; move = mp.next()) {
         assert(std::abs(g_board[move.end]) != R_KING && g_board[move.beg] != 0);
         if (!legal_move(move)) continue;
@@ -103,7 +102,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
         }
         const DEPTH lmr_depth = normal_depth - reduction;
 
-        // pvs
+        // PVS
         VL vl { -INF };
         if (!is_cut && vlbest == -INF) {
             vl = -search_vl_(normal_depth, -b, -a, NODE_PV, false, gives_check);
@@ -132,7 +131,7 @@ VL search_vl_(DEPTH depth, VL a, VL b, bool is_cut, bool ban_null, bool checking
         }
     }
 
-    // caching the search informantion
+    // 整理搜索结果
     if (movebest) {
         HASH_FLAG movetype { EXACT };
         if (vlbest >= b) {
@@ -169,7 +168,7 @@ VL search_q_(VL a, VL b, DEPTH depth, bool checking)
         if (vl > a) a = vl;
     }
 
-    // repeat status validation
+    // 重复局面判定
     if (is_repeat()) return -INF;
 
     // moves
