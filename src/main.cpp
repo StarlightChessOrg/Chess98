@@ -9,8 +9,6 @@ int main()
     history_init();
     killer_init();
     // END DO_NOT_REMOVE
-    move_preformance_test();
-    minmax_example();
     ucci_loop();
     return 0;
 }
